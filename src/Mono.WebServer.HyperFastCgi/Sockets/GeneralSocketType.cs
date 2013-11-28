@@ -30,6 +30,7 @@ using System;
 
 namespace Mono.WebServer.HyperFastCgi.Sockets
 {
+	//FIXME: remove enum and use typeof() instead of this enum
 	[Serializable]
 	public enum GeneralSocketType
 	{

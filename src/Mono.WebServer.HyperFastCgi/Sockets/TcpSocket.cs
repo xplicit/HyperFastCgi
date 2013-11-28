@@ -30,19 +30,19 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 
-namespace Mono.WebServer.HyperFastCgi
+namespace Mono.WebServer.HyperFastCgi.Sockets
 {
 	public class TcpSocket : GeneralSocket
 	{
 		public TcpSocket (IPEndPoint localEndPoint) 
-			: base(localEndPoint.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp,localEndPoint)
+			: base (localEndPoint.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp, localEndPoint)
 		{
 			NoDelay = true;
 		}
 
 		public override Socket EndAccept (IAsyncResult ar)
 		{
-			Socket socket=base.EndAccept (ar);
+			Socket socket = base.EndAccept (ar);
 			socket.NoDelay = true;
 			return socket;
 		}

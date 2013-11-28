@@ -42,18 +42,17 @@ namespace Mono.WebServer.HyperFastCgi
 {
 	public class WorkerRequest : MonoWorkerRequest
 	{
-//		private static string [] indexFiles = { "index.aspx",
-//			"default.aspx",
-//			"index.html",
-//			"index.htm" };
-
+		//		private static string [] indexFiles = { "index.aspx",
+		//			"default.aspx",
+		//			"index.html",
+		//			"index.htm" };
 		static WorkerRequest ()
 		{
 			//SetDefaultIndexFiles (System.Configuration.ConfigurationManager.AppSettings ["MonoServerDefaultIndexFiles"]);
 		}
 
 		private StringBuilder headers = new StringBuilder ();
-		private byte [] input_data;
+		private byte[] input_data;
 		private string file_path;
 		string raw_url = null;
 		private bool closed = false;
@@ -62,7 +61,7 @@ namespace Mono.WebServer.HyperFastCgi
 		Request cgiRequest;
 		NetworkConnector connector;
 
-		public WorkerRequest (NetworkConnector connector,Request cgiRequest,ApplicationHost appHost) : base (appHost)
+		public WorkerRequest (NetworkConnector connector, Request cgiRequest, ApplicationHost appHost) : base (appHost)
 		{
 			this.cgiRequest = cgiRequest;
 			this.connector = connector;
@@ -81,7 +80,7 @@ namespace Mono.WebServer.HyperFastCgi
 		#region Overrides: Transaction Oriented
 
 		public override int RequestId {
-			get {return cgiRequest.RequestId;}
+			get { return cgiRequest.RequestId; }
 		}
 
 		protected override bool GetRequestData ()
@@ -99,6 +98,7 @@ namespace Mono.WebServer.HyperFastCgi
 			if (finalFlush)
 				CloseConnection ();
 		}
+
 		public override void CloseConnection ()
 		{
 			if (closed)
@@ -106,9 +106,10 @@ namespace Mono.WebServer.HyperFastCgi
 
 			closed = true;
 			this.EnsureHeadersSent ();
-			connector.CompleteRequest (cgiRequest.RequestId,0);
+			connector.CompleteRequest (cgiRequest.RequestId, 0);
 		}
-		public override void SendResponseFromMemory (byte [] data, int length)
+
+		public override void SendResponseFromMemory (byte[] data, int length)
 		{
 			EnsureHeadersSent ();
 			connector.SendOutput (cgiRequest.RequestId, data, length);
@@ -139,7 +140,6 @@ namespace Mono.WebServer.HyperFastCgi
 
 		#region Overrides: Request Oriented
 
-
 		public override string GetPathInfo ()
 		{
 			return String.Empty;
@@ -156,8 +156,7 @@ namespace Mono.WebServer.HyperFastCgi
 				return raw_url;
 
 			string fcgiRequestUri = cgiRequest.GetParameter ("REQUEST_URI");
-			if (fcgiRequestUri != null)
-			{
+			if (fcgiRequestUri != null) {
 				raw_url = fcgiRequestUri;
 				return raw_url;
 			}
@@ -173,13 +172,10 @@ namespace Mono.WebServer.HyperFastCgi
 			return raw_url;
 		}
 
-
-
 		public override bool IsSecure ()
 		{
 			return cgiRequest.GetParameter ("HTTPS") == "on";
 		}
-
 
 		public override string GetHttpVerbName ()
 		{
@@ -276,7 +272,6 @@ namespace Mono.WebServer.HyperFastCgi
 			return value != null ? value : base.GetServerVariable (name);
 		}
 
-
 		public override string GetUriPath ()
 		{
 			if (uri_path != null)
@@ -340,7 +335,7 @@ namespace Mono.WebServer.HyperFastCgi
 		public override string GetServerName ()
 		{
 			string server_name = HostNameFromString (
-				cgiRequest.GetParameter ("SERVER_NAME"));
+				                     cgiRequest.GetParameter ("SERVER_NAME"));
 
 			if (server_name == null)
 				server_name = HostNameFromString (
@@ -363,7 +358,7 @@ namespace Mono.WebServer.HyperFastCgi
 
 		#region Private Methods
 
-		private void AppendHeaderLine (string format, params object [] args)
+		private void AppendHeaderLine (string format, params object[] args)
 		{
 			if (headers == null)
 				return;
@@ -386,7 +381,6 @@ namespace Mono.WebServer.HyperFastCgi
 
 		#endregion
 
-
 		#region Private Static Methods
 
 		private static string AddressFromHostName (string host)
@@ -396,7 +390,7 @@ namespace Mono.WebServer.HyperFastCgi
 			if (host == null || host.Length > 126)
 				return null;
 
-			System.Net.IPAddress [] addresses = null;
+			System.Net.IPAddress[] addresses = null;
 			try {
 				addresses = Dns.GetHostAddresses (host);
 			} catch (System.Net.Sockets.SocketException) {
@@ -426,26 +420,26 @@ namespace Mono.WebServer.HyperFastCgi
 
 			return host.Substring (0, colon_index);
 		}
-
-//		private static void SetDefaultIndexFiles (string list)
-//		{
-//			if (list == null)
-//				return;
-//
-//			List<string> files = new List<string> ();
-//
-//			string [] fs = list.Split (',');
-//			foreach (string f in fs) {
-//				string trimmed = f.Trim ();
-//				if (trimmed == "") 
-//					continue;
-//
-//				files.Add (trimmed);
-//			}
-//
-//			indexFiles = files.ToArray ();
-//		}
+		//		private static void SetDefaultIndexFiles (string list)
+		//		{
+		//			if (list == null)
+		//				return;
+		//
+		//			List<string> files = new List<string> ();
+		//
+		//			string [] fs = list.Split (',');
+		//			foreach (string f in fs) {
+		//				string trimmed = f.Trim ();
+		//				if (trimmed == "")
+		//					continue;
+		//
+		//				files.Add (trimmed);
+		//			}
+		//
+		//			indexFiles = files.ToArray ();
+		//		}
 
 		#endregion
+
 	}
 }

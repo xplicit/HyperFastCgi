@@ -29,35 +29,35 @@
 
 using System;
 
-namespace Mono.WebServer.HyperFastCgi {
-
+namespace Mono.WebServer.HyperFastCgi
+{
 	// FIXME: This class could be removed if
 	// Mono.WebServer.ApplicationServer is broken into two classes:
 	// * ApplicationManager to handle application hosts, and
 	// * ApplicationServer, a subclass of ApplicationManager that
 	//   adds on server support.
-
-	public class WebSource : Mono.WebServer.WebSource {
+	public class WebSource : Mono.WebServer.WebSource
+	{
 		public WebSource ()
 		{
 		}
 
-		public override IRequestBroker CreateRequestBroker()
+		public override IRequestBroker CreateRequestBroker ()
 		{
 			return null;
 		}
 
-		public override System.Type GetApplicationHostType()
+		public override System.Type GetApplicationHostType ()
 		{
 			return typeof(ApplicationHost);
 		}
 
-		public override Worker CreateWorker(System.Net.Sockets.Socket socket, ApplicationServer server)
+		public override Worker CreateWorker (System.Net.Sockets.Socket socket, ApplicationServer server)
 		{
 			return null;
 		}
 
-		public override System.Net.Sockets.Socket CreateSocket()
+		public override System.Net.Sockets.Socket CreateSocket ()
 		{
 			return null;
 		}

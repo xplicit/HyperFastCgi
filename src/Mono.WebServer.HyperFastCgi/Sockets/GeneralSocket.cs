@@ -29,26 +29,19 @@
 using System;
 using System.Net.Sockets;
 
-namespace Mono.WebServer.HyperFastCgi
+namespace Mono.WebServer.HyperFastCgi.Sockets
 {
-	[Serializable]
-	public enum GeneralSocketType
-	{
-		Tcp,
-		Unix
-	}
-
 	public abstract class GeneralSocket : Socket
 	{
 		public GeneralSocket (System.Net.Sockets.AddressFamily addressFamily,
-			System.Net.Sockets.SocketType socketType,
-			System.Net.Sockets.ProtocolType protocolType,
-			System.Net.EndPoint localEndPoint) : base(addressFamily,socketType,protocolType)
+		                      System.Net.Sockets.SocketType socketType,
+		                      System.Net.Sockets.ProtocolType protocolType,
+		                      System.Net.EndPoint localEndPoint) : base (addressFamily, socketType, protocolType)
 		{
 			base.Bind (localEndPoint);
 		}
 
-		public new virtual Socket EndAccept(IAsyncResult ar)
+		public new virtual Socket EndAccept (IAsyncResult ar)
 		{
 			return base.EndAccept (ar);
 		}

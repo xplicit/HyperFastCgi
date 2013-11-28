@@ -28,35 +28,31 @@
 
 using System;
 
-namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol {
+namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol
+{
 	public enum Role : ushort
 	{
-		Responder  = 1,
-
+		Responder = 1,
 		Authorizer = 2,
-
-		Filter     = 3
+		Filter = 3
 	}
 
 	[Flags]
 	public enum BeginRequestFlags : byte
 	{
-		None      = 0,
-
+		None = 0,
 		KeepAlive = 1
 	}
 
 	public struct BeginRequestBody
 	{
+
 		#region Private Fields
 
 		private Role role;
-
 		private BeginRequestFlags flags;
 
 		#endregion
-
-
 
 		#region Constructors
 
@@ -72,25 +68,24 @@ namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol {
 					Strings.BeginRequestBody_WrongSize, "record");
 
 			byte[] body = record.Body;
-			role  = (Role) Record.ReadUInt16 (body, 0);
-			flags = (BeginRequestFlags) body [2];
+			role = (Role)Record.ReadUInt16 (body, 0);
+			flags = (BeginRequestFlags)body [2];
 		}
 
 		#endregion
-
-
 
 		#region Public Properties
 
 		public Role Role {
-			get {return role;}
+			get { return role; }
 		}
 
 		public BeginRequestFlags Flags {
-			get {return flags;}
+			get { return flags; }
 		}
 
 		#endregion
+
 	}
 }
 

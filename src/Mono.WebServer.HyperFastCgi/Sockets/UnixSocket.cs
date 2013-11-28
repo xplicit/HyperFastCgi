@@ -31,7 +31,7 @@ using System.Globalization;
 using System.Net.Sockets;
 using Mono.Unix;
 
-namespace Mono.WebServer.HyperFastCgi
+namespace Mono.WebServer.HyperFastCgi.Sockets
 {
 	internal class UnixSocket : GeneralSocket, IDisposable
 	{
@@ -39,9 +39,9 @@ namespace Mono.WebServer.HyperFastCgi
 
 		protected UnixSocket (Mono.Unix.UnixEndPoint localEndPoint)
 			: base (System.Net.Sockets.AddressFamily.Unix,
-				System.Net.Sockets.SocketType.Stream,
-				System.Net.Sockets.ProtocolType.IP,
-				localEndPoint)
+		         System.Net.Sockets.SocketType.Stream,
+		         System.Net.Sockets.ProtocolType.IP,
+		         localEndPoint)
 		{
 			//base.Bind (localEndPoint);
 		}
@@ -51,14 +51,13 @@ namespace Mono.WebServer.HyperFastCgi
 			this.path = path;
 		}
 
-
 		protected static Mono.Unix.UnixEndPoint CreateEndPoint (string path)
 		{
 			if (path == null)
 				throw new ArgumentNullException ("path");
 
 			Mono.Unix.UnixEndPoint ep = new Mono.Unix.UnixEndPoint (
-				path);
+				                            path);
 
 			if (System.IO.File.Exists (path)) {
 				System.Net.Sockets.Socket conn =
@@ -85,12 +84,11 @@ namespace Mono.WebServer.HyperFastCgi
 
 		#region IDisposable
 
-		protected override void Dispose(bool disposing)
+		protected override void Dispose (bool disposing)
 		{
 			//clear managed resources
-			if (disposing)
-			{
-				base.Dispose(true);
+			if (disposing) {
+				base.Dispose (true);
 			}
 
 			if (path != null) {
@@ -98,6 +96,7 @@ namespace Mono.WebServer.HyperFastCgi
 			}
 
 		}
+
 		#endregion
 
 	}

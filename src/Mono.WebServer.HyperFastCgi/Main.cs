@@ -43,6 +43,7 @@ using System.Configuration;
 using Mono.Unix;
 using Mono.Unix.Native;
 using Mono.WebServer.HyperFastCgi.Logging;
+using Mono.WebServer.HyperFastCgi.Sockets;
 
 namespace Mono.WebServer.HyperFastCgi
 {
@@ -55,14 +56,14 @@ namespace Mono.WebServer.HyperFastCgi
 			object att;
 
 			att = assembly.GetCustomAttributes (
-				typeof (AssemblyCopyrightAttribute), false) [0];
+				typeof(AssemblyCopyrightAttribute), false) [0];
 			string copyright =
-				((AssemblyCopyrightAttribute) att).Copyright;
+				((AssemblyCopyrightAttribute)att).Copyright;
 
 			att = assembly.GetCustomAttributes (
-				typeof (AssemblyDescriptionAttribute), false) [0];
+				typeof(AssemblyDescriptionAttribute), false) [0];
 			string description =
-				((AssemblyDescriptionAttribute) att).Description;
+				((AssemblyDescriptionAttribute)att).Description;
 
 			Console.WriteLine ("{0} {1}\n(c) {2}\n{3}",
 				Path.GetFileName (assembly.Location), version,
@@ -72,7 +73,7 @@ namespace Mono.WebServer.HyperFastCgi
 		static void ShowHelp ()
 		{
 			string name = Path.GetFileName (
-				Assembly.GetExecutingAssembly ().Location);
+				              Assembly.GetExecutingAssembly ().Location);
 
 			ShowVersion ();
 			Console.WriteLine ();
@@ -86,32 +87,32 @@ namespace Mono.WebServer.HyperFastCgi
 		private static ConfigurationManager configmanager;
 
 		public static VPathToHost GetApplicationForPath (string vhost,
-			int port,
-			string path,
-			string realPath)
+		                                                 int port,
+		                                                 string path,
+		                                                 string realPath)
 		{
 			return appserver.GetApplicationForPath (vhost,	port, path, false);
 		}
 
-		public static int Main (string [] args)
+		public static int Main (string[] args)
 		{
 			// Load the configuration file stored in the
 			// executable's resources.
 			configmanager = new ConfigurationManager (
-				typeof (Server).Assembly,
+				typeof(Server).Assembly,
 				"ConfigurationManager.xml");
 
 			configmanager.LoadCommandLineArgs (args);
 
 			// Show the help and exit.
-			if ((bool) configmanager ["help"] ||
-				(bool) configmanager ["?"]) {
+			if ((bool)configmanager ["help"] ||
+			    (bool)configmanager ["?"]) {
 				ShowHelp ();
 				return 0;
 			}
 
 			// Show the version and exit.
-			if ((bool) configmanager ["version"]) {
+			if ((bool)configmanager ["version"]) {
 				ShowVersion ();
 				return 0;
 			}
@@ -138,8 +139,8 @@ namespace Mono.WebServer.HyperFastCgi
 
 				if (log_level != null)
 					Logger.Level = (LogLevel)
-					               Enum.Parse (typeof (LogLevel),
-						               log_level);
+					               Enum.Parse (typeof(LogLevel),
+						log_level);
 			} catch {
 				Console.WriteLine ("Failed to parse log levels.");
 				Console.WriteLine ("Using default levels: {0}",
@@ -172,16 +173,16 @@ namespace Mono.WebServer.HyperFastCgi
 			if (socket_type == null)
 				socket_type = "pipe";
 
-			string [] socket_parts = socket_type.Split (
-				new char [] {':'}, 3);
+			string[] socket_parts = socket_type.Split (
+				                         new char [] { ':' }, 3);
 
 			GeneralSocketType sockType;
 			string address;
-			int port=0;
+			int port = 0;
 
 			switch (socket_parts [0].ToLower ()) {
-				// The FILE sockets is of the format
-				// "file[:PATH]".
+			// The FILE sockets is of the format
+			// "file[:PATH]".
 			case "unix":
 			case "file":
 				if (socket_parts.Length == 2)
@@ -205,8 +206,8 @@ namespace Mono.WebServer.HyperFastCgi
 //					"Listening on file: {0}",	path);
 				break;
 
-				// The TCP socket is of the format
-				// "tcp[[:ADDRESS]:PORT]".
+			// The TCP socket is of the format
+			// "tcp[[:ADDRESS]:PORT]".
 			case "tcp":
 				if (socket_parts.Length > 1)
 					configmanager ["port"] = socket_parts [
@@ -218,14 +219,14 @@ namespace Mono.WebServer.HyperFastCgi
 
 				//ushort port;
 				try {
-					port = (ushort) configmanager ["port"];
+					port = (ushort)configmanager ["port"];
 				} catch (ApplicationException e) {
 					Logger.Write (LogLevel.Error, e.Message);
 					return 1;
 				}
 
 				string address_str =
-					(string) configmanager ["address"];
+					(string)configmanager ["address"];
 				IPAddress ipAddress;
 
 				try {
@@ -265,20 +266,20 @@ namespace Mono.WebServer.HyperFastCgi
 
 			string root_dir = configmanager ["root"] as string;
 			if (root_dir != null && root_dir.Length != 0) {
-			try {
-				Environment.CurrentDirectory = root_dir;
-			} catch (Exception e) {
-				Logger.Write (LogLevel.Error,
-					"Error: {0}", e.Message);
-				return 1;
-			}
+				try {
+					Environment.CurrentDirectory = root_dir;
+				} catch (Exception e) {
+					Logger.Write (LogLevel.Error,
+						"Error: {0}", e.Message);
+					return 1;
+				}
 			}
 
 			root_dir = Environment.CurrentDirectory;
 			bool auto_map = false; //(bool) configmanager ["automappaths"];
 			WebSource webSource = new WebSource ();
 			appserver = new ApplicationServer (webSource, root_dir);
-			appserver.Verbose = (bool) configmanager ["verbose"];
+			appserver.Verbose = (bool)configmanager ["verbose"];
 
 			string applications = (string)
 			                      configmanager ["applications"];
@@ -308,7 +309,7 @@ namespace Mono.WebServer.HyperFastCgi
 					app_config_dir);
 
 			if (applications == null && app_config_dir == null &&
-				app_config_file == null && !auto_map) {
+			    app_config_file == null && !auto_map) {
 				Logger.Write (LogLevel.Error,
 					"There are no applications defined, and path mapping is disabled.");
 				Logger.Write (LogLevel.Error,
@@ -329,8 +330,8 @@ namespace Mono.WebServer.HyperFastCgi
 			vapp.CreateHost (appserver, webSource);
 			ApplicationHost host = vapp.AppHost as ApplicationHost;
 
-			bool keepAlive = (bool) configmanager ["keepalive"];
-			bool useThreadPool = (bool) configmanager ["usethreadpool"];
+			bool keepAlive = (bool)configmanager ["keepalive"];
+			bool useThreadPool = (bool)configmanager ["usethreadpool"];
 
 //			server.MaxConnections = (ushort)
 //			                        configmanager ["maxconns"];
@@ -346,10 +347,10 @@ namespace Mono.WebServer.HyperFastCgi
 //			Logger.Write (LogLevel.Debug, "Multiplex connections: {0}",
 //				server.MultiplexConnections);
 
-			bool stopable = (bool) configmanager ["stopable"];
-			Logger.WriteToConsole = (bool) configmanager ["printlog"];
+			bool stopable = (bool)configmanager ["stopable"];
+			Logger.WriteToConsole = (bool)configmanager ["printlog"];
 //			host.Start (stopable);
-			host.Start (sockType,address,port,keepAlive,useThreadPool);
+			host.Start (sockType, address, port, keepAlive, useThreadPool);
 
 			configmanager = null;
 
@@ -359,18 +360,16 @@ namespace Mono.WebServer.HyperFastCgi
 				Console.ReadLine ();
 				host.Shutdown ();
 			} else {
-				UnixSignal [] signals = new UnixSignal[] { 
-					new UnixSignal(Signum.SIGINT), 
-					new UnixSignal(Signum.SIGTERM), 
+				UnixSignal[] signals = new UnixSignal[] { 
+					new UnixSignal (Signum.SIGINT), 
+					new UnixSignal (Signum.SIGTERM), 
 				};
 
 				// Wait for a unix signal
-				for (bool exit = false; !exit;)
-				{
-					int id = UnixSignal.WaitAny(signals);
+				for (bool exit = false; !exit;) {
+					int id = UnixSignal.WaitAny (signals);
 
-					if (id >= 0 && id < signals.Length)
-					{
+					if (id >= 0 && id < signals.Length) {
 						if (signals [id].IsSet)
 							exit = true;
 					}

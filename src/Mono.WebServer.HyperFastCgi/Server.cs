@@ -31,12 +31,13 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using Mono.WebServer.HyperFastCgi.Logging;
+using Mono.WebServer.HyperFastCgi.Sockets;
 
 namespace Mono.WebServer.HyperFastCgi
 {
 	public class Server
 	{
-		private ManualResetEvent allDone=new ManualResetEvent(false);
+		private ManualResetEvent allDone = new ManualResetEvent (false);
 		private AsyncCallback accept;
 		ApplicationHost appHost;
 		GeneralSocket listener;
@@ -48,12 +49,12 @@ namespace Mono.WebServer.HyperFastCgi
 			accept = new AsyncCallback (acceptCallback);
 		}
 
-		public Server(ApplicationHost appHost) : this ()
+		public Server (ApplicationHost appHost) : this ()
 		{
 			this.appHost = appHost;
 		}
 
-		public bool Start(GeneralSocketType sockType, string address, int port, bool keepAlive,bool useThreadPool)
+		public bool Start (GeneralSocketType sockType, string address, int port, bool keepAlive, bool useThreadPool)
 		{
 			this.keepAlive = keepAlive;
 			this.useThreadPool = useThreadPool;
@@ -61,18 +62,15 @@ namespace Mono.WebServer.HyperFastCgi
 
 			//log.InfoFormat("Local address and port : {0}",localEP);
 
-			try
-			{
-				this.listener = CreateSocket(sockType,address,port);
+			try {
+				this.listener = CreateSocket (sockType, address, port);
 				//listener = new TcpSocket (localEP);
 				//listener = new UnixSocket("/tmp/fastcgi.socket");
 
-				listener.Listen(500);
-				listener.BeginAccept(accept, listener);
+				listener.Listen (500);
+				listener.BeginAccept (accept, listener);
 
-			}
-			catch (Exception ex) 
-			{
+			} catch (Exception ex) {
 				//log.Error(e);
 				Logger.Write (LogLevel.Error, "{0}", ex);
 				return false;
@@ -81,15 +79,15 @@ namespace Mono.WebServer.HyperFastCgi
 			return true;
 		}
 
-		public void Shutdown()
+		public void Shutdown ()
 		{
 			listener.Close ();
-			allDone.Set();
+			allDone.Set ();
 
 			//flush all changes
 		}
 
-		public GeneralSocket CreateSocket(GeneralSocketType sockType, string address, int port)
+		public GeneralSocket CreateSocket (GeneralSocketType sockType, string address, int port)
 		{
 			GeneralSocket socket = null;
 
@@ -98,7 +96,7 @@ namespace Mono.WebServer.HyperFastCgi
 				socket = new UnixSocket (address);
 				break;
 			case GeneralSocketType.Tcp:
-				IPEndPoint localEP = new IPEndPoint(IPAddress.Parse(address),port);
+				IPEndPoint localEP = new IPEndPoint (IPAddress.Parse (address), port);
 				socket = new TcpSocket (localEP);
 				break;
 			}
@@ -106,35 +104,33 @@ namespace Mono.WebServer.HyperFastCgi
 			return socket;
 		}
 
-
-		public void acceptCallback(IAsyncResult ar)
+		public void acceptCallback (IAsyncResult ar)
 		{
 			//TODO: add try/catch clause and raise EnexpectedException event 
 			GeneralSocket listener = (GeneralSocket)ar.AsyncState;
-			Socket client = listener.EndAccept(ar);
+			Socket client = listener.EndAccept (ar);
 
 			//allDone.Set();
-			listener.BeginAccept(accept, listener);
+			listener.BeginAccept (accept, listener);
 
 
 			// Additional code to read data goes here.
-			NetworkConnector connector = new NetworkConnector(client,appHost);
+			NetworkConnector connector = new NetworkConnector (client, appHost);
 			connector.KeepAlive = keepAlive;
 			connector.UseThreadPool = useThreadPool;
 			connector.Disconnected += OnDisconnect;
 
-			connector.Receive();
+			connector.Receive ();
 		}
 
-		protected void OnDisconnect(object sender, EventArgs args)
+		protected void OnDisconnect (object sender, EventArgs args)
 		{
 			NetworkConnector connector = sender as NetworkConnector;
 
 			//connector.Tag=null;
-			connector.Dispose();
+			connector.Dispose ();
 
 		}
-
 	}
 }
 

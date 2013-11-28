@@ -1,5 +1,7 @@
-namespace Mono.WebServer.HyperFastCgi {
-	internal static class Strings {
+namespace Mono.WebServer.HyperFastCgi
+{
+	internal static class Strings
+	{
 		public static string Server_MaxConnsOutOfRange = "At least one connection must be permitted.";
 		public static string Server_MaxReqsOutOfRange = "At least one request must be permitted.";
 		public static string Server_AlreadyStarted = "The server is already started.";
@@ -18,7 +20,7 @@ namespace Mono.WebServer.HyperFastCgi {
 		public static string Connection_RecordNotReceived = "Failed to receive record.";
 		public static string Connection_RequestAlreadyExists = "Request with given ID already exists.";
 		public static string Connection_RoleNotSupported = "{0} role not supported by server.";
-		public static string Connection_RequestDoesNotExist = "Request {0} does not exist."; 
+		public static string Connection_RequestDoesNotExist = "Request {0} does not exist.";
 		public static string Connection_AbortRecordReceived = "FastCGI Abort Request";
 		public static string Connection_UnknownRecordType = "Unknown type, {0}, encountered.";
 		public static string Connection_Terminating = "Terminating connection.";

@@ -31,25 +31,20 @@ using System.IO;
 using System.Text;
 using System.Globalization;
 
-namespace Mono.WebServer.HyperFastCgi.Logging {
-
+namespace Mono.WebServer.HyperFastCgi.Logging
+{
 	public class Logger
 	{
+
 		#region Private Fields
 
 		private StreamWriter writer;
-
 		private bool write_to_console;
-
 		private LogLevel level = LogLevel.Standard;
-
 		private object write_lock = new object ();
-
 		private static Logger logger = new Logger ();
 
 		#endregion
-
-
 
 		#region Private Methods
 
@@ -60,23 +55,19 @@ namespace Mono.WebServer.HyperFastCgi.Logging {
 
 		#endregion
 
-
-
 		#region Public Static Properties
 
 		public static LogLevel Level {
-			get {return logger.level;}
-			set {logger.level = value;}
+			get { return logger.level; }
+			set { logger.level = value; }
 		}
 
 		public static bool WriteToConsole {
-			get {return logger.write_to_console;}
-			set {logger.write_to_console = value;}
+			get { return logger.write_to_console; }
+			set { logger.write_to_console = value; }
 		}
 
 		#endregion
-
-
 
 		#region Public Static Methods
 
@@ -88,22 +79,22 @@ namespace Mono.WebServer.HyperFastCgi.Logging {
 			lock (logger.write_lock) {
 				Close ();
 				Stream stream = File.Open (path,
-					FileMode.Append, FileAccess.Write,
-					FileShare.ReadWrite);
+					                FileMode.Append, FileAccess.Write,
+					                FileShare.ReadWrite);
 				stream.Seek (0, SeekOrigin.End);
 				logger.writer = new StreamWriter (stream);
 			}
 		}
 
 		public static void Write (LogLevel level,
-			IFormatProvider provider,
-			string format, params object [] args)
+		                          IFormatProvider provider,
+		                          string format, params object[] args)
 		{
 			Write (level, string.Format (provider, format, args));
 		}
 
 		public static void Write (LogLevel level, string format,
-			params object [] args)
+		                          params object[] args)
 		{
 			Write (level, CultureInfo.CurrentCulture, format, args);
 		}
@@ -117,10 +108,10 @@ namespace Mono.WebServer.HyperFastCgi.Logging {
 				return;
 
 			string text = string.Format (CultureInfo.CurrentCulture,
-				Strings.Logger_Format,
-				DateTime.Now,
-				level,
-				message);
+				              Strings.Logger_Format,
+				              DateTime.Now,
+				              level,
+				              message);
 
 			lock (logger.write_lock) {
 				if (logger.write_to_console)
@@ -150,5 +141,6 @@ namespace Mono.WebServer.HyperFastCgi.Logging {
 		}
 
 		#endregion
+
 	}
 }

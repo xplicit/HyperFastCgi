@@ -28,16 +28,16 @@
 
 using System;
 
-namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol {
+namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol
+{
 	public struct UnknownTypeBody
 	{
+
 		#region Private Fields
 
 		private RecordType type;
 
 		#endregion
-
-
 
 		#region Constructors
 
@@ -48,17 +48,16 @@ namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol {
 
 		#endregion
 
-
-
 		#region Public Methods
 
 		public byte [] GetData ()
 		{
-			byte [] data = new byte [8];
-			data [0] = (byte) type;
+			byte[] data = new byte [8];
+			data [0] = (byte)type;
 			return data;
 		}
 
 		#endregion
+
 	}
 }

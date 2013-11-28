@@ -40,15 +40,11 @@ namespace Mono.WebServer.HyperFastCgi
 	public class ConfigurationManager
 	{
 		private int hash;
-
 		private XmlNodeList elems;
-
 		private NameValueCollection cmd_args = 
 			new NameValueCollection ();
-
 		private NameValueCollection xml_args =
 			new NameValueCollection ();
-
 		private NameValueCollection default_args =
 			new NameValueCollection ();
 
@@ -61,7 +57,7 @@ namespace Mono.WebServer.HyperFastCgi
 		}
 
 		void ImportSettings (XmlDocument doc, NameValueCollection collection,
-			bool allowDuplicates, bool insertEmptyValue)
+		                     bool allowDuplicates, bool insertEmptyValue)
 		{
 			elems = doc.GetElementsByTagName ("Setting");
 			foreach (XmlElement setting in elems) {
@@ -74,7 +70,7 @@ namespace Mono.WebServer.HyperFastCgi
 				if (!allowDuplicates && collection [name] != null)
 					throw AppExcept (except_xml_duplicate, name);
 
-				if (insertEmptyValue ||  value.Length > 0)
+				if (insertEmptyValue || value.Length > 0)
 					collection [name] = value;
 			}
 		}
@@ -96,8 +92,10 @@ namespace Mono.WebServer.HyperFastCgi
 				return null;
 
 			string value;
-			if ((value = cmd_args [name]) != null) return value;
-			if ((value = xml_args [name]) != null) return value;
+			if ((value = cmd_args [name]) != null)
+				return value;
+			if ((value = xml_args [name]) != null)
+				return value;
 
 			string env_setting = GetXmlValue (setting, "Environment");
 			if (env_setting.Length > 0)
@@ -105,7 +103,7 @@ namespace Mono.WebServer.HyperFastCgi
 				return value;
 
 			string app_setting = GetXmlValue (setting,
-				"AppSetting");
+				                     "AppSetting");
 
 			if (app_setting.Length > 0)
 			if ((value = AppSettings [app_setting]) != null)
@@ -122,19 +120,14 @@ namespace Mono.WebServer.HyperFastCgi
 
 		private static string except_unregistered =
 			"Argument \"{0}\" is unknown.";
-
 		private static string except_uint16 =
 			"Error in argument \"{0}\". \"{1}\" cannot be converted to an integer.";
-
 		private static string except_bool =
 			"Error in argument \"{0}\". \"{1}\" should be \"True\" or \"False\".";
-
 		private static string except_directory =
 			"Error in argument \"{0}\". \"{1}\" is not a directory or does not exist.";
-
 		private static string except_file =
 			"Error in argument \"{0}\". \"{1}\" does not exist.";
-
 		private static string except_unknown =
 			"The Argument \"{0}\" has an invalid type: {1}.";
 
@@ -148,20 +141,20 @@ namespace Mono.WebServer.HyperFastCgi
 						name);
 
 				string type = GetXmlValue (setting,
-					"Type").ToLower (
-						CultureInfo.InvariantCulture);
+					              "Type").ToLower (
+					              CultureInfo.InvariantCulture);
 
 				if (value == null)
 					switch (type) {
-				case "uint16":
-					return 0;
-				case "bool":
-					return false;
-				default:
-					return null;
+					case "uint16":
+						return 0;
+					case "bool":
+						return false;
+					default:
+						return null;
 					}
 
-					switch (type) {
+				switch (type) {
 				case "string":
 					return value;
 
@@ -186,7 +179,7 @@ namespace Mono.WebServer.HyperFastCgi
 
 				case "directory":
 					DirectoryInfo dir = new DirectoryInfo (
-						value);
+						                    value);
 					if (dir.Exists)
 						return value;
 
@@ -204,8 +197,8 @@ namespace Mono.WebServer.HyperFastCgi
 				default:
 					throw AppExcept (except_unknown, name,
 						type);
-					}
 				}
+			}
 
 			set {
 				cmd_args.Set (name, value.ToString ());
@@ -213,8 +206,8 @@ namespace Mono.WebServer.HyperFastCgi
 		}
 
 		private ApplicationException AppExcept (Exception except,
-			string message,
-			params object [] args)
+		                                        string message,
+		                                        params object[] args)
 		{
 			return new ApplicationException (string.Format (
 				CultureInfo.InvariantCulture, message, args),
@@ -222,7 +215,7 @@ namespace Mono.WebServer.HyperFastCgi
 		}
 
 		private ApplicationException AppExcept (string message,
-			params object [] args)
+		                                        params object[] args)
 		{
 			return new ApplicationException (string.Format (
 				CultureInfo.InvariantCulture, message, args));
@@ -233,15 +226,15 @@ namespace Mono.WebServer.HyperFastCgi
 			int left_margin = 0;
 			foreach (XmlElement setting in elems) {
 				string show = GetXmlValue (setting,
-					"ConsoleVisible").ToLower (
-						CultureInfo.InvariantCulture);
+					              "ConsoleVisible").ToLower (
+					              CultureInfo.InvariantCulture);
 
 				if (show != "true")
 					continue;
 
 				string type = GetXmlValue (setting,
-					"Type").ToUpper (
-						CultureInfo.InvariantCulture);
+					              "Type").ToUpper (
+					              CultureInfo.InvariantCulture);
 
 				int length = 4 +
 				             GetXmlValue (setting, "Name").Length +
@@ -253,22 +246,22 @@ namespace Mono.WebServer.HyperFastCgi
 
 			foreach (XmlElement setting in elems) {
 				string show = GetXmlValue (setting,
-					"ConsoleVisible").ToLower (
-						CultureInfo.InvariantCulture);
+					              "ConsoleVisible").ToLower (
+					              CultureInfo.InvariantCulture);
 
 				if (show != "true")
 					continue;
 
 				string type = GetXmlValue (setting,
-					"Type").ToUpper (
-						CultureInfo.InvariantCulture);
+					              "Type").ToUpper (
+					              CultureInfo.InvariantCulture);
 
 				string name = GetXmlValue (setting, "Name"); 
 				string arg = string.Format (
-					CultureInfo.InvariantCulture,
-					"  /{0}{1}",
-					name,
-					type == "BOOL" ? "[=True|=False]" :
+					             CultureInfo.InvariantCulture,
+					             "  /{0}{1}",
+					             name,
+					             type == "BOOL" ? "[=True|=False]" :
 					"=" + type);
 
 				Console.Write (arg);
@@ -278,7 +271,7 @@ namespace Mono.WebServer.HyperFastCgi
 					RenderXml (desc, values, 0, 78 - left_margin);
 
 				string app_setting = GetXmlValue (setting,
-					"AppSetting");
+					                     "AppSetting");
 
 				if (app_setting.Length > 0) {
 					string val = AppSettings [app_setting];
@@ -292,16 +285,16 @@ namespace Mono.WebServer.HyperFastCgi
 					values.Add (" Default Value: " + val);
 
 					values.Add (" AppSettings Key Name: " +
-						app_setting);
+					app_setting);
 
 				}
 
 				string env_setting = GetXmlValue (setting,
-					"Environment");
+					                     "Environment");
 
 				if (env_setting.Length > 0)
 					values.Add (" Environment Variable Name: " +
-						env_setting);
+					env_setting);
 
 				values.Add (string.Empty);
 
@@ -346,7 +339,7 @@ namespace Mono.WebServer.HyperFastCgi
 		{
 			StringBuilder output = CreateBuilder (indent);
 			int start = -1;
-			for (int i = 0; i <= text.Length; i ++) {
+			for (int i = 0; i <= text.Length; i++) {
 				bool ws = i == text.Length || char.IsWhiteSpace (text [i]);
 
 				if (ws && start >= 0) {
@@ -369,17 +362,17 @@ namespace Mono.WebServer.HyperFastCgi
 		private StringBuilder CreateBuilder (int indent)
 		{
 			StringBuilder builder = new StringBuilder (80);
-			for (int i = 0; i < indent; i ++)
+			for (int i = 0; i < indent; i++)
 				builder.Append (' ');
 			return builder;
 		}
 
-		public void LoadCommandLineArgs (string [] args)
+		public void LoadCommandLineArgs (string[] args)
 		{
 			if (args == null)
 				throw new ArgumentNullException ("args");
 
-			for (int i = 0; i < args.Length; i ++) {
+			for (int i = 0; i < args.Length; i++) {
 				// Randomize the hash a bit.
 				int idx = (i + 1 < args.Length) ? i + 1 : i;
 				hash ^= args [idx].GetHashCode () + i;
@@ -401,8 +394,8 @@ namespace Mono.WebServer.HyperFastCgi
 						"Warning: \"{0}\" has already been set. Overwriting.",
 						args [i]);
 
-				string [] pair = arg.Split (new char [] {'='},
-					2);
+				string[] pair = arg.Split (new char [] { '=' },
+					                 2);
 
 				if (pair.Length == 2) {
 					cmd_args.Add (pair [0], pair [1]);
@@ -418,15 +411,15 @@ namespace Mono.WebServer.HyperFastCgi
 				}
 
 				string type = GetXmlValue (setting,
-					"Type").ToLower (
-						CultureInfo.InvariantCulture);
+					              "Type").ToLower (
+					              CultureInfo.InvariantCulture);
 				string value;
 
 				if (type == "bool")
 					value = (i + 1 < args.Length &&
-						(args [i+1].ToLower () == "true" ||
-							args [i+1].ToLower () == "false")) ?
-					        args [++ i] : "True";
+					(args [i + 1].ToLower () == "true" ||
+					args [i + 1].ToLower () == "false")) ?
+					        args [++i] : "True";
 				else if (i + 1 < args.Length)
 					value = args [++i];
 				else {
@@ -442,7 +435,6 @@ namespace Mono.WebServer.HyperFastCgi
 
 		private static readonly string except_bad_elem =
 			"XML setting \"{0}={1}\" is invalid.";
-
 		private static readonly string except_xml_duplicate =
 			"XML setting \"{0}\" can only be assigned once.";
 
@@ -468,7 +460,7 @@ namespace Mono.WebServer.HyperFastCgi
 		}
 
 		public int Hash {
-			get {return hash < 0 ? -hash : hash;}
+			get { return hash < 0 ? -hash : hash; }
 		}
 
 		private static NameValueCollection AppSettings {

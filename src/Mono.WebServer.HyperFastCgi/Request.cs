@@ -41,19 +41,17 @@ namespace Mono.WebServer.HyperFastCgi
 	public class Request
 	{
 		private ushort requestId;
-		private List<byte> parameter_data=new List<byte>();
-		IDictionary<string, string> parameter_table=new Dictionary<string,string>();
-		private byte [] input_data;
+		private List<byte> parameter_data = new List<byte> ();
+		IDictionary<string, string> parameter_table = new Dictionary<string,string> ();
+		private byte[] input_data;
 		int input_data_offset;
 		private	bool input_data_completed;
 		private static Encoding encoding = Encoding.Default;
-
 		//cgi request params
 		string path;
 		string rpath;
 		private int port = -1;
 		private string vhost = null;
-
 		//headers
 		private string[] knownHeaders;
 		private Dictionary<string,string> unknownHeadersDict = new Dictionary<string, string> ();
@@ -73,25 +71,25 @@ namespace Mono.WebServer.HyperFastCgi
 		}
 
 		public byte [] InputData {
-			get {return input_data != null ? input_data : new byte [0];}
+			get { return input_data != null ? input_data : new byte [0]; }
 		}
 
-		public string GetKnownRequestHeader(int index)
+		public string GetKnownRequestHeader (int index)
 		{
 			return knownHeaders [index];
 		}
 
-		public string[][] GetUnknownRequestHeaders()
+		public string[][] GetUnknownRequestHeaders ()
 		{
 			return unknownHeaders;
 		}
 
-		public string GetUnknownRequestHeader(string name)
+		public string GetUnknownRequestHeader (string name)
 		{
-			return unknownHeadersDict[name];
+			return unknownHeadersDict [name];
 		}
 
-		public bool AddParameterData (byte [] data, bool parseHeaders)
+		public bool AddParameterData (byte[] data, bool parseHeaders)
 		{
 			// Validate arguments in public methods.
 			if (data == null)
@@ -130,11 +128,11 @@ namespace Mono.WebServer.HyperFastCgi
 //			ParseParameterData ();
 		}
 
-		private void ParseParameters(byte[] data,bool parseHeaders)
+		private void ParseParameters (byte[] data, bool parseHeaders)
 		{
 			int dataLength = data.Length;
 			int offset = 0;
-			int nlen,vlen;
+			int nlen, vlen;
 			string name, value;
 			//TODO: can encoding change?
 			Encoding enc = encoding;
@@ -143,28 +141,28 @@ namespace Mono.WebServer.HyperFastCgi
 				nlen = data [offset++];
 
 				if (nlen > 0x80) {
-					nlen=((0x7F & nlen) * 0x1000000)
-						+ ((int) data [offset++]) * 0x10000
-						+ ((int) data [offset++]) *0x100
-						+ ((int) data [offset++]);
+					nlen = ((0x7F & nlen) * 0x1000000)
+					+ ((int)data [offset++]) * 0x10000
+					+ ((int)data [offset++]) * 0x100
+					+ ((int)data [offset++]);
 				}
 
 				vlen = data [offset++];
 
 				if (vlen > 0x80) {
-					vlen=((0x7F & vlen) * 0x1000000)
-						+ ((int) data [offset++]) * 0x10000
-						+ ((int) data [offset++]) *0x100
-						+ ((int) data [offset++]);
+					vlen = ((0x7F & vlen) * 0x1000000)
+					+ ((int)data [offset++]) * 0x10000
+					+ ((int)data [offset++]) * 0x100
+					+ ((int)data [offset++]);
 				}
 
 				// Do a sanity check on the size of the data.
 				if (offset + nlen + vlen > dataLength)
 					throw new ArgumentOutOfRangeException ("offset");
 
-				name=enc.GetString (data, offset, nlen);
+				name = enc.GetString (data, offset, nlen);
 				offset += nlen;
-				value=enc.GetString (data, offset, vlen);
+				value = enc.GetString (data, offset, vlen);
 				offset += vlen;
 
 				parameter_table.Add (name, value);
@@ -210,7 +208,7 @@ namespace Mono.WebServer.HyperFastCgi
 
 			return String.Empty;
 		}
-	
+
 		public bool AddInputData (Record record)
 		{
 			// Validate arguments in public methods.
@@ -243,7 +241,7 @@ namespace Mono.WebServer.HyperFastCgi
 					input_data = new byte[len];
 				} 
 
-				if (input_data_offset + record.BodyLength> input_data.Length ) {
+				if (input_data_offset + record.BodyLength > input_data.Length) {
 					//TODO: throw an exception
 				}
 
@@ -258,7 +256,6 @@ namespace Mono.WebServer.HyperFastCgi
 
 			return input_data_completed;
 		}
-
 
 		private bool file_data_completed = false;
 
@@ -287,10 +284,11 @@ namespace Mono.WebServer.HyperFastCgi
 		}
 
 		#region properties, which should be optimized
+
 		public string GetParameter (string parameter)
 		{
 			if (parameter_table != null && parameter_table.ContainsKey (parameter))
-				return (string) parameter_table [parameter];
+				return (string)parameter_table [parameter];
 
 			return null;
 		}
@@ -299,7 +297,6 @@ namespace Mono.WebServer.HyperFastCgi
 		{
 			return parameter_table;
 		}
-
 
 		public string Path {
 			get {
@@ -337,7 +334,9 @@ namespace Mono.WebServer.HyperFastCgi
 				return vhost;
 			}
 		}
+
 		#endregion
+
 	}
 }
 

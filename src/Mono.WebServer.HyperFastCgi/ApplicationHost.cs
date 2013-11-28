@@ -32,6 +32,7 @@ using System.Text;
 using System.Web;
 using System.Web.Hosting;
 using System.Threading;
+using Mono.WebServer.HyperFastCgi.Sockets;
 
 namespace Mono.WebServer.HyperFastCgi
 {
@@ -44,27 +45,24 @@ namespace Mono.WebServer.HyperFastCgi
 			server = new Server (this);
 		}
 
-		public void Start(GeneralSocketType sockType, string address, int port, bool keepAlive,bool useThreadPool)
+		public void Start (GeneralSocketType sockType, string address, int port, bool keepAlive, bool useThreadPool)
 		{
-			server.Start (sockType,address,port,keepAlive,useThreadPool);
+			server.Start (sockType, address, port, keepAlive, useThreadPool);
 		}
 
-		public void Shutdown()
+		public void Shutdown ()
 		{
 			server.Shutdown ();
 		}
-
-//		public void Unload()
-//		{
-//			base.Unload ();
-//		}
-
-		public void ProcessRequest (NetworkConnector connector,Request cgiRequest)
+		//		public void Unload()
+		//		{
+		//			base.Unload ();
+		//		}
+		public void ProcessRequest (NetworkConnector connector, Request cgiRequest)
 		{
-			WorkerRequest worker = new WorkerRequest (connector,cgiRequest,this);
+			WorkerRequest worker = new WorkerRequest (connector, cgiRequest, this);
 
 			ProcessRequest (worker);
 		}
-
 	}
 }

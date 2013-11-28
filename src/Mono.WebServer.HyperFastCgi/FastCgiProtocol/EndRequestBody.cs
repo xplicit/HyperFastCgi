@@ -28,42 +28,36 @@
 
 using System;
 
-namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol {
+namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol
+{
 	public enum ProtocolStatus : byte
 	{
 		RequestComplete = 0,
-
 		CantMultiplexConnections = 1,
-
 		Overloaded = 2,
-
 		UnknownRole = 3
 	}
 
 	public struct EndRequestBody
 	{
+
 		#region Private Fields
 
 		int app_status;
-
 		ProtocolStatus protocol_status;
 
 		#endregion
 
-
-
 		#region Constructors
 
 		public EndRequestBody (int appStatus,
-			ProtocolStatus protocolStatus)
+		                       ProtocolStatus protocolStatus)
 		{
-			app_status      = appStatus;
+			app_status = appStatus;
 			protocol_status = protocolStatus;
 		}
 
 		#endregion
-
-
 
 		#region Public Methods
 
@@ -71,17 +65,18 @@ namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol {
 		{
 			uint app;
 			unchecked {
-				app = (uint) app_status;
+				app = (uint)app_status;
 			}
-			byte [] data = new byte [8];
+			byte[] data = new byte [8];
 			data [0] = (byte)((app >> 24) & 0xFF);
 			data [1] = (byte)((app >> 16) & 0xFF);
-			data [2] = (byte)((app >>  8) & 0xFF);
-			data [3] = (byte)((app      ) & 0xFF);
-			data [4] = (byte) protocol_status;
+			data [2] = (byte)((app >> 8) & 0xFF);
+			data [3] = (byte)((app) & 0xFF);
+			data [4] = (byte)protocol_status;
 			return data;
 		}
 
 		#endregion
+
 	}
 }

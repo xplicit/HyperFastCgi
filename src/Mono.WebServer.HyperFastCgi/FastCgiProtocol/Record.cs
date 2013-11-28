@@ -32,75 +32,53 @@ using System;
 using System.Globalization;
 using System.Net.Sockets;
 
-namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol {
-	public enum RecordType : byte {
-		None            =  0,
-
-		BeginRequest    =  1,
-
-		AbortRequest    =  2,
-
-		EndRequest      =  3,
-
-		Params          =  4,
-
-		StandardInput   =  5,
-
-		StandardOutput  =  6,
-
-		StandardError   =  7,
-
-		Data            =  8,
-
-		GetValues       =  9,
-
+namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol
+{
+	public enum RecordType : byte
+	{
+		None = 0,
+		BeginRequest = 1,
+		AbortRequest = 2,
+		EndRequest = 3,
+		Params = 4,
+		StandardInput = 5,
+		StandardOutput = 6,
+		StandardError = 7,
+		Data = 8,
+		GetValues = 9,
 		GetValuesResult = 10,
-
-		UnknownType     = 11
+		UnknownType = 11
 	}
 
 	public struct Record
 	{
 		public byte Version;
-
 		public RecordType Type;
-
 		public ushort RequestId;
-
 		public ushort BodyLength;
-
-		public byte [] Body;
-
+		public byte[] Body;
 		public byte PaddingLength;
-
 		public int BodyOffset;
-
-
 		public const int SuggestedBufferSize = 0x08 + 0xFFFF + 0xFF;
-
-
 
 		#region Public Fields
 
 		public const int HeaderSize = 8;
-
 		public const int ProtocolVersion = 1;
 
 		#endregion
 
-
-
 		#region Constructors
 
 		public Record (byte version, RecordType type, ushort requestID,
-			byte [] bodyData) : this (version, type,
-				requestID, bodyData,
-				0, -1)
+		               byte[] bodyData) : this (version, type,
+		                           requestID, bodyData,
+		                           0, -1)
 		{
 		}
 
 		public Record (byte version, RecordType type, ushort requestID,
-			byte [] bodyData, int bodyIndex, int bodyLength)
+		               byte[] bodyData, int bodyIndex, int bodyLength)
 		{
 			if (bodyData == null)
 				throw new ArgumentNullException ("bodyData");
@@ -118,28 +96,27 @@ namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol {
 					"data");
 
 
-			this.Version     = version;
-			this.Type        = type;
-			this.RequestId  = requestID;
-			this.Body        = bodyData;
-			this.BodyOffset  = bodyIndex;
-			this.BodyLength = (ushort) bodyLength;
+			this.Version = version;
+			this.Type = type;
+			this.RequestId = requestID;
+			this.Body = bodyData;
+			this.BodyOffset = bodyIndex;
+			this.BodyLength = (ushort)bodyLength;
 			this.PaddingLength = 0;
 		}
 
 		#endregion
 
-		internal static ushort ReadUInt16 (byte [] array,
-			int arrayIndex)
+		internal static ushort ReadUInt16 (byte[] array,
+		                                   int arrayIndex)
 		{
 			ushort value = array [arrayIndex];
-			value = (ushort) (value << 8);
+			value = (ushort)(value << 8);
 			value += array [arrayIndex + 1];
 			return value;
 		}
 
 		#region Public Methods
-
 
 		public override string ToString ()
 		{
@@ -148,7 +125,7 @@ namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol {
 				Version, Type, RequestId, BodyLength);
 		}
 
-		public byte[] GetRecord()
+		public byte[] GetRecord ()
 		{
 			byte[] buffer = new byte[HeaderSize + BodyLength + PaddingLength];
 
@@ -163,7 +140,6 @@ namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol {
 
 			return buffer;
 		}
-
 
 		#endregion
 
