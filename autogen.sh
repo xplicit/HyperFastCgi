@@ -17,7 +17,7 @@ test -z "$srcdir" && srcdir=.
 ORIGDIR=`pwd`
 cd $srcdir
 TEST_TYPE=-f
-aclocalinclude="-I . $ACLOCAL_FLAGS"
+aclocalinclude="-I . $ACLOCAL_FLAGS -I build/m4/shamrock -I build/m4/shave"
 
 DIE=0
 

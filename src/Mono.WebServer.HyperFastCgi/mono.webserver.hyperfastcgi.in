@@ -1,3 +1,0 @@
-#!/bin/sh
-
-exec mono-sgen "@expanded_libdir@/@PACKAGE@/Mono.WebServer.HyperFastCgi.exe" "$@"

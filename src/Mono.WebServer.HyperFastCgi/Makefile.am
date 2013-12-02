@@ -1,3 +1,4 @@
+SUBDIRS = scripts
 
 EXTRA_DIST =  
 
@@ -5,7 +6,7 @@ EXTRA_DIST =
 
 if ENABLE_DEBUG_X86
 ASSEMBLY_COMPILER_COMMAND = dmcs
-ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize- -debug "-define:DEBUG;"
+ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize- -debug "-define:DEBUG; -keyfile:$(top_srcdir)/src/mono.snk"
 ASSEMBLY = bin/Debug/Mono.WebServer.HyperFastCgi.exe
 ASSEMBLY_MDB = $(ASSEMBLY).mdb
 COMPILE_TARGET = exe
@@ -19,7 +20,7 @@ endif
 
 if ENABLE_RELEASE_X86
 ASSEMBLY_COMPILER_COMMAND = dmcs
-ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize+
+ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize+ -keyfile:$(top_srcdir)/src/mono.snk
 ASSEMBLY = bin/Release/Mono.WebServer.HyperFastCgi.exe
 ASSEMBLY_MDB = 
 COMPILE_TARGET = exe
@@ -30,48 +31,64 @@ MONO_WEBSERVER_HYPERFASTCGI_EXE_MDB=
 
 endif
 
+if NET_2_0
+ASSEMBLY2 = 2.0/$(ASSEMBLY)
+GACUTIL2 = $(GACUTIL) -package 2.0
+endif
+if NET_4_0
+ASSEMBLY4 = 4.0/$(ASSEMBLY)
+GACUTIL4 = $(GACUTIL) -package 4.5
+endif
+
+if NET_2_0
+MONO_WEBSERVER_HYPERFASTCGI2  = 2.0/$(BUILD_DIR)/mono-webserver-hyperfastcgi2
+endif
+
+if NET_4_0
+MONO_WEBSERVER_HYPERFASTCGI4  = 4.0/$(BUILD_DIR)/mono-webserver-hyperfastcgi4
+endif
+
 AL=al
 SATELLITE_ASSEMBLY_NAME=$(notdir $(basename $(ASSEMBLY))).resources.dll
 
 PROGRAMFILES = \
 	$(MONO_WEBSERVER_HYPERFASTCGI_EXE_MDB)  
 
-BINARIES = \
-	$(MONO_WEBSERVER_HYPERFASTCGI)  
-
+#BINARIES = \
+#	$(MONO_WEBSERVER_HYPERFASTCGI2) \
+#	$(MONO_WEBSERVER_HYPERFASTCGI4)  
 
 RESGEN=resgen2
 	
-all: $(ASSEMBLY) $(PROGRAMFILES) $(BINARIES) 
+all: $(ASSEMBLY2) $(ASSEMBLY4) $(PROGRAMFILES) $(BINARIES) 
 
-FILES = \
-	Program.cs \
-	Properties/AssemblyInfo.cs \
-	Strings.cs \
-	Server.cs \
-	NetworkConnector.cs \
-	Request.cs \
-	TestResponse.cs \
+FILES =  \
 	ApplicationHost.cs \
-	WorkerRequest.cs \
-	WebSource.cs \
-	Main.cs \
+	Config/ConfigurationManager.cs \
 	FastCgiProtocol/BeginRequestBody.cs \
 	FastCgiProtocol/EndRequestBody.cs \
 	FastCgiProtocol/Record.cs \
 	FastCgiProtocol/UnknownTypeBody.cs \
-	Sockets/TcpSocket.cs \
-	Sockets/UnixSocket.cs \
-	Sockets/GeneralSocket.cs \
-	Config/ConfigurationManager.cs \
 	Logging/Logger.cs \
 	Logging/LogLevel.cs \
-	Sockets/GeneralSocketType.cs 
+	Main.cs \
+	NetworkConnector.cs \
+	Program.cs \
+	Properties/AssemblyInfo.cs \
+	Request.cs \
+	Server.cs \
+	Sockets/GeneralSocket.cs \
+	Sockets/GeneralSocketType.cs \
+	Sockets/TcpSocket.cs \
+	Sockets/UnixSocket.cs \
+	Strings.cs \
+	TestResponse.cs \
+	WebSource.cs \
+	WorkerRequest.cs 
 
 DATA_FILES = 
 
-RESOURCES = \
-	Config/ConfigurationManager.xml 
+RESOURCES = Config/ConfigurationManager.xml 
 
 EXTRAS = \
 	FastCgiProtocol \
@@ -81,30 +98,100 @@ EXTRAS = \
 	mono.webserver.hyperfastcgi.in 
 
 REFERENCES =  \
-	System \
 	Mono.Posix \
-	System.Web \
+	System \
 	System.Configuration \
-	System.Xml \
-	$(XSP_4_LIBS)
+	System.Web \
+	System.Xml
 
 DLL_REFERENCES = 
 
 CLEANFILES = $(PROGRAMFILES) $(BINARIES) 
 
-include $(top_srcdir)/Makefile.include
+#include $(top_srcdir)/Makefile.include
+# $(call emit-deploy-wrapper,wrapper-variable-name,wrapper-sourcefile,x)
+# assumes that for a wrapper foo.pc its source template is foo.pc.in
+# if $3 is non-empty then wrapper is marked exec
+define emit-deploy-wrapper
+$($1): $2
+	mkdir -p '$$(shell dirname '$$@')'
+	cp '$$<' '$$@'
+	$(if $3,chmod +x '$$@')
+endef
 
-MONO_WEBSERVER_HYPERFASTCGI = $(BUILD_DIR)/mono.webserver.hyperfastcgi
+if NET_4_0
+programfiles4dir=$(pkglibdir)/4.0
+programfiles4_DATA=$(ASSEMBLY4)
+endif
+if NET_2_0
+programfiles2dir=$(pkglibdir)/2.0
+programfiles2_DATA=$(ASSEMBLY2)
+endif
 
-$(eval $(call emit-deploy-wrapper,MONO_WEBSERVER_HYPERFASTCGI,mono.webserver.hyperfastcgi,x))
+#bin_SCRIPTS = $(BINARIES)
+
+#$(MONO_WEBSERVER_HYPERFASTCGI2):
+#	echo -e 1
+$(eval $(call emit-deploy-wrapper,MONO_WEBSERVER_HYPERFASTCGI2,mono-webserver-hyperfastcgi2,x))
+
+#$(MONO_WEBSERVER_HYPERFASTCGI4):
+#	echo -e 2
+$(eval $(call emit-deploy-wrapper,MONO_WEBSERVER_HYPERFASTCGI4,mono-webserver-hyperfastcgi4,x))
 
 
 $(eval $(call emit_resgen_targets))
 $(build_xamlg_list): %.xaml.g.cs: %.xaml
 	xamlg '$<'
 
+s2q=$(subst \ ,?,$1)
+q2s=$(subst ?,\ ,$1)
+
+build_sources= $(FILES)
+
+build_resources= $(RESOURCES)
+
+references2=$(REFERENCES) -pkg:xsp-2
+
+references4=$(REFERENCES) -pkg:xsp-4
+
+build_references_ref2 = $(call q2s,$(foreach ref, $(call s2q,$(references2)), $(if $(filter -pkg:%, $(ref)), $(ref), $(if $(filter -r:%, $(ref)), $(ref), -r:$(ref)))))
+build_references_ref2 += $(call q2s,$(foreach ref, $(call s2q,$(DLL_REFERENCES)), -r:$(ref)))
+build_references_ref2 += $(call q2s,$(foreach ref, $(call s2q,$(PROJECT_REFERENCES)), -r:$(ref)))
+
+build_references_ref4 = $(call q2s,$(foreach ref, $(call s2q,$(references4)), $(if $(filter -pkg:%, $(ref)), $(ref), $(if $(filter -r:%, $(ref)), $(ref), -r:$(ref)))))
+build_references_ref4 += $(call q2s,$(foreach ref, $(call s2q,$(DLL_REFERENCES)), -r:$(ref)))
+build_references_ref4 += $(call q2s,$(foreach ref, $(call s2q,$(PROJECT_REFERENCES)), -r:$(ref)))
+
+
 $(ASSEMBLY_MDB): $(ASSEMBLY)
 
-$(ASSEMBLY): $(build_sources) $(build_resources) $(build_datafiles) $(DLL_REFERENCES) $(PROJECT_REFERENCES) $(build_xamlg_list) $(build_satellite_assembly_list)
-	mkdir -p $(shell dirname $(ASSEMBLY))
-	$(ASSEMBLY_COMPILER_COMMAND) $(ASSEMBLY_COMPILER_FLAGS) -out:$(ASSEMBLY) -target:$(COMPILE_TARGET) $(build_sources_embed) $(build_resources_embed) $(build_references_ref)
+if NET_2_0
+$(ASSEMBLY2): $(build_sources) $(build_resources) $(build_datafiles) $(DLL_REFERENCES) $(PROJECT_REFERENCES) $(build_xamlg_list) $(build_satellite_assembly_list)
+	mkdir -p $(shell dirname 2.0/$(ASSEMBLY))
+	$(GMCS) $(ASSEMBLY_COMPILER_FLAGS) -out:$(ASSEMBLY2) -target:$(COMPILE_TARGET) $(build_sources) $(build_resources:%=-resource:%) $(build_references_ref4)
+	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
+endif
+
+if NET_4_0
+$(ASSEMBLY4): $(build_sources) $(build_resources) $(build_datafiles) $(DLL_REFERENCES) $(PROJECT_REFERENCES) $(build_xamlg_list) $(build_satellite_assembly_list)
+	mkdir -p $(shell dirname 4.0/$(ASSEMBLY))
+	$(DMCS) $(ASSEMBLY_COMPILER_FLAGS) -out:$(ASSEMBLY4) -target:$(COMPILE_TARGET) $(build_sources) $(build_resources:%=-resource:%) $(build_references_ref4)
+	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
+endif
+
+
+install-data-local:
+if NET_2_0
+	$(GACUTIL2) $(GACUTIL_FLAGS) -i $(ASSEMBLY2)
+endif
+if NET_4_0
+	$(GACUTIL4) $(GACUTIL_FLAGS) -i $(ASSEMBLY4)
+endif
+
+uninstall-local:
+	-for i in Mono.WebServer.HyperFastCgi ; do \
+		$(GACUTIL) $(GACUTIL_FLAGS) -u $$(basename $$i .exe) ; \
+	done
+
+clean-local:
+	rm -rf 2.0 4.0
