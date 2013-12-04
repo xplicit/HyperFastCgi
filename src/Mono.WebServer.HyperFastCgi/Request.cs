@@ -185,7 +185,7 @@ namespace Mono.WebServer.HyperFastCgi
 
 		private static string ReformatHttpHeader (string name)
 		{
-			if (name.StartsWith ("HTTP_", StringComparison.InvariantCulture)) {
+			if (name.StartsWith ("HTTP_", StringComparison.Ordinal)) {
 				char[] header = new char[name.Length - 5];
 
 				// "HTTP_".Length
