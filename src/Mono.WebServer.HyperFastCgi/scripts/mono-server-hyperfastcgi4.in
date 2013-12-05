@@ -1,3 +1,3 @@
 #!/bin/sh
 
-exec mono-sgen "@expanded_libdir@/@PACKAGE@/4.0/Mono.WebServer.HyperFastCgi.exe" "$@"
+exec @RUNTIME@ $MONO_OPTIONS "@expanded_libdir@/@PACKAGE@/4.0/Mono.WebServer.HyperFastCgi.exe" "$@"
