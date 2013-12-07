@@ -37,7 +37,6 @@ namespace Mono.WebServer.HyperFastCgi
 {
 	public class Server
 	{
-		private ManualResetEvent allDone = new ManualResetEvent (false);
 		private AsyncCallback accept;
 		ApplicationHost appHost;
 		GeneralSocket listener;
@@ -58,23 +57,22 @@ namespace Mono.WebServer.HyperFastCgi
 		{
 			this.keepAlive = keepAlive;
 			this.useThreadPool = useThreadPool;
+
 			//IPEndPoint localEP = new IPEndPoint(IPAddress.Any,port);
 
 			//log.InfoFormat("Local address and port : {0}",localEP);
 
 			try {
 				this.listener = CreateSocket (sockType, address, port);
-				//listener = new TcpSocket (localEP);
-				//listener = new UnixSocket("/tmp/fastcgi.socket");
 
 				listener.Listen (500);
 				listener.BeginAccept (accept, listener);
 
 			} catch (Exception ex) {
-				//log.Error(e);
 				Logger.Write (LogLevel.Error, "{0}", ex);
 				return false;
 			}
+			Logger.Write (LogLevel.Debug, "Application started");
 
 			return true;
 		}
@@ -82,8 +80,9 @@ namespace Mono.WebServer.HyperFastCgi
 		public void Shutdown ()
 		{
 			listener.Close ();
-			allDone.Set ();
 
+			//TODO: send EndOfRequest to all unprocessed requests. Close all open connections
+			Logger.Write (LogLevel.Debug, "Application stopped");
 			//flush all changes
 		}
 
@@ -106,21 +105,28 @@ namespace Mono.WebServer.HyperFastCgi
 
 		public void acceptCallback (IAsyncResult ar)
 		{
-			//TODO: add try/catch clause and raise EnexpectedException event 
+			//TODO: add try/catch clause and raise UnexpectedException event 
 			GeneralSocket listener = (GeneralSocket)ar.AsyncState;
-			Socket client = listener.EndAccept (ar);
+			Socket client=null;
 
-			//allDone.Set();
-			listener.BeginAccept (accept, listener);
+			try {
+				client = listener.EndAccept (ar);
+			}
+			catch (ObjectDisposedException) {
+				//socket has been closed in Shutdown method
+			}
 
+			if (client != null) {
+				listener.BeginAccept (accept, listener);
 
-			// Additional code to read data goes here.
-			NetworkConnector connector = new NetworkConnector (client, appHost);
-			connector.KeepAlive = keepAlive;
-			connector.UseThreadPool = useThreadPool;
-			connector.Disconnected += OnDisconnect;
+				// Additional code to read data goes here.
+				NetworkConnector connector = new NetworkConnector (client, appHost);
+				connector.KeepAlive = keepAlive;
+				connector.UseThreadPool = useThreadPool;
+				connector.Disconnected += OnDisconnect;
 
-			connector.Receive ();
+				connector.Receive ();
+			}
 		}
 
 		protected void OnDisconnect (object sender, EventArgs args)

@@ -57,7 +57,7 @@ namespace Mono.WebServer.HyperFastCgi
 		string raw_url = null;
 		private bool closed = false;
 		string uri_path = null;
-		string path_info;
+//		string path_info;
 		Request cgiRequest;
 		NetworkConnector connector;
 

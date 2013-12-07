@@ -24,10 +24,9 @@
         <Variable name="MONO_PATH" value="." />
       </EnvironmentVariables>
     </EnvironmentVariables>
-    <Commandlineparameters>/applications=ssbench3:/:/var/www/nginx-mono /socket=tcp:127.0.0.1:9000</Commandlineparameters>
+    <Commandlineparameters>/applications=ssbench3:/:/var/www/ssbench3 /socket=tcp:127.0.0.1:9000 /loglevels=Debug /printlog</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>full</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
@@ -38,7 +37,7 @@
         <Variable name="MONO_PATH" value="." />
       </EnvironmentVariables>
     </EnvironmentVariables>
-    <Commandlineparameters>/applications=ssbench3:/:/var/www/nginx-mono /socket=tcp:127.0.0.1:9000</Commandlineparameters>
+    <Commandlineparameters>/applications=ssbench3:/:/var/www/ssbench3 /socket=tcp:127.0.0.1:9000 /minthreads=20,8 /loglevels=Debug</Commandlineparameters>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -50,7 +49,6 @@
     <Compile Include="TestResponse.cs" />
     <Compile Include="ApplicationHost.cs" />
     <Compile Include="WorkerRequest.cs" />
-    <Compile Include="WebSource.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="FastCgiProtocol\BeginRequestBody.cs" />
     <Compile Include="FastCgiProtocol\EndRequestBody.cs" />
@@ -63,6 +61,17 @@
     <Compile Include="Logging\Logger.cs" />
     <Compile Include="Logging\LogLevel.cs" />
     <Compile Include="Sockets\GeneralSocketType.cs" />
+    <Compile Include="WebServer\ApplicationServer.cs" />
+    <Compile Include="WebServer\BaseApplicationHost.cs" />
+    <Compile Include="WebServer\EndOfRequestHandler.cs" />
+    <Compile Include="WebServer\HttpErrors.cs" />
+    <Compile Include="WebServer\IApplicationHost.cs" />
+    <Compile Include="WebServer\MonoWorkerRequest.cs" />
+    <Compile Include="WebServer\VPathToHost.cs" />
+    <Compile Include="WebServer\WebTrace.cs" />
+    <Compile Include="WebServer\Events\MapPathEventArgs.cs" />
+    <Compile Include="WebServer\Events\MapPathEventHandler.cs" />
+    <Compile Include="WebServer\Events\DomainReloadEventArgs.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -75,6 +84,8 @@
     <Folder Include="Sockets\" />
     <Folder Include="Config\" />
     <Folder Include="Logging\" />
+    <Folder Include="WebServer\" />
+    <Folder Include="WebServer\Events\" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
@@ -93,9 +104,6 @@
   </ProjectExtensions>
   <ItemGroup>
     <Reference Include="Mono.Posix" />
-    <Reference Include="Mono.WebServer2, Version=0.4.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web" />

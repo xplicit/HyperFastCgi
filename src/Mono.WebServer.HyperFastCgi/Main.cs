@@ -87,13 +87,11 @@ namespace Mono.WebServer.HyperFastCgi
 		private static ApplicationServer appserver;
 		private static ConfigurationManager configmanager;
 
-		public static VPathToHost GetApplicationForPath (string vhost,
-		                                                 int port,
-		                                                 string path,
-		                                                 string realPath)
-		{
-			return appserver.GetApplicationForPath (vhost,	port, path, false);
-		}
+		private static GeneralSocketType sockType;
+		private static string address; 
+		private static int port=0;
+		private static bool keepAlive; 
+		private static bool useThreadPool;
 
 		public static int Main (string[] args)
 		{
@@ -177,10 +175,6 @@ namespace Mono.WebServer.HyperFastCgi
 			string[] socket_parts = socket_type.Split (
 				                         new char [] { ':' }, 3);
 
-			GeneralSocketType sockType;
-			string address;
-			int port = 0;
-
 			switch (socket_parts [0].ToLower ()) {
 			// The FILE sockets is of the format
 			// "file[:PATH]".
@@ -228,10 +222,9 @@ namespace Mono.WebServer.HyperFastCgi
 
 				string address_str =
 					(string)configmanager ["address"];
-				IPAddress ipAddress;
 
 				try {
-					ipAddress = IPAddress.Parse (address_str);
+					IPAddress.Parse (address_str);
 				} catch {
 					Logger.Write (LogLevel.Error,
 						"Error in argument \"address\". \"{0}\" cannot be converted to an IP address.",
@@ -278,9 +271,10 @@ namespace Mono.WebServer.HyperFastCgi
 
 			root_dir = Environment.CurrentDirectory;
 			bool auto_map = false; //(bool) configmanager ["automappaths"];
-			WebSource webSource = new WebSource ();
-			appserver = new ApplicationServer (webSource, root_dir);
+
+			appserver = new ApplicationServer (typeof(ApplicationHost), root_dir);
 			appserver.Verbose = (bool)configmanager ["verbose"];
+			appserver.DomainReloadEvent +=DomainReloadEventHandler;
 
 			string applications = (string)
 			                      configmanager ["applications"];
@@ -328,11 +322,11 @@ namespace Mono.WebServer.HyperFastCgi
 				Logger.Write (LogLevel.Error, "Only one application currently supported");
 				return 1;
 			}
-			vapp.CreateHost (appserver, webSource);
+			vapp.CreateHost (appserver, typeof(ApplicationHost));
 			ApplicationHost host = vapp.AppHost as ApplicationHost;
 
-			bool keepAlive = (bool)configmanager ["keepalive"];
-			bool useThreadPool = (bool)configmanager ["usethreadpool"];
+			keepAlive = (bool)configmanager ["keepalive"];
+			useThreadPool = (bool)configmanager ["usethreadpool"];
 
 			string[] minThreads = ((string)configmanager ["minthreads"]).Split(',');
 			string[] maxThreads = ((string)configmanager ["maxthreads"]).Split(',');
@@ -365,8 +359,11 @@ namespace Mono.WebServer.HyperFastCgi
 
 			bool stopable = (bool)configmanager ["stopable"];
 			Logger.WriteToConsole = (bool)configmanager ["printlog"];
-//			host.Start (stopable);
-			host.Start (sockType, address, port, keepAlive, useThreadPool);
+			host.LogLevel = Logger.Level;
+			host.LogToConsole = Logger.WriteToConsole;
+
+			if (!host.Start (sockType, address, port, keepAlive, useThreadPool))
+				return 1;
 
 			configmanager = null;
 
@@ -393,6 +390,13 @@ namespace Mono.WebServer.HyperFastCgi
 			}
 
 			return 0;
+		}
+
+		static void DomainReloadEventHandler(object sender,DomainReloadEventArgs args)
+		{
+			ApplicationHost host = args.VApp.AppHost as ApplicationHost;
+
+			host.Start (sockType, address, port, keepAlive, useThreadPool);
 		}
 
 		static void SetThreads(int minWorkerThreads, int minIOThreads, int maxWorkerThreads, int maxIOThreads)

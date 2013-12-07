@@ -86,7 +86,9 @@ namespace Mono.WebServer.HyperFastCgi
 		private ApplicationHost appHost;
 		static int threadName = 0;
 		private static int nConnect = 0;
+		#pragma warning disable 414
 		int cn = 0;
+		#pragma warning restore
 
 		public bool UseThreadPool {
 			get { return useThreadPool; }
@@ -234,10 +236,10 @@ namespace Mono.WebServer.HyperFastCgi
 				if (keepAlive || !stopReceive)
 					client.BeginReceive (state.buffer, 0, state.buffer.Length, 0, asyncRecieveCallback, state);
 			} catch (SocketException ex) {
-//				log.WarnFormat("ReceiveCallback. Socket error while receivieng data: {0}", ex.Message);
+				Logger.Write (LogLevel.Error, "ReceiveCallback. Socket error while receivieng data: {0}", ex.Message);
 				OnDisconnected ();
 			} catch (ObjectDisposedException) {
-//				log.Warn("ReceiveCallback. Socket was closed");
+				Logger.Write (LogLevel.Error, "ReceiveCallback. Socket was closed");
 				OnDisconnected ();
 			} catch (Exception ex) {
 				Logger.Write (LogLevel.Error, "Unhandled exception in recv {0}", ex);
@@ -358,13 +360,13 @@ namespace Mono.WebServer.HyperFastCgi
 					Interlocked.Exchange (ref sendProcessing, 0);
 				}
 			} catch (SocketException ex) {
-//				log.WarnFormat("Socket error while sending data: {0}", ex.Message);
+				Logger.Write (LogLevel.Error, "Socket error while sending data: {0}", ex.Message);
 				sendState.buffer = null;
 				sendState.workSocket = null;
 				OnDisconnected ();
 				Interlocked.Exchange (ref sendProcessing, 0);
 			} catch (ObjectDisposedException ex) {
-//				log.WarnFormat("Socket error while sending data: {0}", ex.Message);
+				Logger.Write (LogLevel.Error, "Socket error while sending data: {0}", ex.Message);
 				sendState.buffer = null;
 				sendState.workSocket = null;
 				OnDisconnected ();
@@ -398,18 +400,17 @@ namespace Mono.WebServer.HyperFastCgi
 					Disconnect ();
 				}
 			} catch (SocketException ex) {
-//				log.DebugFormat("SendCallback. Socket error while sending data: {0}", ex.Message);
+				Logger.Write (LogLevel.Error, "SendCallback. Socket error while sending data: {0}", ex.Message);
 				OnDisconnected ();
 				Interlocked.Exchange (ref sendProcessing, 0);
 				return;
 			} catch (ObjectDisposedException) {
-//				log.Debug("Socket has already been disposed");
+				Logger.Write (LogLevel.Error, "SendCallback. Socket has already been disposed");
 				OnDisconnected ();
 				Interlocked.Exchange (ref sendProcessing, 0);
 				return;
 				//??? should we return or try to process other messages in queue.
 			} catch (Exception ex) {
-//				log.Error("Unexpected exception in SendCallback", ex);
 				Logger.Write (LogLevel.Error, "Unexpected exception in SendCallback", ex);
 				Interlocked.Exchange (ref sendProcessing, 0);
 				throw;

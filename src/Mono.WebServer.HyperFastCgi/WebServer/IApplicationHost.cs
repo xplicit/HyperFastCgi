@@ -1,12 +1,15 @@
 //
-// WebSource.cs: Provides a shell implementation of Mono.WebServer.WebSource
-// for ApplicationServer to get the IApplicationHost type from.
+// Mono.WebServer.IApplicationHost
 //
-// Author:
-//   Brian Nickel (brian.nickel@gmail.com)
+// Authors:
+//	Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //
-// Copyright (C) 2007 Brian Nickel
-// 
+// Documentation:
+//	Brian Nickel
+//
+// (C) 2003 Ximian, Inc (http://www.ximian.com)
+// (C) Copyright 2004-2010 Novell, Inc
+//
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
 // "Software"), to deal in the Software without restriction, including
@@ -28,38 +31,21 @@
 //
 
 using System;
+using System.Web;
 
-namespace Mono.WebServer.HyperFastCgi
+namespace Mono.WebServer
 {
-	// FIXME: This class could be removed if
-	// Mono.WebServer.ApplicationServer is broken into two classes:
-	// * ApplicationManager to handle application hosts, and
-	// * ApplicationServer, a subclass of ApplicationManager that
-	//   adds on server support.
-	public class WebSource : Mono.WebServer.WebSource
+	public interface IApplicationHost
 	{
-		public WebSource ()
-		{
-		}
+		string Path { get; }
 
-		public override IRequestBroker CreateRequestBroker ()
-		{
-			return null;
-		}
+		string VPath { get; }
 
-		public override System.Type GetApplicationHostType ()
-		{
-			return typeof(ApplicationHost);
-		}
+		AppDomain Domain { get; }
 
-		public override Worker CreateWorker (System.Net.Sockets.Socket socket, ApplicationServer server)
-		{
-			return null;
-		}
+		ApplicationServer Server { get; set; }
 
-		public override System.Net.Sockets.Socket CreateSocket ()
-		{
-			return null;
-		}
+		void Unload ();
 	}
 }
+

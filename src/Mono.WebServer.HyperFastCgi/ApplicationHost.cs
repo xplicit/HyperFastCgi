@@ -33,6 +33,7 @@ using System.Web;
 using System.Web.Hosting;
 using System.Threading;
 using Mono.WebServer.HyperFastCgi.Sockets;
+using Mono.WebServer.HyperFastCgi.Logging;
 
 namespace Mono.WebServer.HyperFastCgi
 {
@@ -40,29 +41,44 @@ namespace Mono.WebServer.HyperFastCgi
 	{
 		private Server server;
 
+		public LogLevel LogLevel {
+			get { return Logger.Level; }
+			set { Logger.Level = value; }
+		}
+
+		public bool LogToConsole {
+			get { return Logger.WriteToConsole; }
+			set { Logger.WriteToConsole = value; }
+		}
+
 		public ApplicationHost ()
 		{
 			server = new Server (this);
 		}
 
-		public void Start (GeneralSocketType sockType, string address, int port, bool keepAlive, bool useThreadPool)
+		public bool Start (GeneralSocketType sockType, string address, int port, bool keepAlive, bool useThreadPool)
 		{
-			server.Start (sockType, address, port, keepAlive, useThreadPool);
+			return server.Start (sockType, address, port, keepAlive, useThreadPool);
 		}
 
 		public void Shutdown ()
 		{
 			server.Shutdown ();
 		}
-		//		public void Unload()
-		//		{
-		//			base.Unload ();
-		//		}
+
 		public void ProcessRequest (NetworkConnector connector, Request cgiRequest)
 		{
 			WorkerRequest worker = new WorkerRequest (connector, cgiRequest, this);
 
 			ProcessRequest (worker);
+		}
+
+		protected override void OnUnload (object o, EventArgs args)
+		{
+			server.Shutdown ();
+			if (base.appserver != null) {
+				appserver.ReloadHost (this);
+			}
 		}
 	}
 }

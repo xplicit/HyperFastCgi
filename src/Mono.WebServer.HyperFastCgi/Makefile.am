@@ -83,7 +83,17 @@ FILES =  \
 	Sockets/UnixSocket.cs \
 	Strings.cs \
 	TestResponse.cs \
-	WebSource.cs \
+	WebServer/ApplicationServer.cs \
+	WebServer/BaseApplicationHost.cs \
+	WebServer/EndOfRequestHandler.cs \
+	WebServer/Events/DomainReloadEventArgs.cs \
+	WebServer/Events/MapPathEventArgs.cs \
+	WebServer/Events/MapPathEventHandler.cs \
+	WebServer/HttpErrors.cs \
+	WebServer/IApplicationHost.cs \
+	WebServer/MonoWorkerRequest.cs \
+	WebServer/VPathToHost.cs \
+	WebServer/WebTrace.cs \
 	WorkerRequest.cs 
 
 DATA_FILES = 
@@ -150,9 +160,9 @@ build_sources= $(FILES)
 
 build_resources= $(RESOURCES)
 
-references2=$(REFERENCES) -pkg:xsp-2
+references2=$(REFERENCES)
 
-references4=$(REFERENCES) -pkg:xsp-4
+references4=$(REFERENCES)
 
 build_references_ref2 = $(call q2s,$(foreach ref, $(call s2q,$(references2)), $(if $(filter -pkg:%, $(ref)), $(ref), $(if $(filter -r:%, $(ref)), $(ref), -r:$(ref)))))
 build_references_ref2 += $(call q2s,$(foreach ref, $(call s2q,$(DLL_REFERENCES)), -r:$(ref)))
