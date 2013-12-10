@@ -105,7 +105,6 @@ namespace Mono.WebServer.HyperFastCgi
 
 		public void acceptCallback (IAsyncResult ar)
 		{
-			//TODO: add try/catch clause and raise UnexpectedException event 
 			GeneralSocket listener = (GeneralSocket)ar.AsyncState;
 			Socket client=null;
 

@@ -343,6 +343,9 @@ namespace Mono.WebServer.HyperFastCgi
 					if (packet.Type == RecordType.EndRequest || packet.Type == RecordType.AbortRequest) {
 						sendState.disconnectAfterSend = true;
 					}
+					//TODO: change GetRecord() to GetHeader() and GetBody(byte[] arr,int offset, int length). 
+					//This will increase performance for large packets, 
+					//cause we don't need to use BlockCopy and create new byte[] in GetRecord()
 					sendState.buffer = packet.GetRecord ();
 					sendState.offset = 0;
 					sendState.workSocket = this.client;
@@ -504,10 +507,8 @@ namespace Mono.WebServer.HyperFastCgi
 
 			int max_size = 0x7fff;
 
-			//FIXME: change < to <=
-			if (length < max_size)
-				SendRecord (type, requestId, data, 0,
-					length);
+			if (length <= max_size)
+				SendRecord (type, requestId, data, 0, length);
 			else {
 				int index = 0;
 				while (index < length) {

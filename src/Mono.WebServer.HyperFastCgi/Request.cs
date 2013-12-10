@@ -117,11 +117,11 @@ namespace Mono.WebServer.HyperFastCgi
 				Dictionary<string,string>.Enumerator en = unknownHeadersDict.GetEnumerator ();
 
 				for (int i = 0; i < unknownHeadersDict.Count; i++) {
+					en.MoveNext ();
 					unknownHeaders [i] = new string[] {
 						en.Current.Key,
 						en.Current.Value
 					};
-					en.MoveNext ();
 				}
 			}
 			return true;
@@ -140,7 +140,7 @@ namespace Mono.WebServer.HyperFastCgi
 			while (offset < dataLength) {
 				nlen = data [offset++];
 
-				if (nlen > 0x80) {
+				if (nlen >= 0x80) {
 					nlen = ((0x7F & nlen) * 0x1000000)
 					+ ((int)data [offset++]) * 0x10000
 					+ ((int)data [offset++]) * 0x100
@@ -149,7 +149,7 @@ namespace Mono.WebServer.HyperFastCgi
 
 				vlen = data [offset++];
 
-				if (vlen > 0x80) {
+				if (vlen >= 0x80) {
 					vlen = ((0x7F & vlen) * 0x1000000)
 					+ ((int)data [offset++]) * 0x10000
 					+ ((int)data [offset++]) * 0x100
