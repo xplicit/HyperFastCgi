@@ -80,7 +80,10 @@ namespace Mono.WebServer.HyperFastCgi
 		private Queue<Record> sendQueue = new Queue<Record> ();
 		private SendStateObject sendState = new SendStateObject ();
 		private int sendProcessing = 0;
+		//all data from front-end were received. No need to receive more
 		bool stopReceive;
+		//front-end tells that all data have been sent and asks for shutdown socket one way
+		bool readShutdown;
 		bool keepAlive = true;
 		bool useThreadPool = true;
 		private ApplicationHost appHost;
@@ -157,13 +160,15 @@ namespace Mono.WebServer.HyperFastCgi
 					return;
 				}
 
-				//TODO: BytesRead==0 in general means, that connection is closed
-				//but also TCP State should be CLOSE_WAIT
-				//Is there a way to know the state? Maybe by getsockopt(TCP_INFO)?
-				if (bytesRead <= 0 /*&& !client.Connected*/) {
+				//TODO: BytesRead==0 means, that socket is gracefully shutdown
+				// on the other side. By the way it only means, that socket is shutdown
+				// for sending data and it can wait for receiveing data. Underlying 
+				// Connection can still be in ESTABLISHED state, even if socket is closed
+				// (in case when socket reuses connection)
+				if (bytesRead <= 0) {
 
-					//Client disconnected
-					OnDisconnected ();
+					//Front-end disconnected
+					readShutdown=true;
 					return;
 				}
 
@@ -455,6 +460,8 @@ namespace Mono.WebServer.HyperFastCgi
 				if (!isDisconnected) {
 					SendRecord (new Record (Record.ProtocolVersion, RecordType.EndRequest, requestId,
 						body.GetData ()));
+					if (readShutdown)
+						OnDisconnected();
 				}
 			} catch (System.Net.Sockets.SocketException) {
 				throw;
