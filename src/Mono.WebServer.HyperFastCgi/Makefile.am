@@ -138,17 +138,6 @@ programfiles2dir=$(pkglibdir)/2.0
 programfiles2_DATA=$(ASSEMBLY2)
 endif
 
-#bin_SCRIPTS = $(BINARIES)
-
-#$(MONO_WEBSERVER_HYPERFASTCGI2):
-#	echo -e 1
-#$(eval $(call emit-deploy-wrapper,MONO_WEBSERVER_HYPERFASTCGI2,mono-webserver-hyperfastcgi2,x))
-
-#$(MONO_WEBSERVER_HYPERFASTCGI4):
-#	echo -e 2
-#$(eval $(call emit-deploy-wrapper,MONO_WEBSERVER_HYPERFASTCGI4,mono-webserver-hyperfastcgi4,x))
-
-
 $(eval $(call emit_resgen_targets))
 $(build_xamlg_list): %.xaml.g.cs: %.xaml
 	xamlg '$<'

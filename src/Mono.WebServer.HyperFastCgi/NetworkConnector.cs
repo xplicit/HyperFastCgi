@@ -160,7 +160,7 @@ namespace Mono.WebServer.HyperFastCgi
 					return;
 				}
 
-				//TODO: BytesRead==0 means, that socket is gracefully shutdown
+				// BytesRead==0 means, that socket is gracefully shutdown
 				// on the other side. By the way it only means, that socket is shutdown
 				// for sending data and it can wait for receiveing data. Underlying 
 				// Connection can still be in ESTABLISHED state, even if socket is closed
@@ -505,23 +505,21 @@ namespace Mono.WebServer.HyperFastCgi
 		private void SendStreamData (RecordType type, ushort requestId, byte[] data,
 		                             int length)
 		{
-			// Records are only able to hold 32767 bytes of data. If
+			// Records are only able to hold 65535 bytes of data. If
 			// larger data is to be sent, it must be broken into
 			// smaller components.
 
 			if (length > data.Length)
 				length = data.Length;
 
-			int max_size = 0x7fff;
-
-			if (length <= max_size)
+			if (length <= Record.MaxBodySize)
 				SendRecord (type, requestId, data, 0, length);
 			else {
 				int index = 0;
 				while (index < length) {
-					int chunk_length = (max_size <
-					                   length - index) ? max_size :
-					                   (length - index);
+					int chunk_length = (length - index < Record.SuggestedBodySize) 
+						? (length - index)
+						: Record.SuggestedBodySize; 
 
 					SendRecord (type, requestId,
 						data, index, chunk_length);

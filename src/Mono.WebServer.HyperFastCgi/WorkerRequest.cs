@@ -37,6 +37,7 @@ using System.Text;
 using System.Net;
 using System.Globalization;
 using System.IO;
+using Mono.WebServer.HyperFastCgi.FastCgiProtocol;
 
 namespace Mono.WebServer.HyperFastCgi
 {
@@ -75,6 +76,7 @@ namespace Mono.WebServer.HyperFastCgi
 //			}
 		}
 
+
 		#region Overrides
 
 		#region Overrides: Transaction Oriented
@@ -108,6 +110,55 @@ namespace Mono.WebServer.HyperFastCgi
 			this.EnsureHeadersSent ();
 			connector.CompleteRequest (cgiRequest.RequestId, 0);
 		}
+
+		protected void SendFromStream (Stream stream, long offset, long length)
+		{
+			if (offset < 0 || length <= 0)
+				return;
+
+			long stLength = stream.Length;
+			if (offset + length > stLength)
+				length = stLength - offset;
+
+			if (offset > 0)
+				stream.Seek (offset, SeekOrigin.Begin);
+
+			//TODO: change to Math.Min(length,32760);
+			byte[] fileContent = new byte [System.Math.Min(length,Record.SuggestedBodySize)];
+			int count = fileContent.Length;
+			while (length > 0 && (count = stream.Read (fileContent, 0, count)) != 0) {
+				SendResponseFromMemory (fileContent, count);
+				length -= count;
+				count = (int)System.Math.Min (length, fileContent.Length);
+			}
+		}
+
+		public override void SendResponseFromFile (string filename, long offset, long length)
+		{
+			FileStream file = null;
+			try {
+				file = File.OpenRead (filename);
+				SendFromStream (file, offset, length);
+			} finally {
+				if (file != null)
+					file.Close ();
+			}
+		}
+
+		public override void SendResponseFromFile (IntPtr handle, long offset, long length)
+		{
+			Stream file = null;
+			try {
+				#pragma warning disable 618
+				file = new FileStream (handle, FileAccess.Read);
+				#pragma warning restore
+				SendFromStream (file, offset, length);
+			} finally {
+				if (file != null)
+					file.Close ();
+			}
+		}
+
 
 		public override void SendResponseFromMemory (byte[] data, int length)
 		{

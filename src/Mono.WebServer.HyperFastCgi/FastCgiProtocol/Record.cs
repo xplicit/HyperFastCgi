@@ -59,11 +59,13 @@ namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol
 		public byte[] Body;
 		public byte PaddingLength;
 		public int BodyOffset;
-		public const int SuggestedBufferSize = 0x08 + 0xFFFF + 0xFF;
 
 		#region Public Fields
 
 		public const int HeaderSize = 8;
+		public const int MaxBodySize = 0xffff;
+		//SuggestedBodySize+HeaderSize=0x10000 - good size for whole packet
+		public const int SuggestedBodySize = 0xfff8;
 		public const int ProtocolVersion = 1;
 
 		#endregion
@@ -90,7 +92,7 @@ namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol
 			if (bodyLength < 0)
 				bodyLength = bodyData.Length - bodyIndex;
 
-			if (bodyLength > 0xFFFF)
+			if (bodyLength > MaxBodySize)
 				throw new ArgumentException (
 					Strings.Record_DataTooBig,
 					"data");

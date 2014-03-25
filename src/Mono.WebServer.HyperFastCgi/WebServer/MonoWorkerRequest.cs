@@ -374,53 +374,6 @@ namespace Mono.WebServer
 			SendUnknownResponseHeader (headerName, value);
 		}
 
-		protected void SendFromStream (Stream stream, long offset, long length)
-		{
-			if (offset < 0 || length <= 0)
-				return;
-			
-			long stLength = stream.Length;
-			if (offset + length > stLength)
-				length = stLength - offset;
-
-			if (offset > 0)
-				stream.Seek (offset, SeekOrigin.Begin);
-
-			byte[] fileContent = new byte [8192];
-			int count = fileContent.Length;
-			while (length > 0 && (count = stream.Read (fileContent, 0, count)) != 0) {
-				SendResponseFromMemory (fileContent, count);
-				length -= count;
-				count = (int)System.Math.Min (length, fileContent.Length);
-			}
-		}
-
-		public override void SendResponseFromFile (string filename, long offset, long length)
-		{
-			FileStream file = null;
-			try {
-				file = File.OpenRead (filename);
-				SendFromStream (file, offset, length);
-			} finally {
-				if (file != null)
-					file.Close ();
-			}
-		}
-
-		public override void SendResponseFromFile (IntPtr handle, long offset, long length)
-		{
-			Stream file = null;
-			try {
-				#pragma warning disable 618
-				file = new FileStream (handle, FileAccess.Read);
-				#pragma warning restore
-				SendFromStream (file, offset, length);
-			} finally {
-				if (file != null)
-					file.Close ();
-			}
-		}
-
 		public override string GetServerVariable (string name)
 		{
 			if (server_variables == null)

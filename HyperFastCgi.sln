@@ -38,5 +38,9 @@ Global
 		$5.inheritsSet = Mono
 		$5.inheritsScope = application/xml
 		$5.scope = application/xml
+		$0.DotNetNamingPolicy = $6
+		$6.DirectoryNamespaceAssociation = PrefixedHierarchical
+		$6.ResourceNamePolicy = FileFormatDefault
+		version = 0.2
 	EndGlobalSection
 EndGlobal
