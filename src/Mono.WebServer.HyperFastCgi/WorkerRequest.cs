@@ -135,28 +135,20 @@ namespace Mono.WebServer.HyperFastCgi
 
 		public override void SendResponseFromFile (string filename, long offset, long length)
 		{
-			FileStream file = null;
-			try {
-				file = File.OpenRead (filename);
+			using (FileStream file = File.OpenRead (filename)) {
 				SendFromStream (file, offset, length);
-			} finally {
-				if (file != null)
-					file.Close ();
-			}
+			} 
 		}
 
 		public override void SendResponseFromFile (IntPtr handle, long offset, long length)
 		{
-			Stream file = null;
-			try {
-				#pragma warning disable 618
-				file = new FileStream (handle, FileAccess.Read);
-				#pragma warning restore
+			#pragma warning disable 618
+			using (FileStream file = new FileStream (handle, FileAccess.Read)) 
+			#pragma warning restore
+			{
 				SendFromStream (file, offset, length);
-			} finally {
-				if (file != null)
-					file.Close ();
-			}
+			} 
+
 		}
 
 
