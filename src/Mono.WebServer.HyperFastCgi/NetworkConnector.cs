@@ -75,8 +75,12 @@ namespace Mono.WebServer.HyperFastCgi
 		private AsyncCallback asyncSendCallback;
 		private Socket client;
 		private volatile bool isDisconnected;
+
+		private const int maxRequestsCache=512;
+		private Request[] requestsCache = new Request[maxRequestsCache];
 		private Dictionary<ushort,Request> requests = new Dictionary<ushort, Request> ();
 		private static object requestsLock = new object ();
+
 		private Queue<Record> sendQueue = new Queue<Record> ();
 		private SendStateObject sendState = new SendStateObject ();
 		private int sendProcessing = 0;
@@ -624,8 +628,12 @@ namespace Mono.WebServer.HyperFastCgi
 		{
 			Request request;
 
-			lock (requestsLock) {
-				requests.TryGetValue (requestId, out request);
+			if (requestId < maxRequestsCache) {
+				request = requestsCache [requestId];
+			} else {
+				lock (requestsLock) {
+					requests.TryGetValue (requestId, out request);
+				}
 			}
 
 			return request;
@@ -633,15 +641,25 @@ namespace Mono.WebServer.HyperFastCgi
 
 		public void AddRequest (Request request)
 		{
-			lock (requestsLock) {
-				requests.Add (request.RequestId, request);
+			if (request.RequestId < maxRequestsCache) {
+				requestsCache [request.RequestId] = request;
+//				Interlocked.Exchange (ref requestsCache [request.RequestId], request);
+			} else {
+				lock (requestsLock) {
+					requests.Add (request.RequestId, request);
+				}
 			}
 		}
 
 		public void RemoveRequest (ushort requestId)
 		{
-			lock (requestsLock) {
-				requests.Remove (requestId);
+			if (requestId < maxRequestsCache) {
+				requestsCache [requestId] = null; 
+//				Interlocked.Exchange (ref requestsCache [requestId], null);
+			} else {
+				lock (requestsLock) {
+					requests.Remove (requestId);
+				}
 			}
 		}
 
