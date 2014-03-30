@@ -1,7 +1,8 @@
+[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=xplicit-ru&url=https://github.com/xplicit/HyperFastCgi&title=HyperFastCgi&language=&tags=github&category=software)
 HyperFastCgi
 ============
 
-Performant nginx to mono fastcgi server
+Performant nginx to mono fastcgi server  
 
 Installation
 ------------
@@ -39,5 +40,6 @@ Sets the keepalive feature. Default value is 'true'
 
 Additional Info
 ------------
+
 For more information read the blog
 http://forcedtoadmin.blogspot.com
