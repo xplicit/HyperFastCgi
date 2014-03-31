@@ -148,7 +148,6 @@ namespace Mono.WebServer.HyperFastCgi
 			{
 				SendFromStream (file, offset, length);
 			} 
-
 		}
 
 

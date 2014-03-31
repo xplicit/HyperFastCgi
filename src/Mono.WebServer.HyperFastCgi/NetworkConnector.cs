@@ -305,12 +305,12 @@ namespace Mono.WebServer.HyperFastCgi
 				}
 				break;
 			// Aborts a request when the server aborts.
+			//TODO: make Thread.Abort for request
 			case RecordType.AbortRequest:
-				if (request == null)
-					break;
-
-				SendError (request.RequestId, Strings.Connection_AbortRecordReceived);
-				EndRequest (request.RequestId, -1, ProtocolStatus.RequestComplete);
+				if (request != null) {
+					SendError (request.RequestId, Strings.Connection_AbortRecordReceived);
+					EndRequest (request.RequestId, -1, ProtocolStatus.RequestComplete);
+				}
 
 				break;
 
@@ -545,6 +545,9 @@ namespace Mono.WebServer.HyperFastCgi
 			//DataNeeded = false;
 			Request req = GetRequest (requestId);
 
+			if (req == null)
+				return;
+
 			// Close the standard output if it was opened.
 			if (req.StdOutSent)
 				SendStreamData (RecordType.StandardOutput, requestId, new byte [0], 0);
@@ -568,6 +571,10 @@ namespace Mono.WebServer.HyperFastCgi
 				return;
 
 			Request req = GetRequest (requestId);
+
+			if (req == null)
+				return;
+
 			req.StdOutSent = true;
 
 			SendStreamData (RecordType.StandardOutput, req.RequestId, data, length);
@@ -601,6 +608,9 @@ namespace Mono.WebServer.HyperFastCgi
 				return;
 
 			Request req = GetRequest (requestId);
+			if (req == null)
+				return;
+
 			req.StdErrSent = true;
 
 			SendStreamData (RecordType.StandardError, requestId, data, length);
