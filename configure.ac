@@ -85,8 +85,8 @@ fi
 
 
 dnl package checks, common for all configs
-AM_COND_IF([NET_4_0],[PKG_CHECK_MODULES([XSP_4],[xsp-4])])
-AM_COND_IF([NET_2_0],[PKG_CHECK_MODULES([XSP_2],[xsp-2])])
+#AM_COND_IF([NET_4_0],[PKG_CHECK_MODULES([XSP_4],[xsp-4])])
+#AM_COND_IF([NET_2_0],[PKG_CHECK_MODULES([XSP_2],[xsp-2])])
 
 
 AC_CONFIG_FILES([Makefile
