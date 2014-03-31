@@ -1,0 +1,18 @@
+language: c
+
+before_install:
+	#add badgerpots ppa key
+	wget http://badgerports.org/directhex.ppa.asc
+	sudo apt-key add directhex.ppa.asc
+	#add bagderport repository
+	sudo apt-get install python-software-properties
+	sudo add-apt-repository "deb http://badgerports.org $(lsb_release -sc) main"
+	sudo apt-get update
+	#install mono
+	sudo apt-get install mono-devel
+
+script:
+	/autogen.sh --prefix=/usr
+	make
+	sudo make install
+
