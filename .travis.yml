@@ -12,7 +12,7 @@ before_install:
     - sudo apt-get install mono-devel
 
 script:
-    - /autogen.sh --prefix=/usr
+    - ./autogen.sh --prefix=/usr
     - make
     - sudo make install
 
