@@ -86,6 +86,9 @@ namespace Mono.WebServer.HyperFastCgi
 
 		public string GetUnknownRequestHeader (string name)
 		{
+			if (!unknownHeadersDict.ContainsKey(name))
+				return null;
+
 			return unknownHeadersDict [name];
 		}
 
