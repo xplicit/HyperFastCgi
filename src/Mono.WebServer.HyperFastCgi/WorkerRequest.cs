@@ -43,13 +43,14 @@ namespace Mono.WebServer.HyperFastCgi
 {
 	public class WorkerRequest : MonoWorkerRequest
 	{
-		//		private static string [] indexFiles = { "index.aspx",
-		//			"default.aspx",
-		//			"index.html",
-		//			"index.htm" };
+		private static string [] indexFiles = { "index.aspx",
+			"default.aspx",
+			"index.html",
+			"index.htm" };
+
 		static WorkerRequest ()
 		{
-			//SetDefaultIndexFiles (System.Configuration.ConfigurationManager.AppSettings ["MonoServerDefaultIndexFiles"]);
+			SetDefaultIndexFiles (System.Configuration.ConfigurationManager.AppSettings ["MonoServerDefaultIndexFiles"]);
 		}
 
 		private StringBuilder headers = new StringBuilder ();
@@ -58,6 +59,7 @@ namespace Mono.WebServer.HyperFastCgi
 		string raw_url = null;
 		private bool closed = false;
 		string uri_path = null;
+		private bool addTrailingSlash;
 //		string path_info;
 		Request cgiRequest;
 		NetworkConnector connector;
@@ -67,6 +69,7 @@ namespace Mono.WebServer.HyperFastCgi
 			this.cgiRequest = cgiRequest;
 			this.connector = connector;
 			input_data = cgiRequest.InputData;
+			addTrailingSlash = appHost.AddTrailingSlash;
 //			try {
 //				//TODO: cache paths
 //				Paths.GetPathsFromUri (appHost, GetHttpVerbName (), GetFilePath (), out file_path, out path_info);
@@ -336,29 +339,31 @@ namespace Mono.WebServer.HyperFastCgi
 
 			// The following will check if the request was made to a
 			// directory, and if so, if attempts to find the correct
-			// index file from the list. Case is ignored to improve
+			// index file from the list. Filename case is ignored to improve
 			// Windows compatability.
+			if (addTrailingSlash) {
+				string path = cgiRequest.PhysicalPath;
 
-//			string path = cgiRequest.PhysicalPath;
-//
-//			DirectoryInfo dir = new DirectoryInfo (path);
-//
-//			if (!dir.Exists)
-//				return file_path;
-//
-//			if (!file_path.EndsWith ("/"))
-//				file_path += "/";
-//
-//			FileInfo [] files = dir.GetFiles ();
-//
-//			foreach (string file in indexFiles) {
-//				foreach (FileInfo info in files) {
-//					if (file.Equals (info.Name, StringComparison.InvariantCultureIgnoreCase)) {
-//						file_path += info.Name;
-//						return file_path;
-//					}
-//				}
-//			}
+				DirectoryInfo dir = new DirectoryInfo (path);
+
+				if (!dir.Exists)
+					return file_path;
+
+				if (!file_path.EndsWith ("/", StringComparison.OrdinalIgnoreCase))
+					file_path += "/";
+			
+
+				FileInfo[] files = dir.GetFiles ();
+
+				foreach (string file in indexFiles) {
+					foreach (FileInfo info in files) {
+						if (file.Equals (info.Name, StringComparison.OrdinalIgnoreCase)) {
+							file_path += info.Name;
+							return file_path;
+						}
+					}
+				}
+			}
 
 			return file_path;
 		}
@@ -466,24 +471,25 @@ namespace Mono.WebServer.HyperFastCgi
 
 			return host.Substring (0, colon_index);
 		}
-		//		private static void SetDefaultIndexFiles (string list)
-		//		{
-		//			if (list == null)
-		//				return;
-		//
-		//			List<string> files = new List<string> ();
-		//
-		//			string [] fs = list.Split (',');
-		//			foreach (string f in fs) {
-		//				string trimmed = f.Trim ();
-		//				if (trimmed == "")
-		//					continue;
-		//
-		//				files.Add (trimmed);
-		//			}
-		//
-		//			indexFiles = files.ToArray ();
-		//		}
+
+		private static void SetDefaultIndexFiles (string list)
+		{
+			if (list == null)
+				return;
+
+			List<string> files = new List<string> ();
+
+			string [] fs = list.Split (',');
+			foreach (string f in fs) {
+				string trimmed = f.Trim ();
+				if (trimmed == "")
+					continue;
+
+				files.Add (trimmed);
+			}
+
+			indexFiles = files.ToArray ();
+		}
 
 		#endregion
 

@@ -224,16 +224,25 @@
 	<Setting Name="keepalive" AppSetting="FastCgiKeepAlive" 
 		Environment="MONO_FCGI_KEEPALIVE" Type="Bool" ConsoleVisible="True"  WebVisible="True" Value="True" >
 		<Description>
-			<para>Use keepalive feature. Enabled by default. Set the value to 'false' if you don't want to use nginx keepalive feature</para>
+			<para>Use keepalive feature. Enabled by default. Set the value to 'false' if you don't want to use nginx keepalive feature.</para>
 		</Description>
 	</Setting>
 
 	<Setting Name="usethreadpool" AppSetting="FastCgiThreadPool" 
 		Environment="MONO_FCGI_USETHREADPOOL" Type="Bool" ConsoleVisible="True"  WebVisible="True" Value="True" >
 		<Description>
-			<para>Using threadpool for processing requests. Enabled by default. Setting the value to 'false' may reduce performance</para>
+			<para>Using threadpool for processing requests. Enabled by default. Setting the value to 'false' may reduce performance.</para>
 		</Description>
 	</Setting>
+
+	<Setting Name="addtrailingslash" AppSetting="FastCgiTrailingSlash" 
+		Environment="MONO_FCGI_ADDTRAILINGSLASH" Type="Bool" ConsoleVisible="True"  WebVisible="True" Value="False" >
+		<Description>
+			<para>Add trailing slash to requests path. Enable this setting only if you can't use standard
+			url rewrite mechanism of front-end web server.</para>
+		</Description>
+	</Setting>
+
 <!--	
 	<Setting Name="automappaths" AppSetting="MonoAutomapPaths"
 		Environment="MONO_FCGI_AUTOMAPPATHS" Type="Bool" ConsoleVisible="True" Value="False">

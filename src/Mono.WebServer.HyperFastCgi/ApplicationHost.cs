@@ -51,6 +51,11 @@ namespace Mono.WebServer.HyperFastCgi
 			set { Logger.WriteToConsole = value; }
 		}
 
+		public bool AddTrailingSlash {
+			get;
+			set;
+		}
+
 		public ApplicationHost ()
 		{
 			server = new Server (this);

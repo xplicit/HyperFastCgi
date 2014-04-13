@@ -361,6 +361,7 @@ namespace Mono.WebServer.HyperFastCgi
 			Logger.WriteToConsole = (bool)configmanager ["printlog"];
 			host.LogLevel = Logger.Level;
 			host.LogToConsole = Logger.WriteToConsole;
+			host.AddTrailingSlash = (bool)configmanager ["addtrailingslash"];
 
 			if (!host.Start (sockType, address, port, keepAlive, useThreadPool))
 				return 1;

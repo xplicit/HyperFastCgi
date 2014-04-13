@@ -38,6 +38,12 @@ Use or not use threadpool for processing requests. Default value is 'true'
 
 Sets the keepalive feature. Default value is 'true'
 
+**/addtrailingslash=[true|false]**
+
+Adds trailing slash if path to directory does not end with '/'. Default is 'false'. 
+This option were added for compatibility with mono-fastcgi-server. For performance reasons it's recommended to use nginx 'rewrite' command instead, i. e.
+    rewrite ^([^.]*[^/])$ $1/ permanent;
+
 Additional Info
 ------------
 
