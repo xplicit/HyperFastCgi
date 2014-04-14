@@ -191,12 +191,7 @@ namespace Mono.WebServer.HyperFastCgi
 
 		public override string GetPathInfo ()
 		{
-			return String.Empty;
-//			string pi = cgiRequest.GetParameter ("PATH_INFO");
-//			if (!String.IsNullOrEmpty (pi))
-//				return pi;
-//
-//			return path_info ?? String.Empty;
+			return cgiRequest.GetParameter ("PATH_INFO") ?? String.Empty;
 		}
 
 		public override string GetRawUrl ()
