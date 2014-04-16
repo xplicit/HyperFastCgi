@@ -191,11 +191,12 @@ namespace Mono.WebServer.HyperFastCgi
 
 		public override string GetPathInfo ()
 		{
+//			return String.Empty;
+			string pi = cgiRequest.GetParameter ("PATH_INFO");
+			if (!String.IsNullOrEmpty (pi))
+				return pi;
+
 			return String.Empty;
-//			string pi = cgiRequest.GetParameter ("PATH_INFO");
-//			if (!String.IsNullOrEmpty (pi))
-//				return pi;
-//
 //			return path_info ?? String.Empty;
 		}
 
@@ -342,7 +343,7 @@ namespace Mono.WebServer.HyperFastCgi
 			// index file from the list. Filename case is ignored to improve
 			// Windows compatability.
 			if (addTrailingSlash) {
-				string path = cgiRequest.PhysicalPath;
+				string path = MapPath (file_path); //or just path = cgiRequest.PhysicalPath
 
 				DirectoryInfo dir = new DirectoryInfo (path);
 
@@ -351,7 +352,6 @@ namespace Mono.WebServer.HyperFastCgi
 
 				if (!file_path.EndsWith ("/", StringComparison.OrdinalIgnoreCase))
 					file_path += "/";
-			
 
 				FileInfo[] files = dir.GetFiles ();
 
