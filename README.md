@@ -44,6 +44,11 @@ Adds trailing slash if path to directory does not end with '/'. Default is 'fals
 This option were added for compatibility with mono-fastcgi-server. For performance reasons it's recommended to use nginx 'rewrite' command instead, i. e.
     rewrite ^([^.]*[^/])$ $1/ permanent;
 
+Nginx configuration
+-------------------
+
+See the [wiki page for examples of how to configure Nginx](https://github.com/xplicit/HyperFastCgi/wiki/Nginx-configuration)
+
 Additional Info
 ------------
 
