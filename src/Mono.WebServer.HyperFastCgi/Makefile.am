@@ -64,11 +64,26 @@ all: $(ASSEMBLY2) $(ASSEMBLY4) $(PROGRAMFILES) $(BINARIES)
 
 FILES =  \
 	ApplicationHost.cs \
+	ApplicationServer/SimpleApplicationServer.cs \
+	AspNetServer/AspNetApplicationHost.cs \
+	AspNetServer/AspNetApplicationHostFactory.cs \
+	AspNetServer/AspNetWebRequest.cs \
+	AspNetServer/MonoWorkerRequest.cs \
 	Config/ConfigurationManager.cs \
 	FastCgiProtocol/BeginRequestBody.cs \
 	FastCgiProtocol/EndRequestBody.cs \
 	FastCgiProtocol/Record.cs \
 	FastCgiProtocol/UnknownTypeBody.cs \
+	Interfaces/IApplicationHost.cs \
+	Interfaces/IApplicationHostFactory.cs \
+	Interfaces/IApplicationHostTransport.cs \
+	Interfaces/IApplicationServer.cs \
+	Interfaces/IListenerTransport.cs \
+	Interfaces/IWebListener.cs \
+	Interfaces/IWebRequest.cs \
+	Interfaces/IWebResponse.cs \
+	Listener/FastCgiNetworkConnector.cs \
+	Listener/ManagedFastCgiListener.cs \
 	Logging/Logger.cs \
 	Logging/LogLevel.cs \
 	Main.cs \
@@ -83,6 +98,10 @@ FILES =  \
 	Sockets/UnixSocket.cs \
 	Strings.cs \
 	TestResponse.cs \
+	Transport/FastCgiAppHostTransport.cs \
+	Transport/FastCgiListenerTransport.cs \
+	Transport/TransportRequest.cs \
+	Utils/HostUtils.cs \
 	WebServer/ApplicationServer.cs \
 	WebServer/BaseApplicationHost.cs \
 	WebServer/EndOfRequestHandler.cs \
@@ -90,7 +109,7 @@ FILES =  \
 	WebServer/Events/MapPathEventArgs.cs \
 	WebServer/Events/MapPathEventHandler.cs \
 	WebServer/HttpErrors.cs \
-	WebServer/IApplicationHost.cs \
+	WebServer/IApplicationHost1.cs \
 	WebServer/MonoWorkerRequest.cs \
 	WebServer/VPathToHost.cs \
 	WebServer/WebTrace.cs \

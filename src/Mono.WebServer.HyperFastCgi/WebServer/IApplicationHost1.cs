@@ -35,7 +35,7 @@ using System.Web;
 
 namespace Mono.WebServer
 {
-	public interface IApplicationHost
+	public interface IApplicationHost1
 	{
 		string Path { get; }
 

@@ -25,7 +25,7 @@
         <Variable name="MONO_PATH" value="." />
       </EnvironmentVariables>
     </EnvironmentVariables>
-    <Commandlineparameters>/applications=ssbench3:/:/var/www/ssbench3 /socket=tcp:127.0.0.1:9000 /loglevels=Debug /printlog</Commandlineparameters>
+    <Commandlineparameters>/applications=ssbench3:81:/aaa:/home/sergey/Projects/HttpHandlerTest/HttpHandlerTest /socket=tcp:127.0.0.1:9000 /loglevels=Debug /printlog /addtrailingslash=true</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -66,13 +66,32 @@
     <Compile Include="WebServer\BaseApplicationHost.cs" />
     <Compile Include="WebServer\EndOfRequestHandler.cs" />
     <Compile Include="WebServer\HttpErrors.cs" />
-    <Compile Include="WebServer\IApplicationHost.cs" />
     <Compile Include="WebServer\MonoWorkerRequest.cs" />
     <Compile Include="WebServer\VPathToHost.cs" />
     <Compile Include="WebServer\WebTrace.cs" />
     <Compile Include="WebServer\Events\MapPathEventArgs.cs" />
     <Compile Include="WebServer\Events\MapPathEventHandler.cs" />
     <Compile Include="WebServer\Events\DomainReloadEventArgs.cs" />
+    <Compile Include="Interfaces\IApplicationHost.cs" />
+    <Compile Include="Interfaces\IWebRequest.cs" />
+    <Compile Include="Interfaces\IApplicationHostFactory.cs" />
+    <Compile Include="AspNetServer\AspNetApplicationHostFactory.cs" />
+    <Compile Include="Utils\HostUtils.cs" />
+    <Compile Include="AspNetServer\AspNetApplicationHost.cs" />
+    <Compile Include="WebServer\IApplicationHost1.cs" />
+    <Compile Include="Interfaces\IWebListener.cs" />
+    <Compile Include="Listener\ManagedFastCgiListener.cs" />
+    <Compile Include="Listener\FastCgiNetworkConnector.cs" />
+    <Compile Include="AspNetServer\AspNetWebRequest.cs" />
+    <Compile Include="Interfaces\IWebResponse.cs" />
+    <Compile Include="Interfaces\IListenerTransport.cs" />
+    <Compile Include="Interfaces\IApplicationHostTransport.cs" />
+    <Compile Include="Transport\TransportRequest.cs" />
+    <Compile Include="Transport\FastCgiListenerTransport.cs" />
+    <Compile Include="Transport\FastCgiAppHostTransport.cs" />
+    <Compile Include="AspNetServer\MonoWorkerRequest.cs" />
+    <Compile Include="Interfaces\IApplicationServer.cs" />
+    <Compile Include="ApplicationServer\SimpleApplicationServer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -87,6 +106,12 @@
     <Folder Include="Logging\" />
     <Folder Include="WebServer\" />
     <Folder Include="WebServer\Events\" />
+    <Folder Include="Interfaces\" />
+    <Folder Include="AspNetServer\" />
+    <Folder Include="Utils\" />
+    <Folder Include="Transport\" />
+    <Folder Include="Listener\" />
+    <Folder Include="ApplicationServer\" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>

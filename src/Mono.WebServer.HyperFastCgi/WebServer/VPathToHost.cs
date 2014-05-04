@@ -49,7 +49,7 @@ namespace Mono.WebServer
 		public readonly string vpath;
 		public string realPath;
 		public readonly bool haveWildcard;
-		public IApplicationHost AppHost;
+		public IApplicationHost1 AppHost;
 
 		public VPathToHost (string vhost, int vport, string vpath, string realPath)
 		{
@@ -69,7 +69,7 @@ namespace Mono.WebServer
 			}
 		}
 
-		public bool TryClearHost (IApplicationHost host)
+		public bool TryClearHost (IApplicationHost1 host)
 		{
 			if (this.AppHost == host) {
 				this.AppHost = null;
@@ -146,7 +146,7 @@ namespace Mono.WebServer
 				v = v.Substring (0, v.Length - 1);
 			}
 
-			AppHost = ApplicationHost.CreateApplicationHost (applicationHostType, v, realPath) as IApplicationHost;
+			AppHost = ApplicationHost.CreateApplicationHost (applicationHostType, v, realPath) as IApplicationHost1;
 			AppHost.Server = server;
 
 		}

@@ -38,7 +38,7 @@ using System.Collections.Generic;
 
 namespace Mono.WebServer
 {
-	public class BaseApplicationHost : MarshalByRefObject, IApplicationHost
+	public class BaseApplicationHost : MarshalByRefObject, IApplicationHost1
 	{
 		string path;
 		string vpath;

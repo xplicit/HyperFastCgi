@@ -92,7 +92,7 @@ namespace Mono.WebServer
 			set { single_app = value; }
 		}
 
-		public IApplicationHost AppHost {
+		public IApplicationHost1 AppHost {
 			get { return ((VPathToHost)vpathToHost [0]).AppHost; }
 			set { ((VPathToHost)vpathToHost [0]).AppHost = value; }
 		}
@@ -318,7 +318,7 @@ namespace Mono.WebServer
 			return null;
 		}
 
-		public void DestroyHost (IApplicationHost host)
+		public void DestroyHost (IApplicationHost1 host)
 		{
 			// Called when the host appdomain is being unloaded
 			for (int i = vpathToHost.Count - 1; i >= 0; i--) {
@@ -328,7 +328,7 @@ namespace Mono.WebServer
 			}
 		}
 
-		public void ReloadHost (IApplicationHost host)
+		public void ReloadHost (IApplicationHost1 host)
 		{
 			for (int i = vpathToHost.Count - 1; i >= 0; i--) {
 				VPathToHost v = (VPathToHost)vpathToHost [i];

@@ -1,4 +1,4 @@
-//
+﻿//
 // NetworkConnector.cs: Processes fastcgi requests.
 //
 // Author:
@@ -35,8 +35,9 @@ using System.Text;
 using System.Net;
 using Mono.WebServer.HyperFastCgi.FastCgiProtocol;
 using Mono.WebServer.HyperFastCgi.Logging;
+using Mono.WebServer.HyperFastCgi.Transport;
 
-namespace Mono.WebServer.HyperFastCgi
+namespace Mono.WebServer.HyperFastCgi.Listener
 {
 	public enum ReadState
 	{
@@ -68,18 +69,12 @@ namespace Mono.WebServer.HyperFastCgi
 		public Record record = new Record ();
 	}
 
-	public class NetworkConnector : IDisposable
+	public class FastCgiNetworkConnector : IDisposable
 	{
-		private WaitCallback processCallback;
 		private AsyncCallback asyncRecieveCallback;
 		private AsyncCallback asyncSendCallback;
 		private Socket client;
 		private volatile bool isDisconnected;
-
-		private const int maxRequestsCache=512;
-		private Request[] requestsCache = new Request[maxRequestsCache];
-		private Dictionary<ushort,Request> requests = new Dictionary<ushort, Request> ();
-		private static object requestsLock = new object ();
 
 		private Queue<Record> sendQueue = new Queue<Record> ();
 		private SendStateObject sendState = new SendStateObject ();
@@ -90,11 +85,10 @@ namespace Mono.WebServer.HyperFastCgi
 		bool readShutdown;
 		bool keepAlive = true;
 		bool useThreadPool = true;
-		private ApplicationHost appHost;
 		static int threadName = 0;
 		private static int nConnect = 0;
 		#pragma warning disable 414
-		int cn = 0;
+		uint cn = 0;
 		#pragma warning restore
 
 		public bool UseThreadPool {
@@ -107,9 +101,18 @@ namespace Mono.WebServer.HyperFastCgi
 			set { keepAlive = value; }
 		}
 
-		public NetworkConnector ()
+		public FastCgiListenerTransport Transport {
+			get;
+			set;
+		}
+
+		public uint Tag {
+			get { return cn;}
+		}
+
+
+		public FastCgiNetworkConnector ()
 		{
-			processCallback = new WaitCallback (ProcessInternal);
 			asyncRecieveCallback = new AsyncCallback (ReceiveCallback);
 			asyncSendCallback = new AsyncCallback (SendCallback);
 			if (Thread.CurrentThread.Name [0] != 't') {
@@ -117,19 +120,17 @@ namespace Mono.WebServer.HyperFastCgi
 				Thread.CurrentThread.Name = "t" + threadName.ToString ();
 			}
 			Interlocked.Increment (ref nConnect);
-			cn = nConnect;
-			if (cn % 10 == 0)
-				Logger.Write (LogLevel.All, "cn={0}", cn);
+			cn = (uint)nConnect;
 		}
 
-		public NetworkConnector (Socket client) : this ()
+		public FastCgiNetworkConnector (Socket client) : this ()
 		{
 			this.client = client;
 		}
 
-		public NetworkConnector (Socket client, ApplicationHost appHost) : this (client)
+		public FastCgiNetworkConnector (Socket client, FastCgiListenerTransport transport) : this (client)
 		{
-			this.appHost = appHost;
+			this.Transport = transport;
 		}
 
 		public void Receive ()
@@ -161,7 +162,7 @@ namespace Mono.WebServer.HyperFastCgi
 				bytesRead = client.EndReceive (ar, out socketError);
 
 				if (socketError != SocketError.Success) {
-//					log.DebugFormat("Socket error during receving [{0}]", socketError);
+					//					log.DebugFormat("Socket error during receving [{0}]", socketError);
 					OnDisconnected ();
 					return;
 				}
@@ -201,7 +202,7 @@ namespace Mono.WebServer.HyperFastCgi
 								if (state.record.BodyLength == 0) {
 									state.State = state.record.PaddingLength != 0 ? ReadState.Padding : ReadState.Header;
 									if (state.State == ReadState.Header) {
-										ProcessRecord (state.record);
+										ProcessRecord (state.header,state.record.Body);
 									}
 								}
 							} else {
@@ -219,7 +220,7 @@ namespace Mono.WebServer.HyperFastCgi
 
 								if (state.record.PaddingLength == 0) {
 									state.State = ReadState.Header;
-									ProcessRecord (state.record);
+									ProcessRecord (state.header, state.record.Body);
 								} else {
 									state.State = ReadState.Padding;
 								}
@@ -233,7 +234,7 @@ namespace Mono.WebServer.HyperFastCgi
 								offset += state.record.PaddingLength - state.arrayOffset;
 								state.State = ReadState.Header;
 								//Process Record
-								ProcessRecord (state.record);
+								ProcessRecord (state.header, state.record.Body);
 							} else {
 								state.arrayOffset += bytesRead - offset;
 								offset = bytesRead;
@@ -258,78 +259,9 @@ namespace Mono.WebServer.HyperFastCgi
 			}
 		}
 
-		public void ProcessRecord (Record record)
+		public void ProcessRecord (byte[] header, byte[] body)
 		{
-			Request request = GetRequest (record.RequestId);
-
-			switch (record.Type) {
-			case RecordType.BeginRequest:
-				//CreateRequest
-				BeginRequestBody body = new BeginRequestBody (record);
-
-				if (request != null) {
-					throw new ArgumentException ("Request is not served!");
-					//EndRequest (record.RequestId, 200, ProtocolStatus.RequestComplete);
-					//break;
-				}
-				// If the role is "Responder", and it is
-				// supported, create a ResponderRequest.
-				if (body.Role == Role.Responder 
-					/*&& server.SupportsResponder*/) {				
-					request = new Request (record.RequestId);
-					AddRequest (request);
-				}
-				break;
-			case RecordType.Params:
-				if (request != null)
-					request.AddParameterData (record.Body, true); 
-				break;
-			case RecordType.StandardInput:
-				//Ready to process
-				if (request != null) {
-					if (request.AddInputData (record)) {
-						if (useThreadPool)
-							ThreadPool.QueueUserWorkItem (processCallback, request);
-						else
-							appHost.ProcessRequest (this, request);
-					}
-				}
-				stopReceive = true;
-				break;
-			case RecordType.Data:
-				if (request != null) {
-					request.AddFileData (record);
-				}
-				break;
-			case RecordType.GetValues:
-				if (request != null) {
-					//TODO: return server values
-				}
-				break;
-			// Aborts a request when the server aborts.
-			//TODO: make Thread.Abort for request
-			case RecordType.AbortRequest:
-				if (request != null) {
-					SendError (request.RequestId, Strings.Connection_AbortRecordReceived);
-					EndRequest (request.RequestId, -1, ProtocolStatus.RequestComplete);
-				}
-
-				break;
-
-			default:
-				SendRecord (new Record (Record.ProtocolVersion,
-					RecordType.UnknownType,
-					request.RequestId,
-					new UnknownTypeBody (record.Type).GetData ()));
-				break;
-			}
-		}
-
-		private void ProcessInternal (object state)
-		{
-			appHost.ProcessRequest (this, state as Request);
-			//TestSend (record.RequestId);
-			//EndRequest (record.RequestId, 0, ProtocolStatus.RequestComplete);
+			Transport.ProcessRecord (Tag, header, body);
 		}
 
 		private void StartSendPackets ()
@@ -454,26 +386,6 @@ namespace Mono.WebServer.HyperFastCgi
 			}
 		}
 
-		public void EndRequest (ushort requestId, int appStatus,
-		                        ProtocolStatus protocolStatus)
-		{
-			EndRequestBody body = new EndRequestBody (appStatus,
-				                      protocolStatus);
-
-			RemoveRequest (requestId);
-
-			try {	
-				if (!isDisconnected) {
-					SendRecord (new Record (Record.ProtocolVersion, RecordType.EndRequest, requestId,
-						body.GetData ()));
-					if (readShutdown)
-						OnDisconnected();
-				}
-			} catch (System.Net.Sockets.SocketException) {
-				throw;
-			}
-		}
-
 		public void SendRecord (Record record)
 		{
 			lock (sendQueue) {
@@ -485,194 +397,6 @@ namespace Mono.WebServer.HyperFastCgi
 				StartSendPackets ();
 			}
 
-		}
-
-		public void SendRecord (RecordType type, ushort requestID,
-		                        byte[] bodyData, int bodyIndex,
-		                        int bodyLength)
-		{
-			Record record = new Record (Record.ProtocolVersion, type, requestID,
-				               bodyData, bodyIndex,
-				               bodyLength);
-
-			SendRecord (record);
-		}
-
-		private void TestSend (ushort requestId)
-		{
-			byte[] toSend1 = Encoding.Default.GetBytes (TestResponse.Header);
-			byte[] toSend2 = Encoding.Default.GetBytes (TestResponse.Response);
-
-			SendStreamData (RecordType.StandardOutput, requestId, toSend1, toSend1.Length);
-			SendStreamData (RecordType.StandardOutput, requestId, toSend2, toSend2.Length);
-			SendRecord (RecordType.StandardOutput, requestId, new byte[0], 0, 0);
-		}
-
-		private void SendStreamData (RecordType type, ushort requestId, byte[] data,
-		                             int length)
-		{
-			// Records are only able to hold 65535 bytes of data. If
-			// larger data is to be sent, it must be broken into
-			// smaller components.
-
-			if (length > data.Length)
-				length = data.Length;
-
-			if (length <= Record.MaxBodySize)
-				SendRecord (type, requestId, data, 0, length);
-			else {
-				int index = 0;
-				while (index < length) {
-					int chunk_length = (length - index < Record.SuggestedBodySize) 
-						? (length - index)
-						: Record.SuggestedBodySize; 
-
-					SendRecord (type, requestId,
-						data, index, chunk_length);
-
-					index += chunk_length;
-				}
-			}
-		}
-
-		public void CompleteRequest (ushort requestId, int appStatus)
-		{
-			CompleteRequest (requestId, appStatus, ProtocolStatus.RequestComplete);
-		}
-
-		private void CompleteRequest (ushort requestId, int appStatus,
-		                              ProtocolStatus protocolStatus)
-		{
-			// Data is no longer needed.
-			//DataNeeded = false;
-			Request req = GetRequest (requestId);
-
-			if (req == null)
-				return;
-
-			// Close the standard output if it was opened.
-			if (req.StdOutSent)
-				SendStreamData (RecordType.StandardOutput, requestId, new byte [0], 0);
-
-			// Close the standard error if it was opened.
-			if (req.StdErrSent)
-				SendStreamData (RecordType.StandardError, requestId, new byte [0], 0);
-
-			EndRequest (requestId, appStatus,
-				protocolStatus);
-		}
-
-		#region Standard Output Handling
-
-		public void SendOutput (ushort requestId, byte[] data, int length)
-		{
-			if (data == null)
-				throw new ArgumentNullException ("data");
-
-			if (data.Length == 0)
-				return;
-
-			Request req = GetRequest (requestId);
-
-			if (req == null)
-				return;
-
-			req.StdOutSent = true;
-
-			SendStreamData (RecordType.StandardOutput, req.RequestId, data, length);
-		}
-
-		public void SendOutput (ushort requestId, byte[] data)
-		{
-			SendOutput (requestId, data, data.Length);
-		}
-
-		public void SendOutputText (ushort requestId, string text)
-		{
-			SendOutput (requestId, text, System.Text.Encoding.UTF8);
-		}
-
-		public void SendOutput (ushort requestId, string text, System.Text.Encoding encoding)
-		{
-			SendOutput (requestId, encoding.GetBytes (text));
-		}
-
-		#endregion
-
-		#region Standard Error Handling
-
-		public void SendError (ushort requestId, byte[] data, int length)
-		{
-			if (data == null)
-				throw new ArgumentNullException ("data");
-
-			if (data.Length == 0)
-				return;
-
-			Request req = GetRequest (requestId);
-			if (req == null)
-				return;
-
-			req.StdErrSent = true;
-
-			SendStreamData (RecordType.StandardError, requestId, data, length);
-		}
-
-		public void SendError (ushort requestId, byte[] data)
-		{
-			SendError (requestId, data, data.Length);
-		}
-
-		public void SendError (ushort requestId, string text)
-		{
-			SendError (requestId, text, System.Text.Encoding.UTF8);
-		}
-
-		public void SendError (ushort requestId, string text,
-		                       System.Text.Encoding encoding)
-		{
-			SendError (requestId, encoding.GetBytes (text));
-		}
-
-		#endregion
-
-		public Request GetRequest (ushort requestId)
-		{
-			Request request;
-
-			if (requestId < maxRequestsCache) {
-				request = requestsCache [requestId];
-			} else {
-				lock (requestsLock) {
-					requests.TryGetValue (requestId, out request);
-				}
-			}
-
-			return request;
-		}
-
-		public void AddRequest (Request request)
-		{
-			if (request.RequestId < maxRequestsCache) {
-				requestsCache [request.RequestId] = request;
-//				Interlocked.Exchange (ref requestsCache [request.RequestId], request);
-			} else {
-				lock (requestsLock) {
-					requests.Add (request.RequestId, request);
-				}
-			}
-		}
-
-		public void RemoveRequest (ushort requestId)
-		{
-			if (requestId < maxRequestsCache) {
-				requestsCache [requestId] = null; 
-//				Interlocked.Exchange (ref requestsCache [requestId], null);
-			} else {
-				lock (requestsLock) {
-					requests.Remove (requestId);
-				}
-			}
 		}
 
 		public void Disconnect ()
@@ -734,7 +458,7 @@ namespace Mono.WebServer.HyperFastCgi
 			}
 		}
 
-		~NetworkConnector ()
+		~FastCgiNetworkConnector ()
 		{
 			Dispose (false);
 		}
@@ -746,4 +470,6 @@ namespace Mono.WebServer.HyperFastCgi
 		}
 	}
 }
+
+
 

@@ -45,6 +45,9 @@ using Mono.Unix.Native;
 using Mono.WebServer.HyperFastCgi.Logging;
 using Mono.WebServer.HyperFastCgi.Sockets;
 using System.Threading;
+using Mono.WebServer.HyperFastCgi.ApplicationServers;
+using Mono.WebServer.HyperFastCgi.Transport;
+using Mono.WebServer.HyperFastCgi.Listener;
 
 namespace Mono.WebServer.HyperFastCgi
 {
@@ -363,8 +366,26 @@ namespace Mono.WebServer.HyperFastCgi
 			host.LogToConsole = Logger.WriteToConsole;
 			host.AddTrailingSlash = (bool)configmanager ["addtrailingslash"];
 
-			if (!host.Start (sockType, address, port, keepAlive, useThreadPool))
-				return 1;
+//			if (!host.Start (sockType, address, port, keepAlive, useThreadPool))
+//				return 1;
+//			Mono.WebServer.HyperFastCgi.AspNetServer.AspNetApplicationHost hst =
+//				System.Web.Hosting.ApplicationHost.CreateApplicationHost (
+//					typeof(Mono.WebServer.HyperFastCgi.AspNetServer.AspNetApplicationHost), 
+//					"/", "/var/www/nginx-mono/") 
+//				as Mono.WebServer.HyperFastCgi.AspNetServer.AspNetApplicationHost;
+//			string domain1 = AppDomain.CurrentDomain.FriendlyName;
+//			string domain2 = hst.Domain.FriendlyName;
+
+//			string vpath=hst.VPath;
+
+			ManagedFastCgiListener listener = new ManagedFastCgiListener ();
+			SimpleApplicationServer srv = new SimpleApplicationServer (root_dir);
+			listener.Server = srv;
+			var h=(Mono.WebServer.HyperFastCgi.AspNetServer.AspNetApplicationHost)
+				srv.CreateApplicationHost ("ssbench3", 81, "/", "/var/www/nginx-mono/",
+				listener.Transport);
+			listener.Listen ("127.0.0.1", 9000);
+			var t=h.GetListenerTransport ();
 
 			configmanager = null;
 

@@ -1,4 +1,4 @@
-//
+﻿//
 // Mono.WebServer.MonoWorkerRequest
 //
 // Authors:
@@ -48,15 +48,17 @@ using System.Threading;
 using System.Web;
 using System.Web.Hosting;
 
-namespace Mono.WebServer
+namespace Mono.WebServer.HyperFastCgi.AspNetServer
 {
+	public delegate void EndOfRequestHandler (MonoWorkerRequest request);
+
 	public abstract class MonoWorkerRequest : SimpleWorkerRequest
 	{
 		static readonly string defaultExceptionHtml = "<html><head><title>Runtime Error</title></head><body>An exception ocurred:<pre>{0}</pre></body></html>";
 		static readonly char[] mapPathTrimStartChars = { '/' };
 		static bool needToReplacePathSeparator;
 		static char pathSeparatorChar;
-		IApplicationHost1 appHostBase;
+		Mono.WebServer.HyperFastCgi.Interfaces.IApplicationHost appHostBase;
 		Encoding encoding;
 		Encoding headerEncoding;
 		byte[] queryStringBytes;
@@ -146,7 +148,7 @@ namespace Mono.WebServer
 			}
 		}
 
-		public MonoWorkerRequest (IApplicationHost1 appHost)
+		public MonoWorkerRequest (Mono.WebServer.HyperFastCgi.Interfaces.IApplicationHost appHost)
 			: base (String.Empty, String.Empty, null)
 		{
 			if (appHost == null)
@@ -281,14 +283,14 @@ namespace Mono.WebServer
 
 			if (basePath == null)
 				basePath = HostPath;
-			
+
 			if (inThisApp && (path.Length == hostVPathLen || path [hostVPathLen] == '/'))
 				path = path.Substring (hostVPathLen + 1);
-			
+
 			path = path.TrimStart (mapPathTrimStartChars);
 			if (needToReplacePathSeparator)
 				path = path.Replace ('/', pathSeparatorChar);
-			
+
 			return Path.Combine (basePath, path);
 		}
 
@@ -303,7 +305,7 @@ namespace Mono.WebServer
 		{
 			string error = null;
 			inUnhandledException = false;
-			
+
 			try {
 				HttpRuntime.ProcessRequest (this);
 			} catch (HttpException ex) {
@@ -320,7 +322,7 @@ namespace Mono.WebServer
 
 			if (!inUnhandledException)
 				return;
-			
+
 			if (error.Length == 0)
 				error = String.Format (defaultExceptionHtml, "Unknown error");
 
@@ -328,13 +330,13 @@ namespace Mono.WebServer
 				SendStatus (400, "Bad request");
 				SendUnknownResponseHeader ("Connection", "close");
 				SendUnknownResponseHeader ("Date", DateTime.Now.ToUniversalTime ().ToString ("r"));
-				
+
 				Encoding enc = Encoding.UTF8;
 				if (enc == null)
 					enc = Encoding.ASCII;
-				
+
 				byte[] bytes = enc.GetBytes (error);
-				
+
 				SendUnknownResponseHeader ("Content-Type", "text/html; charset=" + enc.WebName);
 				SendUnknownResponseHeader ("Content-Length", bytes.Length.ToString ());
 				SendResponseFromMemory (bytes, bytes.Length);
@@ -488,4 +490,5 @@ namespace Mono.WebServer
 		#endregion
 	}
 }
+
 
