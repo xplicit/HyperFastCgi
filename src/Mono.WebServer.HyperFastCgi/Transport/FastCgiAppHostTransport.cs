@@ -3,6 +3,8 @@ using Mono.WebServer.HyperFastCgi.Interfaces;
 using Mono.WebServer.HyperFastCgi.FastCgiProtocol;
 using System.Collections.Generic;
 using Mono.WebServer.HyperFastCgi.AspNetServer;
+using System.Threading;
+using Mono.WebServer.HyperFastCgi.Logging;
 
 namespace Mono.WebServer.HyperFastCgi.Transport
 {
@@ -12,6 +14,9 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 		private Request[] requestsCache = new Request[maxRequestsCache];
 		private Dictionary<uint,Request> requests = new Dictionary<uint, Request> ();
 		private static object requestsLock = new object ();
+
+		private Dictionary<uint,FastCgiRecordQueue> queues = new Dictionary<uint, FastCgiRecordQueue> ();
+		private static object queuesLock = new object ();
 
 		public IApplicationHost AppHost {
 			get;
@@ -34,83 +39,120 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 			record.PaddingLength = header [6];
 			record.Body = recordBody;
 
-			//No multiplexing. If we need multiplexing we must construct
-			//dictionary with key=<listenerTag,requestId>,value=<request>
-			Request request = GetRequest (listenerTag);
+			FastCgiRecordQueue q = AddQueue (listenerTag, record);
 
-			switch (record.Type) {
-			case RecordType.BeginRequest:
-				//CreateRequest
-				BeginRequestBody body = new BeginRequestBody (record);
+			if (Interlocked.CompareExchange (ref q.processing, 1, 0) == 0) {
+				//do process
+				ThreadPool.QueueUserWorkItem (ProcessInternal, q);
+			}
 
-				if (request != null) {
-					throw new ArgumentException ("Request is not served!");
-					//EndRequest (record.RequestId, 200, ProtocolStatus.RequestComplete);
-					//break;
-				}
-				// If the role is "Responder", and it is
-				// supported, create a ResponderRequest.
-				if (body.Role == Role.Responder 
-					/*&& server.SupportsResponder*/) {				
-					request = new Request (record.RequestId);
-					AddRequest (listenerTag, request);
-				}
-				break;
-			case RecordType.Params:
-				if (request != null)
-					request.AddParameterData (record.Body, true); 
-				break;
-			case RecordType.StandardInput:
-				//Ready to process
-				if (request != null) {
-					if (request.AddInputData (record)) {
-						AspNetWebRequest wreq = new AspNetWebRequest (listenerTag, request, AppHost, this);
+			return true;
+		}
 
-						wreq.Process (wreq);
+		public void ProcessInternal(object state)
+		{
+			FastCgiRecordQueue q = (FastCgiRecordQueue)state;
+			uint listenerTag = q.listenerTag;
+
+			Record record;
+			bool stopReceive = false;
+
+			while (q.queue.Count > 0) {
+				Logger.Write (LogLevel.Debug, "lt={0} q.count={1}", listenerTag, q.queue.Count);
+
+				lock (q.queueLock) {
+					if (q.queue.Count > 0) {
+						record = q.queue.Dequeue (); 
+					} else {
+						Interlocked.Exchange (ref q.processing, 0);
+						return;
 					}
 				}
-				stopReceive = true;
-				break;
-			case RecordType.Data:
-				if (request != null) {
-					request.AddFileData (record);
-				}
-				break;
-			case RecordType.GetValues:
-				if (request != null) {
-					//TODO: return server values
-				}
-				break;
+			
+
+				//No multiplexing. If we need multiplexing we must construct
+				//dictionary with key=<listenerTag,requestId>,value=<request>
+				Request request = GetRequest (listenerTag);
+				Logger.Write (LogLevel.Debug, "lt={0} ProcessInternal header={1} reqId={2} req={3}", listenerTag, record.Type, record.RequestId, 
+					request == null ? "null" : request.RequestId.ToString());
+
+				switch (record.Type) {
+				case RecordType.BeginRequest:
+				//CreateRequest
+					BeginRequestBody body = new BeginRequestBody (record);
+
+					if (request != null) {
+						throw new ArgumentException ("Request is not served!");
+						//EndRequest (record.RequestId, 200, ProtocolStatus.RequestComplete);
+						//break;
+					}
+				// If the role is "Responder", and it is
+				// supported, create a ResponderRequest.
+					if (body.Role == Role.Responder 
+					/*&& server.SupportsResponder*/) {				
+						request = new Request (record.RequestId);
+						AddRequest (listenerTag, request);
+					}
+					break;
+				case RecordType.Params:
+					if (request != null)
+						request.AddParameterData (record.Body, true); 
+					break;
+				case RecordType.StandardInput:
+				//Ready to process
+					if (request != null) {
+						if (request.AddInputData (record)) {
+							stopReceive = true;
+							RemoveQueue (listenerTag);
+							RemoveRequest (listenerTag);
+							((FastCgiListenerTransport)AppHost.GetListenerTransport ()).RemoveRequest (listenerTag, request.RequestId);
+
+							AspNetWebRequest wreq = new AspNetWebRequest (listenerTag, request, AppHost, this);
+
+							wreq.Process (wreq);
+						}
+					}
+					break;
+				case RecordType.Data:
+					if (request != null) {
+						request.AddFileData (record);
+					}
+					break;
+				case RecordType.GetValues:
+					if (request != null) {
+						//TODO: return server values
+					}
+					break;
 				// Aborts a request when the server aborts.
 				//TODO: make Thread.Abort for request
-			case RecordType.AbortRequest:
+				case RecordType.AbortRequest:
 //				if (request != null) {
 //					SendError (request.RequestId, Strings.Connection_AbortRecordReceived);
 //					EndRequest (request.RequestId, -1, ProtocolStatus.RequestComplete);
 //				}
 
-				break;
+					break;
 
-			default:
+				default:
 //				SendRecord (new Record (Record.ProtocolVersion,
 //					RecordType.UnknownType,
 //					request.RequestId,
 //					new UnknownTypeBody (record.Type).GetData ()));
-				break;
+					break;
+				}
 			}
 
-			return stopReceive;
+			Interlocked.Exchange (ref q.processing, 0);
+			return;
 		}
 
-		public void SendOutput (uint listenerTag, ushort requestId, byte[] data, int length)
+		public void SendOutput (uint listenerTag, Request req, byte[] data, int length)
 		{
 			if (data == null)
 				throw new ArgumentNullException ("data");
 
 			if (data.Length == 0)
 				return;
-
-			Request req = GetRequest (listenerTag);
 
 			if (req == null)
 				return;
@@ -151,6 +193,7 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 			byte[] bodyData, int bodyIndex,
 			int bodyLength)
 		{
+			Logger.Write (LogLevel.Debug, "at={0} SendRecord header={1} reqId={2}", listenerTag, type, requestID);
 
 			byte[] header = new byte[Record.HeaderSize];
 			header [0] = (byte)Record.ProtocolVersion;
@@ -166,30 +209,26 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 			((FastCgiListenerTransport)AppHost.GetListenerTransport()).SendRecord (listenerTag, header, body);
 		}
 
-		public void CompleteRequest (uint listenerTag, ushort requestId, int appStatus)
+		public void CompleteRequest (uint listenerTag, Request request, int appStatus)
 		{
-			CompleteRequest (listenerTag, requestId, appStatus, ProtocolStatus.RequestComplete);
+			CompleteRequest (listenerTag, request, appStatus, ProtocolStatus.RequestComplete);
 		}
 
-		private void CompleteRequest (uint listenerTag, ushort requestId, int appStatus,
+		private void CompleteRequest (uint listenerTag, Request request, int appStatus,
 			ProtocolStatus protocolStatus)
 		{
-			// Data is no longer needed.
-			//DataNeeded = false;
-			Request req = GetRequest (listenerTag);
-
-			if (req == null)
+			if (request == null)
 				return;
 
 			// Close the standard output if it was opened.
-			if (req.StdOutSent)
-				SendStreamData (listenerTag, RecordType.StandardOutput, requestId, new byte [0], 0);
+			if (request.StdOutSent)
+				SendStreamData (listenerTag, RecordType.StandardOutput, request.RequestId, new byte [0], 0);
 
 			// Close the standard error if it was opened.
-			if (req.StdErrSent)
-				SendStreamData (listenerTag, RecordType.StandardError, requestId, new byte [0], 0);
+			if (request.StdErrSent)
+				SendStreamData (listenerTag, RecordType.StandardError, request.RequestId, new byte [0], 0);
 
-			EndRequest (listenerTag, requestId, appStatus, protocolStatus);
+			EndRequest (listenerTag, request.RequestId, appStatus, protocolStatus);
 		}
 
 		public void EndRequest (uint listenerTag, ushort requestId, int appStatus,
@@ -198,15 +237,50 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 			EndRequestBody body = new EndRequestBody (appStatus,
 				protocolStatus);
 
-			RemoveRequest (requestId);
 			byte[] bodyData = body.GetData ();
 
 			SendRecord (listenerTag, RecordType.EndRequest, requestId,
 				bodyData, 0, bodyData.Length);
 		}
 
+		private FastCgiRecordQueue GetQueue(uint listenerTag)
+		{
+			FastCgiRecordQueue queue;
 
-		public Request GetRequest (uint listenerTag)
+			lock (queuesLock) {
+				queues.TryGetValue (listenerTag, out queue);
+			}
+
+			return queue;
+		}
+
+		private FastCgiRecordQueue AddQueue(uint listenerTag, Record record)
+		{
+			FastCgiRecordQueue q;
+
+			lock (queuesLock) {
+				if (!queues.TryGetValue (listenerTag, out q)) {
+					q = new FastCgiRecordQueue ();
+					q.listenerTag = listenerTag;
+					queues.Add (listenerTag, q);
+				} 
+			}
+
+			lock (q.queueLock) {
+				q.queue.Enqueue (record);
+			}
+
+			return q;
+		}
+
+		private void RemoveQueue(uint listenerTag)
+		{
+			lock (queuesLock) {
+				queues.Remove (listenerTag);
+			}
+		}
+
+		private Request GetRequest (uint listenerTag)
 		{
 			Request request;
 
@@ -221,7 +295,7 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 			return request;
 		}
 
-		public void AddRequest (uint listenerTag, Request request)
+		private void AddRequest (uint listenerTag, Request request)
 		{
 			if (listenerTag < maxRequestsCache) {
 				requestsCache [(int)listenerTag] = request;
@@ -233,7 +307,7 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 			}
 		}
 
-		public void RemoveRequest (uint listenerTag)
+		private void RemoveRequest (uint listenerTag)
 		{
 			if (listenerTag < maxRequestsCache) {
 				requestsCache [listenerTag] = null; 

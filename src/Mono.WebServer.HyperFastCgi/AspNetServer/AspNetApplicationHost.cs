@@ -1,6 +1,7 @@
 ﻿using System;
 using Mono.WebServer.HyperFastCgi.Interfaces;
 using Mono.WebServer.HyperFastCgi.Transport;
+using Mono.WebServer.HyperFastCgi.Logging;
 
 namespace Mono.WebServer.HyperFastCgi.AspNetServer
 {
@@ -68,6 +69,17 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 
 
 		#endregion
+
+		public LogLevel LogLevel {
+			get { return Logger.Level; }
+			set { Logger.Level = value; }
+		}
+
+		public bool LogToConsole {
+			get { return Logger.WriteToConsole; }
+			set { Logger.WriteToConsole = value; }
+		}
+
 	}
 }
 

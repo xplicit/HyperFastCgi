@@ -128,9 +128,9 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 			this.client = client;
 		}
 
-		public FastCgiNetworkConnector (Socket client, FastCgiListenerTransport transport) : this (client)
+		public FastCgiNetworkConnector (Socket client, ManagedFastCgiListener listener) : this (client)
 		{
-			this.Transport = transport;
+			this.Transport = new FastCgiListenerTransport (){Listener=listener};
 		}
 
 		public void Receive ()
@@ -261,6 +261,7 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 
 		public void ProcessRecord (byte[] header, byte[] body)
 		{
+			Logger.Write (LogLevel.Debug, "cn={0} read header={1} reqId={2}", cn, header [1], (ushort)((header [2] << 8) + header [3]));
 			Transport.ProcessRecord (Tag, header, body);
 		}
 
@@ -281,6 +282,8 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 						hasPacket = true;
 					}
 				}
+
+				Logger.Write (LogLevel.Debug, "cn={0} write header={1}, reqId={2}", cn, packet.Type, packet.RequestId);
 
 				if (hasPacket) {
 					if (packet.Type == RecordType.EndRequest || packet.Type == RecordType.AbortRequest) {

@@ -100,6 +100,7 @@ FILES =  \
 	TestResponse.cs \
 	Transport/FastCgiAppHostTransport.cs \
 	Transport/FastCgiListenerTransport.cs \
+	Transport/FastCgiRecordQueue.cs \
 	Transport/TransportRequest.cs \
 	Utils/HostUtils.cs \
 	WebServer/ApplicationServer.cs \

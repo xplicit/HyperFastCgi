@@ -386,6 +386,8 @@ namespace Mono.WebServer.HyperFastCgi
 				listener.Transport);
 			listener.Listen ("127.0.0.1", 9000);
 			var t=h.GetListenerTransport ();
+			h.LogLevel = Logger.Level;
+			h.LogToConsole = Logger.WriteToConsole;
 
 			configmanager = null;
 

@@ -90,7 +90,7 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 				listener.BeginAccept (accept, listener);
 
 				// Additional code to read data goes here.
-				FastCgiNetworkConnector connector = new FastCgiNetworkConnector (client, (FastCgiListenerTransport)Transport);
+				FastCgiNetworkConnector connector = new FastCgiNetworkConnector (client, this);
 				connector.KeepAlive = keepAlive;
 				connector.UseThreadPool = useThreadPool;
 				connector.Disconnected += OnDisconnect;

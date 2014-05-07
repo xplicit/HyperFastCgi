@@ -118,7 +118,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 
 			closed = true;
 			this.EnsureHeadersSent ();
-			transport.CompleteRequest (listenerTag, cgiRequest.RequestId, 0);
+			transport.CompleteRequest (listenerTag, cgiRequest, 0);
 		}
 
 		protected void SendFromStream (Stream stream, long offset, long length)
@@ -165,7 +165,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 		{
 			EnsureHeadersSent ();
 
-			transport.SendOutput (listenerTag, cgiRequest.RequestId, data, length);
+			transport.SendOutput (listenerTag, cgiRequest, data, length);
 		}
 
 		public override void SendStatus (int statusCode, string statusDescription)
@@ -424,7 +424,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 				headers.Append ("\r\n");
 				string str = headers.ToString ();
 				byte[] data = HeaderEncoding.GetBytes (str);
-				transport.SendOutput (listenerTag, cgiRequest.RequestId, data, data.Length);
+				transport.SendOutput (listenerTag, cgiRequest, data, data.Length);
 				headers = null;
 			}
 		}

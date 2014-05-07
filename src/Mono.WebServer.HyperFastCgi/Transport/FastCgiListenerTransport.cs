@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Mono.WebServer.HyperFastCgi.Listener;
 using Mono.WebServer.HyperFastCgi.AspNetServer;
 using System.Threading;
+using Mono.WebServer.HyperFastCgi.Logging;
 
 namespace Mono.WebServer.HyperFastCgi.Transport
 {
@@ -42,6 +43,8 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 			record.BodyLength = (ushort)((header [4] << 8) + header [5]);
 			record.PaddingLength = header [6];
 			record.Body = recordBody;
+			Logger.Write(LogLevel.Debug, "lt={0} LT::ProcessRecord0 header={1} reqId={2}",listenerTag,
+				header[1],(ushort)((header [2] << 8) + header [3]));
 
 			TransportRequest request = GetRequest (record.RequestId);
 
@@ -65,10 +68,15 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 					//FIXME: don't forget, that params can be in several FastCgi records
 					//so we need to pass all saved data, not only begin requestbody
 					if (request.Header != null) {
+						Logger.Write(LogLevel.Debug, "lt={0} LT::ProcessRecord header={1} reqId={2}",listenerTag,
+							request.Header[1],(ushort)((request.Header [2] << 8) + request.Header [3]));
+
 						request.Transport.ProcessRecord (listenerTag, request.Header, request.Body);
 						request.Header = null;
 					}
 					//send last Params request
+					Logger.Write(LogLevel.Debug, "lt={0} LT::ProcessRecord header={1} reqId={2}",listenerTag,
+						header[1],(ushort)((header [2] << 8) + header [3]));
 					request.Transport.ProcessRecord (listenerTag, header, recordBody);
 				} 
 				break;
@@ -77,9 +85,11 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 				if (request != null) {
 					//TODO: ThreadPool.QueueUserWorkItem (we must not delay IO thread)
 					//TODO: get routed host, send request to host as is
-					ThreadPool.QueueUserWorkItem ((state) => 
-						request.Transport.ProcessRecord(listenerTag, header, recordBody)
-					);
+//					ThreadPool.QueueUserWorkItem ((state) => 
+					Logger.Write(LogLevel.Debug, "lt={0} LT::ProcessRecord header={1} reqId={2}",listenerTag,
+						header[1],(ushort)((header [2] << 8) + header [3]));
+					request.Transport.ProcessRecord(listenerTag, header, recordBody);
+//					);
 				}
 				//FIXME: wrong place of stopReceive? (when post data is large)
 				stopReceive = true;
@@ -128,6 +138,7 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 		public bool SendRecord (uint listenerTag, byte[] header,byte[] body)
 		{
 			//get connector by it's tag
+			Logger.Write (LogLevel.Debug, "lt={0} SendRecord", listenerTag); 
 			FastCgiNetworkConnector connector = Listener.GetConnector (listenerTag);
 			if (connector != null) {
 				//TODO: optimize it 
@@ -140,12 +151,18 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 				record.Body = body;
 
 				connector.SendRecord (record);
-				if (record.Type == RecordType.EndRequest) {
-					RemoveRequest (record.RequestId);
-				}
-			}
+			} 
 
 			return true;
+		}
+
+		public void RemoveRequest(uint listenerTag,ushort requestId)
+		{
+			Logger.Write (LogLevel.Debug, "lt={0} LT::RemoveRequest reqId={1}", listenerTag, requestId);
+			FastCgiNetworkConnector connector = Listener.GetConnector (listenerTag);
+			if (connector != null) {
+				connector.Transport.RemoveRequest (requestId);
+			}
 		}
 
 		#region requests caching and handling
