@@ -25,7 +25,7 @@
         <Variable name="MONO_PATH" value="." />
       </EnvironmentVariables>
     </EnvironmentVariables>
-    <Commandlineparameters>/applications=ssbench3:81:/aaa:/home/sergey/Projects/HttpHandlerTest/HttpHandlerTest /socket=tcp:127.0.0.1:9000 /loglevels=All /printlog /addtrailingslash=true</Commandlineparameters>
+    <Commandlineparameters>/applications=ssbench3:81:/:/var/www/nginx-mono /socket=tcp:127.0.0.1:9000 /loglevels=All /printlog /addtrailingslash=true</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -93,6 +93,11 @@
     <Compile Include="Interfaces\IApplicationServer.cs" />
     <Compile Include="ApplicationServer\SimpleApplicationServer.cs" />
     <Compile Include="Transport\FastCgiRecordQueue.cs" />
+    <Compile Include="Interfaces\INativeTransport.cs" />
+    <Compile Include="Transport\NativeTransport.cs" />
+    <Compile Include="Listener\NativeListener.cs" />
+    <Compile Include="Requests\NativeRequest.cs" />
+    <Compile Include="AspNetServer\AspNetNativeWebRequest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -113,6 +118,7 @@
     <Folder Include="Transport\" />
     <Folder Include="Listener\" />
     <Folder Include="ApplicationServer\" />
+    <Folder Include="Requests\" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>

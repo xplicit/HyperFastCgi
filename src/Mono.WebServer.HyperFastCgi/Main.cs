@@ -95,8 +95,16 @@ namespace Mono.WebServer.HyperFastCgi
 		private static int port=0;
 		private static bool keepAlive; 
 		private static bool useThreadPool;
+		delegate int HideFromJit(string[] argc);    
+		private static HideFromJit d=MainFunc;
 
 		public static int Main (string[] args)
+		{
+			NativeTransport.RegisterIcall ();
+			return d (args);
+		}
+
+		public static int MainFunc(string[] args)
 		{
 			// Load the configuration file stored in the
 			// executable's resources.
@@ -384,10 +392,12 @@ namespace Mono.WebServer.HyperFastCgi
 			var h=(Mono.WebServer.HyperFastCgi.AspNetServer.AspNetApplicationHost)
 				srv.CreateApplicationHost ("ssbench3", 81, "/", "/var/www/nginx-mono/",
 				listener.Transport);
-			listener.Listen ("127.0.0.1", 9000);
+//			listener.Listen ("127.0.0.1", 9000);
 			var t=h.GetListenerTransport ();
 			h.LogLevel = Logger.Level;
 			h.LogToConsole = Logger.WriteToConsole;
+			NativeTransport.RegisterTransport (typeof(NativeTransport));
+			NativeListener.Listen (args.Length, args);
 
 			configmanager = null;
 

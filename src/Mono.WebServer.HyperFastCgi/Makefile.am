@@ -67,6 +67,7 @@ FILES =  \
 	ApplicationServer/SimpleApplicationServer.cs \
 	AspNetServer/AspNetApplicationHost.cs \
 	AspNetServer/AspNetApplicationHostFactory.cs \
+	AspNetServer/AspNetNativeWebRequest.cs \
 	AspNetServer/AspNetWebRequest.cs \
 	AspNetServer/MonoWorkerRequest.cs \
 	Config/ConfigurationManager.cs \
@@ -79,11 +80,13 @@ FILES =  \
 	Interfaces/IApplicationHostTransport.cs \
 	Interfaces/IApplicationServer.cs \
 	Interfaces/IListenerTransport.cs \
+	Interfaces/INativeTransport.cs \
 	Interfaces/IWebListener.cs \
 	Interfaces/IWebRequest.cs \
 	Interfaces/IWebResponse.cs \
 	Listener/FastCgiNetworkConnector.cs \
 	Listener/ManagedFastCgiListener.cs \
+	Listener/NativeListener.cs \
 	Logging/Logger.cs \
 	Logging/LogLevel.cs \
 	Main.cs \
@@ -91,6 +94,7 @@ FILES =  \
 	Program.cs \
 	Properties/AssemblyInfo.cs \
 	Request.cs \
+	Requests/NativeRequest.cs \
 	Server.cs \
 	Sockets/GeneralSocket.cs \
 	Sockets/GeneralSocketType.cs \
@@ -101,6 +105,7 @@ FILES =  \
 	Transport/FastCgiAppHostTransport.cs \
 	Transport/FastCgiListenerTransport.cs \
 	Transport/FastCgiRecordQueue.cs \
+	Transport/NativeTransport.cs \
 	Transport/TransportRequest.cs \
 	Utils/HostUtils.cs \
 	WebServer/ApplicationServer.cs \

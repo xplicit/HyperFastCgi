@@ -11,6 +11,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 		string path;
 		string vpath;
 		IListenerTransport transport;
+		NativeTransport t;
 
 		public string Path {
 			get {
@@ -69,6 +70,12 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 
 
 		#endregion
+		public AspNetApplicationHost()
+		{
+			t = new NativeTransport ();
+			t.AppHost = this;
+			t.RegisterHost (VPath, Path);
+		}
 
 		public LogLevel LogLevel {
 			get { return Logger.Level; }
