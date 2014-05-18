@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="libnative" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="../Mono.WebServer.HyperFastCgi/bin/Debug/libnative" prefix_auto="1" extension_auto="1" />
+				<Option object_output="../Mono.WebServer.HyperFastCgi/obj/Debug/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-g" />
+					<Add directory="/usr/lib/pkgconfig/../../include/mono-2.0" />
+					<Add directory="/usr/include/glib-2.0" />
+					<Add directory="/usr/lib/i386-linux-gnu/glib-2.0/include" />
+				</Compiler>
+				<Linker>
+					<Add library="glib-2.0" />
+					<Add library="mono-2.0" />
+					<Add library="event" />
+					<Add library="event_pthreads" />
+					<Add directory="/usr/lib/pkgconfig/../../lib" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="../Mono.WebServer.HyperFastCgi/bin/Release/liblibnative" prefix_auto="1" extension_auto="1" />
+				<Option object_output="../Mono.WebServer.HyperFastCgi/obj/Release/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add directory="/usr/lib/pkgconfig/../../include/mono-2.0" />
+			<Add directory="/usr/include/glib-2.0" />
+			<Add directory="/usr/lib/i386-linux-gnu/glib-2.0/include" />
+		</Compiler>
+		<Unit filename="fcgi-transport.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="fcgi-transport.h" />
+		<Unit filename="fcgi.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="fcgi.h" />
+		<Unit filename="libev.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="libev.h" />
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="mono-bridge.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="mono-bridge.h" />
+		<Unit filename="socket-helper.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="socket-helper.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
