@@ -40,6 +40,7 @@ using Mono.WebServer.HyperFastCgi.FastCgiProtocol;
 using Mono.WebServer.HyperFastCgi.Interfaces;
 using Mono.WebServer.HyperFastCgi.Transport;
 using Mono.WebServer.HyperFastCgi.Requests;
+using System.Web;
 
 namespace Mono.WebServer.HyperFastCgi.AspNetServer
 {
@@ -56,24 +57,72 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 		}
 
 		private StringBuilder headers = new StringBuilder ();
-		private byte[] input_data;
 		private string file_path;
 		string raw_url = null;
 		private bool closed = false;
 		string uri_path = null;
 		private bool addTrailingSlash;
 		//		string path_info;
-		NativeRequest cgiRequest;
-		NativeTransport transport;
+		INativeTransport transport;
+
+		//CGI requests
+		private ulong requestId;
+		private int requestNumber;
+
+		IDictionary<string, string> parameter_table = new Dictionary<string,string> ();
+
+		//cgi request params
+		string path;
+		private int port = -1;
+		//headers
+		private string[] knownHeaders;
+		private Dictionary<string,string> unknownHeadersDict = new Dictionary<string, string> ();
+		private string[][] unknownHeaders;
+
+		//post data
+		private byte[] input_data;
+		private int input_data_offset;
+
+		public int PortNumber {
+			get {
+				if (port < 0)
+					//FIXME: tryparse
+					port = int.Parse (GetParameter (
+						"SERVER_PORT"));
+
+				return port;
+			}
+		}
+
+		public string Path {
+			get {
+				if (path == null)
+					path = GetParameter ("SCRIPT_NAME");
+
+				return path;
+			}
+		}
+
+		public int RequestNumber {
+			get {
+				return requestNumber;
+			}
+		}
+
+		public override ulong RequestId {
+			get { return requestId; }
+		}
 
 		public IWebRequest Request {
 			get { return this;}
 		}
 
-		public AspNetNativeWebRequest (NativeRequest cgiRequest, IApplicationHost appHost, NativeTransport transport) : base (appHost)
+		public AspNetNativeWebRequest (ulong requestId, int requestNumber, IApplicationHost appHost, INativeTransport transport) : base (appHost)
 		{
-			this.cgiRequest = cgiRequest;
-			input_data = cgiRequest.InputData;
+			this.requestId = requestId;
+			this.requestNumber = requestNumber;
+			knownHeaders = new string[HttpWorkerRequest.RequestHeaderMaximum];
+
 			this.transport = transport;
 			//			addTrailingSlash = appHost.AddTrailingSlash;
 			//			try {
@@ -85,14 +134,62 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 			//			}
 		}
 
+		public void AddServerVariable(string name, string value)
+		{
+			parameter_table.Add (name, value);
+		}
+
+		public void AddHeader (string header, string value)
+		{
+			if (!String.IsNullOrEmpty (header)) {
+				int idx = HttpWorkerRequest.GetKnownRequestHeaderIndex (header);
+
+				if (idx != -1) {
+					knownHeaders [idx] = value;
+				} else {
+					unknownHeadersDict.Add (header, value);
+				}
+			}
+		}
+
+		public void AddBodyPart (byte[] data)
+		{
+			if (input_data == null) {
+				int len = 0;
+				string slen = GetParameter ("CONTENT_LENGTH");
+
+				if (slen == null) {
+					//TODO: error, throw an exception
+				}
+				if (!int.TryParse (slen, NumberStyles.None, CultureInfo.InvariantCulture, out len)) {
+					//TODO: error, throw an exception
+				}
+
+				input_data = new byte[len];
+			}
+
+			if (input_data_offset + data.Length > input_data.Length) {
+				//TODO: throw an exception
+			}
+
+			Buffer.BlockCopy (data, 0, input_data, input_data_offset, data.Length);
+			input_data_offset += data.Length;
+		}
+
+		public string GetParameter (string parameter)
+		{
+			if (parameter_table != null && parameter_table.ContainsKey (parameter))
+				return (string)parameter_table [parameter];
+
+			return null;
+		}
+
+
 
 		#region Overrides
 
 		#region Overrides: Transaction Oriented
 
-		public override int RequestId {
-			get { return cgiRequest.RequestNumber; }
-		}
 
 		protected override bool GetRequestData ()
 		{
@@ -117,7 +214,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 
 			closed = true;
 			this.EnsureHeadersSent ();
-			NativeTransport.EndRequest(cgiRequest.RequestId,cgiRequest.RequestNumber, 0);
+			transport.EndRequest(requestId,requestNumber, 0);
 		}
 
 		protected void SendFromStream (Stream stream, long offset, long length)
@@ -164,7 +261,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 		{
 			EnsureHeadersSent ();
 
-			NativeTransport.SendOutput (cgiRequest.RequestId,cgiRequest.RequestNumber, data, length);
+			transport.SendOutput (requestId, requestNumber, data, length);
 		}
 
 		public override void SendStatus (int statusCode, string statusDescription)
@@ -195,7 +292,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 
 		public override string GetPathInfo ()
 		{
-			return cgiRequest.GetParameter ("PATH_INFO") ?? String.Empty;
+			return GetParameter ("PATH_INFO") ?? String.Empty;
 		}
 
 		public override string GetRawUrl ()
@@ -203,7 +300,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 			if (raw_url != null)
 				return raw_url;
 
-			string fcgiRequestUri = cgiRequest.GetParameter ("REQUEST_URI");
+			string fcgiRequestUri = GetParameter ("REQUEST_URI");
 			if (fcgiRequestUri != null) {
 				raw_url = fcgiRequestUri;
 				return raw_url;
@@ -222,32 +319,32 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 
 		public override bool IsSecure ()
 		{
-			return cgiRequest.GetParameter ("HTTPS") == "on";
+			return GetParameter ("HTTPS") == "on";
 		}
 
 		public override string GetHttpVerbName ()
 		{
-			return cgiRequest.GetParameter ("REQUEST_METHOD");
+			return GetParameter ("REQUEST_METHOD");
 		}
 
 		public override string GetHttpVersion ()
 		{
-			return cgiRequest.GetParameter ("SERVER_PROTOCOL");
+			return GetParameter ("SERVER_PROTOCOL");
 		}
 
 		public override string GetLocalAddress ()
 		{
-			string address = cgiRequest.GetParameter ("SERVER_ADDR");
+			string address = GetParameter ("SERVER_ADDR");
 			if (address != null && address.Length > 0)
 				return address;
 
 			address = AddressFromHostName (
-				cgiRequest.GetParameter ("HTTP_HOST"));
+				GetParameter ("HTTP_HOST"));
 			if (address != null && address.Length > 0)
 				return address;
 
 			address = AddressFromHostName (
-				cgiRequest.GetParameter ("SERVER_NAME"));
+				GetParameter ("SERVER_NAME"));
 			if (address != null && address.Length > 0)
 				return address;
 
@@ -257,7 +354,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 		public override int GetLocalPort ()
 		{
 			try {
-				return cgiRequest.PortNumber;
+				return PortNumber;
 			} catch {
 				return base.GetLocalPort ();
 			}
@@ -265,7 +362,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 
 		public override string GetQueryString ()
 		{
-			return cgiRequest.GetParameter ("QUERY_STRING");
+			return GetParameter ("QUERY_STRING");
 		}
 
 		public override byte [] GetQueryStringRawBytes ()
@@ -278,7 +375,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 
 		public override string GetRemoteAddress ()
 		{
-			string addr = cgiRequest.GetParameter ("REMOTE_ADDR");
+			string addr = GetParameter ("REMOTE_ADDR");
 			return addr != null && addr.Length > 0 ?
 				addr : base.GetRemoteAddress ();
 		}
@@ -299,7 +396,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 
 		public override int GetRemotePort ()
 		{
-			string port = cgiRequest.GetParameter ("REMOTE_PORT");
+			string port = GetParameter ("REMOTE_PORT");
 			if (port == null || port.Length == 0)
 				return base.GetRemotePort ();
 
@@ -312,7 +409,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 
 		public override string GetServerVariable (string name)
 		{
-			string value = cgiRequest.GetParameter (name);
+			string value = GetParameter (name);
 
 			if (value == null)
 				value = Environment.GetEnvironmentVariable (name);
@@ -334,7 +431,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 			if (file_path != null)
 				return file_path;
 
-			file_path = cgiRequest.Path;
+			file_path = Path;
 
 			// The following will check if the request was made to a
 			// directory, and if so, if attempts to find the correct
@@ -368,27 +465,42 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 
 		public override string GetUnknownRequestHeader (string name)
 		{
-			return cgiRequest.GetUnknownRequestHeader (name);
+			if (!unknownHeadersDict.ContainsKey(name))
+				return null;
+
+			return unknownHeadersDict [name];
 		}
 
 		public override string [][] GetUnknownRequestHeaders ()
 		{
-			return cgiRequest.GetUnknownRequestHeaders ();
+			if (unknownHeaders == null) {
+				unknownHeaders = new string[unknownHeadersDict.Count][];
+				Dictionary<string,string>.Enumerator en = unknownHeadersDict.GetEnumerator ();
+
+				for (int i = 0; i < unknownHeadersDict.Count; i++) {
+					en.MoveNext ();
+					unknownHeaders [i] = new string[] {
+						en.Current.Key,
+						en.Current.Value
+					};
+				}
+			}
+			return unknownHeaders;
 		}
 
 		public override string GetKnownRequestHeader (int index)
 		{
-			return cgiRequest.GetKnownRequestHeader (index);
+			return knownHeaders [index];
 		}
 
 		public override string GetServerName ()
 		{
 			string server_name = HostNameFromString (
-				cgiRequest.GetParameter ("SERVER_NAME"));
+				GetParameter ("SERVER_NAME"));
 
 			if (server_name == null)
 				server_name = HostNameFromString (
-					cgiRequest.GetParameter ("HTTP_HOST"));
+					GetParameter ("HTTP_HOST"));
 
 			if (server_name == null)
 				server_name = GetLocalAddress ();
@@ -423,7 +535,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 				headers.Append ("\r\n");
 				string str = headers.ToString ();
 				byte[] data = HeaderEncoding.GetBytes (str);
-				NativeTransport.SendOutput (cgiRequest.RequestId, cgiRequest.RequestNumber, data, data.Length);
+				transport.SendOutput (requestId, requestNumber, data, data.Length);
 				headers = null;
 			}
 		}

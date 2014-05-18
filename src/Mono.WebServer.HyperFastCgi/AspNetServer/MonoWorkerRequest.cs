@@ -82,7 +82,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 		public event MapPathEventHandler MapPathEvent;
 		public event EndOfRequestHandler EndOfRequestEvent;
 
-		public abstract int RequestId { get; }
+		public abstract ulong RequestId { get; }
 		// Gets the physical path of the application host of the
 		// current instance.
 		string HostPath {

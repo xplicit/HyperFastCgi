@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Sockets;
 
 namespace Mono.WebServer.HyperFastCgi.Interfaces
 {
@@ -8,7 +9,7 @@ namespace Mono.WebServer.HyperFastCgi.Interfaces
 
 		IApplicationServer Server { get; set;}
 
-		void Listen (string host, int port);
+		int Listen (AddressFamily family, string host, int port);
 
 		void Shutdown ();
 	}

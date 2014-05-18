@@ -30,24 +30,24 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 			set;
 		}
 
-		public void Listen (string host, int port)
+		public int Listen (AddressFamily family, string host, int port)
 		{
 			this.keepAlive = true; //keepAlive;
 			this.useThreadPool = true; //useThreadPool;
 
 			try {
-				this.listener = CreateSocket (GeneralSocketType.Tcp, host, port);
+				this.listener = CreateSocket (family, host, port);
 
 				listener.Listen (500);
 				listener.BeginAccept (accept, listener);
 
 			} catch (Exception ex) {
 				Logger.Write (LogLevel.Error, "{0}", ex);
-				return; //false;
+				return 1; //false;
 			}
 			Logger.Write (LogLevel.Debug, "Application started");
 
-			return; //true;
+			return 0; //true;
 		}
 
 		public void Shutdown ()
@@ -57,15 +57,15 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 
 		#endregion
 
-		private GeneralSocket CreateSocket (GeneralSocketType sockType, string address, int port)
+		private GeneralSocket CreateSocket (AddressFamily sockType, string address, int port)
 		{
 			GeneralSocket socket = null;
 
 			switch (sockType) {
-			case GeneralSocketType.Unix:
+			case AddressFamily.Unix:
 				socket = new UnixSocket (address);
 				break;
-			case GeneralSocketType.Tcp:
+			case AddressFamily.InterNetwork:
 				IPEndPoint localEP = new IPEndPoint (IPAddress.Parse (address), port);
 				socket = new TcpSocket (localEP);
 				break;

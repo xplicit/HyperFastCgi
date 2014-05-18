@@ -63,6 +63,16 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 			return listenerTransport;
 		}
 
+		public IWebRequest CreateRequest (ulong requestId, int requestNumber, object arg)
+		{
+			return new AspNetNativeWebRequest (requestId, requestNumber, this, t);
+		}
+
+		public IWebResponse GetResponse (IWebRequest request, object arg)
+		{
+			return (IWebResponse)request;
+		}
+
 		public void ProcessRequest (IWebRequest request)
 		{
 			throw new NotImplementedException ();

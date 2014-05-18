@@ -40,6 +40,7 @@ using Mono.WebServer.HyperFastCgi.FastCgiProtocol;
 using Mono.WebServer.HyperFastCgi.Interfaces;
 using Mono.WebServer.HyperFastCgi.Transport;
 
+#if OLD_REQUEST
 namespace Mono.WebServer.HyperFastCgi.AspNetServer
 {
 	public class AspNetWebRequest : MonoWorkerRequest, IWebRequest, IWebResponse
@@ -91,7 +92,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 
 		#region Overrides: Transaction Oriented
 
-		public override int RequestId {
+		public override ulong RequestId {
 			get { return cgiRequest.RequestId; }
 		}
 
@@ -535,3 +536,5 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 		#endregion
 	}
 }
+
+#endif //OLD_REQUEST

@@ -107,9 +107,9 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 							RemoveRequest (listenerTag);
 							((FastCgiListenerTransport)AppHost.GetListenerTransport ()).RemoveRequest (listenerTag, request.RequestId);
 
-							AspNetWebRequest wreq = new AspNetWebRequest (listenerTag, request, AppHost, this);
+							IWebRequest wreq = AppHost.CreateRequest (listenerTag, (int)listenerTag, null);
+							wreq.Process (AppHost.GetResponse (wreq, null));
 
-							wreq.Process (wreq);
 						}
 					}
 					break;

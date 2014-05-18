@@ -5,12 +5,15 @@ using Mono.WebServer.HyperFastCgi.Requests;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using Mono.WebServer.HyperFastCgi.AspNetServer;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Text;
 
 namespace Mono.WebServer.HyperFastCgi.Transport
 {
 	public class NativeTransport : INativeTransport
 	{
-		Dictionary<long, NativeRequest> requests = new Dictionary<long, NativeRequest> ();
+		Dictionary<ulong, IWebRequest> requests = new Dictionary<ulong, IWebRequest> ();
 
 		public IApplicationHost AppHost {
 			get;
@@ -19,17 +22,18 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 
 		#region INativeTransport implementation
 
-		public void CreateRequest (long requestId, int requestNumber)
+		public void CreateRequest (ulong requestId, int requestNumber)
 		{
 //			Console.WriteLine ("Add ReqId={0}", requestId);
 
-			requests.Add (requestId, new NativeRequest (requestId, requestNumber));
+			IWebRequest req=AppHost.CreateRequest (requestId, requestNumber, null);
 
+			requests.Add (requestId, req);
 		}
 
-		public void AddServerVariable (long requestId, int requestNumber, string name, string value)
+		public void AddServerVariable (ulong requestId, int requestNumber, string name, string value)
 		{
-			NativeRequest request;
+			IWebRequest request;
 
 			try
 			{
@@ -43,9 +47,9 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 //			Console.WriteLine ("svar: {0}={1}",name, value);
 		}
 
-		public void AddHeader (long requestId, int requestNumber, string name, string value)
+		public void AddHeader (ulong requestId, int requestNumber, string name, string value)
 		{
-			NativeRequest request;
+			IWebRequest request;
 
 			if (requests.TryGetValue (requestId, out request)
 				&& request.RequestNumber == requestNumber) {
@@ -54,30 +58,50 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 //			Console.WriteLine ("header: {0}={1}",name, value);
 		}
 
-		public void HeadersSent (long requestId, int requestNumber)
+		public void HeadersSent (ulong requestId, int requestNumber)
 		{
 
 		}
 
-		public void AddBodyPart (long requestId, int requestNumber, byte[] body, bool final)
+		public void AddBodyPart (ulong requestId, int requestNumber, byte[] body, bool final)
 		{
-			NativeRequest request;
+			IWebRequest request;
 
 			if (requests.TryGetValue (requestId, out request)
 				&& request.RequestNumber == requestNumber) {
 
 				if (final) {
 					requests.Remove (requestId);
-					AspNetNativeWebRequest req = new AspNetNativeWebRequest (request, AppHost, this);
-					req.Process (req);
+//					AspNetNativeWebRequest req = new AspNetNativeWebRequest (request, AppHost, this);
+//					req.Process (req);
+//					ThreadPool.QueueUserWorkItem ( _ => req.Process (req));
+					//ThreadPool.UnsafeQueueUserWorkItem (ProcessInternal,req);
+//					Task.Factory.StartNew ( () => {
+					request.Process ((IWebResponse)request);
+//					});
+//					ThreadPool.QueueUserWorkItem (_ => {
+//						for(int i=0;i<1000000;i++)
+//						{
+//							int j=i*i;
+//						}
+//						SendOutput (request.RequestId, request.RequestNumber, header, header.Length);
+//						SendOutput (request.RequestId, request.RequestNumber, content, content.Length);
+//						EndRequest (request.RequestId, request.RequestNumber, 0);
+//					});
 				} else {
-					request.AddInputData (body);
+					request.AddBodyPart (body);
 				}
 			}
 
 		}
 
-		public void Process (long requestId, int requestNumber)
+		private void ProcessInternal(object state)
+		{
+			AspNetNativeWebRequest req=(AspNetNativeWebRequest)state;
+			req.Process (req);
+		}
+
+		public void Process (ulong requestId, int requestNumber)
 		{
 //			Console.WriteLine ("Remove ReqId={0}", requestId);
 			requests.Remove (requestId);
@@ -92,16 +116,20 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 		public extern static void RegisterTransport (Type transportType);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern static void SendOutput (long requestId, int requestNumber, byte[] data, int len);
+		public extern void SendOutput (ulong requestId, int requestNumber, byte[] data, int len);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern static void EndRequest (long requestId, int requestNumber, int appStatus);
+		public extern void EndRequest (ulong requestId, int requestNumber, int appStatus);
 
 		[DllImport("libnative", EntryPoint="bridge_register_icall")]
 		public extern static void RegisterIcall ();
 
+		byte[] header=Encoding.ASCII.GetBytes(TestResponse.Header);
+		byte[] content=Encoding.ASCII.GetBytes(TestResponse.Response);
+
 		public NativeTransport ()
 		{
+
 		}
 
 	}

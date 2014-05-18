@@ -48,6 +48,7 @@ using System.Threading;
 using Mono.WebServer.HyperFastCgi.ApplicationServers;
 using Mono.WebServer.HyperFastCgi.Transport;
 using Mono.WebServer.HyperFastCgi.Listener;
+using System.Net.Sockets;
 
 namespace Mono.WebServer.HyperFastCgi
 {
@@ -397,7 +398,7 @@ namespace Mono.WebServer.HyperFastCgi
 			h.LogLevel = Logger.Level;
 			h.LogToConsole = Logger.WriteToConsole;
 			NativeTransport.RegisterTransport (typeof(NativeTransport));
-			NativeListener.Listen (args.Length, args);
+			NativeListener.Listen ((ushort)AddressFamily.InterNetwork, "127.0.0.1", 9000);
 
 			configmanager = null;
 
