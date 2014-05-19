@@ -392,7 +392,7 @@ namespace Mono.WebServer.HyperFastCgi
 			listener.Server = srv;
 			var h=(Mono.WebServer.HyperFastCgi.AspNetServer.AspNetApplicationHost)
 				srv.CreateApplicationHost ("ssbench3", 81, "/", "/var/www/nginx-mono/",
-				listener.Transport);
+					typeof(NativeTransport), null);
 //			listener.Listen ("127.0.0.1", 9000);
 			var t=h.GetListenerTransport ();
 			h.LogLevel = Logger.Level;

@@ -4,6 +4,8 @@ namespace Mono.WebServer.HyperFastCgi.Interfaces
 {
 	public interface INativeTransport
 	{
+		void Configure (IApplicationHost host, object config); 
+
 		void CreateRequest (ulong requestId, int requestNumber);
 		void AddServerVariable (ulong requestId, int requestNumber, string name, string value);
 		void AddHeader (ulong requestId, int requestNumber, string name, string value);
@@ -13,8 +15,6 @@ namespace Mono.WebServer.HyperFastCgi.Interfaces
 
 		void SendOutput (ulong requestId, int requestNumber, byte[] data, int len);
 		void EndRequest (ulong requestId, int requestNumber, int appStatus);
-
-		void RegisterHost (string virtualPath,string path);
 	}
 }
 

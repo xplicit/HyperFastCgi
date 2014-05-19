@@ -14,18 +14,22 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 	public class NativeTransport : INativeTransport
 	{
 		Dictionary<ulong, IWebRequest> requests = new Dictionary<ulong, IWebRequest> ();
+		IApplicationHost appHost;
 
 		public IApplicationHost AppHost {
-			get;
-			set;
+			get { return appHost;}
 		}
 
 		#region INativeTransport implementation
 
+		public void Configure (IApplicationHost host, object config)
+		{
+			this.appHost = host;
+			RegisterHost (host.VPath, host.Path);
+		}
+
 		public void CreateRequest (ulong requestId, int requestNumber)
 		{
-//			Console.WriteLine ("Add ReqId={0}", requestId);
-
 			IWebRequest req=AppHost.CreateRequest (requestId, requestNumber, null);
 
 			requests.Add (requestId, req);

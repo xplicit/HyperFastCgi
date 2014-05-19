@@ -11,7 +11,8 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 		string path;
 		string vpath;
 		IListenerTransport transport;
-		NativeTransport t;
+		INativeTransport t;
+		IApplicationServer appServer;
 
 		public string Path {
 			get {
@@ -47,8 +48,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 		}
 
 		public IApplicationServer Server {
-			get;
-			set;
+			get {return appServer;}
 		}
 
 		private IListenerTransport listenerTransport;
@@ -82,9 +82,13 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 		#endregion
 		public AspNetApplicationHost()
 		{
+		}
+
+		public void Init(IApplicationServer server, Type transportType, object transportConfig)
+		{
+			appServer = server;
 			t = new NativeTransport ();
-			t.AppHost = this;
-			t.RegisterHost (VPath, Path);
+			t.Configure (this, null);
 		}
 
 		public LogLevel LogLevel {
