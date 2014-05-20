@@ -87,7 +87,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 		public void Init(IApplicationServer server, Type transportType, object transportConfig)
 		{
 			appServer = server;
-			t = new NativeTransport ();
+			t = (INativeTransport) Activator.CreateInstance (transportType);
 			t.Configure (this, null);
 		}
 

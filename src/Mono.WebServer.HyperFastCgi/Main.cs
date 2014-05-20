@@ -49,6 +49,8 @@ using Mono.WebServer.HyperFastCgi.ApplicationServers;
 using Mono.WebServer.HyperFastCgi.Transport;
 using Mono.WebServer.HyperFastCgi.Listener;
 using System.Net.Sockets;
+using System.Collections.Generic;
+using Mono.WebServer.HyperFastCgi.Config;
 
 namespace Mono.WebServer.HyperFastCgi
 {
@@ -91,9 +93,9 @@ namespace Mono.WebServer.HyperFastCgi
 		private static ApplicationServer appserver;
 		private static ConfigurationManager configmanager;
 
-		private static GeneralSocketType sockType;
+		private static AddressFamily sockType;
 		private static string address; 
-		private static int port=0;
+		private static ushort port=0;
 		private static bool keepAlive; 
 		private static bool useThreadPool;
 		delegate int HideFromJit(string[] argc);    
@@ -198,19 +200,11 @@ namespace Mono.WebServer.HyperFastCgi
 
 				string path = (string)configmanager ["filename"];
 
-				sockType = GeneralSocketType.Unix;
+				sockType = AddressFamily.Unix;
 				address = path;
-//				try {
-//					socket = new UnixSocket (path);
-//				} catch (System.Net.Sockets.SocketException e){
-//					Logger.Write (LogLevel.Error,
-//						"Error creating the socket: {0}",
-//						e.Message);
-//					return 1;
-//				}
 
-//				Logger.Write (LogLevel.Debug,
-//					"Listening on file: {0}",	path);
+				Logger.Write (LogLevel.Debug,
+					"Listening on file: {0}",	path);
 				break;
 
 			// The TCP socket is of the format
@@ -244,23 +238,13 @@ namespace Mono.WebServer.HyperFastCgi
 					return 1;
 				}
 
-				sockType = GeneralSocketType.Tcp;
+				sockType = AddressFamily.InterNetwork;
 				address = address_str;
 
-
-//				try {
-//					socket = new TcpSocket (new IPEndPoint(address, port));
-//				} catch (System.Net.Sockets.SocketException e){
-//					Logger.Write (LogLevel.Error,
-//						"Error creating the socket: {0}",
-//						e.Message);
-//					return 1;
-//				}
-
 				Logger.Write (LogLevel.Debug,
-					"Listening on port: {0}", address_str);
+					"Listening on port: {0}", port);
 				Logger.Write (LogLevel.Debug,
-					"Listening on address: {0}", port);
+					"Listening on address: {0}", address_str);
 				break;
 
 			default:
@@ -292,6 +276,7 @@ namespace Mono.WebServer.HyperFastCgi
 			                      configmanager ["applications"];
 			string app_config_file;
 			string app_config_dir;
+			List<WebAppConfig> webapps = new List<WebAppConfig> ();
 
 			try {
 				app_config_file = (string)
@@ -303,17 +288,17 @@ namespace Mono.WebServer.HyperFastCgi
 				return 1;
 			}
 
-			if (applications != null)
-				appserver.AddApplicationsFromCommandLine (
-					applications);
+			if (applications != null) {
+				webapps.AddRange (ConfigUtils.GetApplicationsFromCommandLine (applications));
+			}
 
-			if (app_config_file != null)
-				appserver.AddApplicationsFromConfigFile (
-					app_config_file);
+			if (app_config_file != null) {
+				webapps.AddRange (ConfigUtils.GetApplicationsFromConfigFile (app_config_file));
+			}
 
-			if (app_config_dir != null)
-				appserver.AddApplicationsFromConfigDirectory (
-					app_config_dir);
+			if (app_config_dir != null) {
+				webapps.AddRange (ConfigUtils.GetApplicationsFromConfigDirectory (app_config_dir));
+			}
 
 			if (applications == null && app_config_dir == null &&
 			    app_config_file == null && !auto_map) {
@@ -329,13 +314,6 @@ namespace Mono.WebServer.HyperFastCgi
 			}
 
 			Logger.Write (LogLevel.Debug, "Root directory: {0}", root_dir);
-			VPathToHost vapp = appserver.GetSingleApp ();
-			if (vapp == null) {
-				Logger.Write (LogLevel.Error, "Only one application currently supported");
-				return 1;
-			}
-			vapp.CreateHost (appserver, typeof(ApplicationHost));
-			ApplicationHost host = vapp.AppHost as ApplicationHost;
 
 			keepAlive = (bool)configmanager ["keepalive"];
 			useThreadPool = (bool)configmanager ["usethreadpool"];
@@ -371,34 +349,17 @@ namespace Mono.WebServer.HyperFastCgi
 
 			bool stopable = (bool)configmanager ["stopable"];
 			Logger.WriteToConsole = (bool)configmanager ["printlog"];
-			host.LogLevel = Logger.Level;
-			host.LogToConsole = Logger.WriteToConsole;
-			host.AddTrailingSlash = (bool)configmanager ["addtrailingslash"];
+//			host.LogLevel = Logger.Level;
+//			host.LogToConsole = Logger.WriteToConsole;
+//			host.AddTrailingSlash = (bool)configmanager ["addtrailingslash"];
 
-//			if (!host.Start (sockType, address, port, keepAlive, useThreadPool))
-//				return 1;
-//			Mono.WebServer.HyperFastCgi.AspNetServer.AspNetApplicationHost hst =
-//				System.Web.Hosting.ApplicationHost.CreateApplicationHost (
-//					typeof(Mono.WebServer.HyperFastCgi.AspNetServer.AspNetApplicationHost), 
-//					"/", "/var/www/nginx-mono/") 
-//				as Mono.WebServer.HyperFastCgi.AspNetServer.AspNetApplicationHost;
-//			string domain1 = AppDomain.CurrentDomain.FriendlyName;
-//			string domain2 = hst.Domain.FriendlyName;
-
-//			string vpath=hst.VPath;
-
-			ManagedFastCgiListener listener = new ManagedFastCgiListener ();
 			SimpleApplicationServer srv = new SimpleApplicationServer (root_dir);
-			listener.Server = srv;
-			var h=(Mono.WebServer.HyperFastCgi.AspNetServer.AspNetApplicationHost)
-				srv.CreateApplicationHost ("ssbench3", 81, "/", "/var/www/nginx-mono/",
+			foreach (WebAppConfig app in webapps) {
+				srv.CreateApplicationHost (app.VHost, app.VPort, app.VPath, app.RealPath,
 					typeof(NativeTransport), null);
-//			listener.Listen ("127.0.0.1", 9000);
-			var t=h.GetListenerTransport ();
-			h.LogLevel = Logger.Level;
-			h.LogToConsole = Logger.WriteToConsole;
+			}
 			NativeTransport.RegisterTransport (typeof(NativeTransport));
-			NativeListener.Listen ((ushort)AddressFamily.InterNetwork, "127.0.0.1", 9000);
+			NativeListener.Listen ((ushort)sockType, address, port);
 
 			configmanager = null;
 
@@ -406,7 +367,7 @@ namespace Mono.WebServer.HyperFastCgi
 				Console.WriteLine (
 					"Hit Return to stop the server.");
 				Console.ReadLine ();
-				host.Shutdown ();
+//				host.Shutdown ();
 			} else {
 				UnixSignal[] signals = new UnixSignal[] { 
 					new UnixSignal (Signum.SIGINT), 
@@ -429,9 +390,9 @@ namespace Mono.WebServer.HyperFastCgi
 
 		static void DomainReloadEventHandler(object sender,DomainReloadEventArgs args)
 		{
-			ApplicationHost host = args.VApp.AppHost as ApplicationHost;
-
-			host.Start (sockType, address, port, keepAlive, useThreadPool);
+//			ApplicationHost host = args.VApp.AppHost as ApplicationHost;
+//
+//			host.Start (sockType, address, port, keepAlive, useThreadPool);
 		}
 
 		static void SetThreads(int minWorkerThreads, int minIOThreads, int maxWorkerThreads, int maxIOThreads)

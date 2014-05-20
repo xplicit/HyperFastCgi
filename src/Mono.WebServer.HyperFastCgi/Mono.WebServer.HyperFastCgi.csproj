@@ -98,6 +98,8 @@
     <Compile Include="Listener\NativeListener.cs" />
     <Compile Include="Requests\NativeRequest.cs" />
     <Compile Include="AspNetServer\AspNetNativeWebRequest.cs" />
+    <Compile Include="Config\WebAppConfig.cs" />
+    <Compile Include="Config\ConfigUtils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
