@@ -30,7 +30,7 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 
 		#endregion
 
-		[DllImport("libnative", EntryPoint="Listen")]
+		[DllImport("libhfc-native", EntryPoint="Listen")]
 		public extern static int Listen(ushort family, string addr, ushort port);
 	}
 }

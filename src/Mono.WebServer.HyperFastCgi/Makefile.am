@@ -71,6 +71,8 @@ FILES =  \
 	AspNetServer/AspNetWebRequest.cs \
 	AspNetServer/MonoWorkerRequest.cs \
 	Config/ConfigurationManager.cs \
+	Config/ConfigUtils.cs \
+	Config/WebAppConfig.cs \
 	FastCgiProtocol/BeginRequestBody.cs \
 	FastCgiProtocol/EndRequestBody.cs \
 	FastCgiProtocol/Record.cs \
@@ -191,14 +193,14 @@ $(ASSEMBLY_MDB): $(ASSEMBLY)
 
 if NET_2_0
 $(ASSEMBLY2): $(build_sources) $(build_resources) $(build_datafiles) $(DLL_REFERENCES) $(PROJECT_REFERENCES) $(build_xamlg_list) $(build_satellite_assembly_list)
-	mkdir -p $(shell dirname 2.0/$(ASSEMBLY))
-	$(GMCS) $(ASSEMBLY_COMPILER_FLAGS) -out:$(ASSEMBLY2) -target:$(COMPILE_TARGET) $(build_sources) $(build_resources:%=-resource:%) $(build_references_ref4)
+	$(MKDIR_P) $(shell dirname 2.0/$(ASSEMBLY))
+	$(GMCS) -d:NET_2_0 $(ASSEMBLY_COMPILER_FLAGS) -out:$(ASSEMBLY2) -target:$(COMPILE_TARGET) $(build_sources) $(build_resources:%=-resource:%) $(build_references_ref4)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 endif
 
 if NET_4_0
 $(ASSEMBLY4): $(build_sources) $(build_resources) $(build_datafiles) $(DLL_REFERENCES) $(PROJECT_REFERENCES) $(build_xamlg_list) $(build_satellite_assembly_list)
-	mkdir -p $(shell dirname 4.0/$(ASSEMBLY))
+	$(MKDIR_P) $(shell dirname 4.0/$(ASSEMBLY))
 	$(DMCS) $(ASSEMBLY_COMPILER_FLAGS) -out:$(ASSEMBLY4) -target:$(COMPILE_TARGET) $(build_sources) $(build_resources:%=-resource:%) $(build_references_ref4)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 endif

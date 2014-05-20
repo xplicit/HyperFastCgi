@@ -6,8 +6,10 @@ using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using Mono.WebServer.HyperFastCgi.AspNetServer;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Text;
+#if !NET_2_0
+using System.Threading.Tasks;
+#endif 
 
 namespace Mono.WebServer.HyperFastCgi.Transport
 {
@@ -125,7 +127,7 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void EndRequest (ulong requestId, int requestNumber, int appStatus);
 
-		[DllImport("libnative", EntryPoint="bridge_register_icall")]
+		[DllImport("libhfc-native", EntryPoint="bridge_register_icall")]
 		public extern static void RegisterIcall ();
 
 		byte[] header=Encoding.ASCII.GetBytes(TestResponse.Header);

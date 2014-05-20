@@ -1,7 +1,7 @@
 dnl Warning: This is an automatically generated file, do not edit!
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ([2.54])
-AC_INIT([HyperFastCgi], [0.3])
+AC_INIT([HyperFastCgi], [0.4])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_MACRO_DIR([build/m4])
 AM_INIT_AUTOMAKE([foreign])
@@ -21,9 +21,20 @@ SHAMROCK_EXPAND_DATADIR
 
 # Checks for programs.
 AC_PROG_INSTALL
+AC_PROG_CC([gcc])
+AC_PROG_MKDIR_P
+AM_PROG_LIBTOOL
+
+LT_INIT
+
+# Checks for required packages
+PKG_CHECK_MODULES([GLIB],[glib-2.0 >= 2.20])
+PKG_CHECK_MODULES([LIBEVENT],[libevent >= 2.0])
+PKG_CHECK_MODULES([LIBEVENT_PTHREADS],[libevent_pthreads >= 2.0])
+
 
 # Mono
-SHAMROCK_CHECK_MONO_MODULE(2.10.0)
+SHAMROCK_CHECK_MONO2_MODULE(2.10.0)
 SHAMROCK_FIND_MONO_2_0_COMPILER
 SHAMROCK_FIND_MONO_4_0_COMPILER
 SHAMROCK_FIND_MONO_RUNTIME
@@ -97,6 +108,7 @@ build/m4/shave/shave-libtool
 src/Makefile
 src/Mono.WebServer.HyperFastCgi/Makefile
 src/Mono.WebServer.HyperFastCgi/scripts/Makefile
+src/libnative/Makefile
 ])
 
 AM_COND_IF([NET_4_0],[AC_CONFIG_FILES([src/Mono.WebServer.HyperFastCgi/scripts/mono-server-hyperfastcgi4])])
