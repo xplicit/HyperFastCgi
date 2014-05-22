@@ -1,12 +1,21 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using Mono.WebServer.HyperFastCgi.Interfaces;
+using Mono.WebServer.HyperFastCgi.Config;
 
 namespace Mono.WebServer.HyperFastCgi.Listener
 {
+	[Config(typeof(ListenerConfig))]
 	public class NativeListener : IWebListener
 	{
+		IApplicationServer server;
+
 		#region IWebListener implementation
+
+		public void Configure(IApplicationServer server, object config)
+		{
+			this.server = server;
+		}
 
 		public int Listen (System.Net.Sockets.AddressFamily family, string host, int port)
 		{
@@ -24,14 +33,13 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 		}
 
 		public IApplicationServer Server {
-			get;
-			set;
+			get { return server;}
 		}
 
 		#endregion
 
 		[DllImport("libhfc-native", EntryPoint="Listen")]
-		public extern static int Listen(ushort family, string addr, ushort port);
+		private extern static int Listen(ushort family, string addr, ushort port);
 	}
 }
 

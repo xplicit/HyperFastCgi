@@ -51,6 +51,7 @@ using Mono.WebServer.HyperFastCgi.Listener;
 using System.Net.Sockets;
 using System.Collections.Generic;
 using Mono.WebServer.HyperFastCgi.Config;
+using Mono.WebServer.HyperFastCgi.Interfaces;
 
 namespace Mono.WebServer.HyperFastCgi
 {
@@ -129,13 +130,14 @@ namespace Mono.WebServer.HyperFastCgi
 				ShowVersion ();
 				return 0;
 			}
+			string config_file;
 
 			try {
-				string config_file = (string)
+				config_file = (string)
 				                     configmanager ["configfile"];
-				if (config_file != null)
-					configmanager.LoadXmlConfig (
-						config_file);
+//				if (config_file != null)
+//					configmanager.LoadXmlConfig (
+//						config_file);
 			} catch (ApplicationException e) {
 				Console.WriteLine (e.Message);
 				return 1;
@@ -354,12 +356,22 @@ namespace Mono.WebServer.HyperFastCgi
 //			host.AddTrailingSlash = (bool)configmanager ["addtrailingslash"];
 
 			SimpleApplicationServer srv = new SimpleApplicationServer (root_dir);
+
+			List<ConfigInfo> listenerConfigs = ConfigUtils.GetConfigsFromFile (config_file, "listener", typeof(ListenerConfig));
+			if (listenerConfigs.Count != 1) {
+				Console.WriteLine ("Only one listener are supported");
+				return 1;
+			}
+
+			IWebListener listener = (IWebListener)Activator.CreateInstance(listenerConfigs[0].Type);
+			listener.Configure (srv, listenerConfigs[0].Config);
+
 			foreach (WebAppConfig app in webapps) {
 				srv.CreateApplicationHost (app.VHost, app.VPort, app.VPath, app.RealPath,
 					typeof(NativeTransport), null);
 			}
 			NativeTransport.RegisterTransport (typeof(NativeTransport));
-			NativeListener.Listen ((ushort)sockType, address, port);
+			listener.Listen (sockType, address, port);
 
 			configmanager = null;
 

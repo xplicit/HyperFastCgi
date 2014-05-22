@@ -18,6 +18,8 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 		Dictionary <uint,FastCgiNetworkConnector> connectors = new Dictionary<uint, FastCgiNetworkConnector> ();
 		object connectorsLock = new object ();
 
+		IApplicationServer server;
+
 		#region IWebListener implementation
 
 		public IListenerTransport Transport {
@@ -26,8 +28,12 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 		}
 
 		public IApplicationServer Server {
-			get;
-			set;
+			get { return server; }
+		}
+
+		public void Configure(IApplicationServer server, object config)
+		{
+			this.server = server;
 		}
 
 		public int Listen (AddressFamily family, string host, int port)

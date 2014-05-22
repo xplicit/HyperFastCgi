@@ -25,7 +25,7 @@
         <Variable name="MONO_PATH" value="." />
       </EnvironmentVariables>
     </EnvironmentVariables>
-    <Commandlineparameters>/applications=ssbench3:81:/:/var/www/nginx-mono /socket=tcp:127.0.0.1:9000 /loglevels=All /printlog /addtrailingslash=true</Commandlineparameters>
+    <Commandlineparameters>/configfile=../../../../samples/server.config  /applications=ssbench3:81:/:/var/www/nginx-mono /socket=tcp:127.0.0.1:9000 /loglevels=All /printlog /addtrailingslash=true</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -100,6 +100,10 @@
     <Compile Include="AspNetServer\AspNetNativeWebRequest.cs" />
     <Compile Include="Config\WebAppConfig.cs" />
     <Compile Include="Config\ConfigUtils.cs" />
+    <Compile Include="Config\ListenerConfig.cs" />
+    <Compile Include="Config\AppHostConfig.cs" />
+    <Compile Include="Config\ConfigAttribute.cs" />
+    <Compile Include="Config\ConfigInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

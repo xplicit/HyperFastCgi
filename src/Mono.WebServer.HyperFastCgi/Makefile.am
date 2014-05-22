@@ -70,8 +70,12 @@ FILES =  \
 	AspNetServer/AspNetNativeWebRequest.cs \
 	AspNetServer/AspNetWebRequest.cs \
 	AspNetServer/MonoWorkerRequest.cs \
+	Config/AppHostConfig.cs \
+	Config/ConfigAttribute.cs \
+	Config/ConfigInfo.cs \
 	Config/ConfigurationManager.cs \
 	Config/ConfigUtils.cs \
+	Config/ListenerConfig.cs \
 	Config/WebAppConfig.cs \
 	FastCgiProtocol/BeginRequestBody.cs \
 	FastCgiProtocol/EndRequestBody.cs \

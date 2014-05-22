@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Xml;
 using System.IO;
+using System.Xml.Serialization;
+using System.Reflection;
 
 namespace Mono.WebServer.HyperFastCgi.Config
 {
@@ -84,7 +86,8 @@ namespace Mono.WebServer.HyperFastCgi.Config
 				doc.Load (fileName);
 
 				foreach (XmlElement el in doc.SelectNodes ("//web-application")) {
-					applist.Add(GetApplicationFromElement (el));
+//					applist.Add(GetApplicationFromElement (el));
+					applist.Add((WebAppConfig)GetConfigFromElement (typeof(WebAppConfig),el));
 				}
 			} catch {
 				Console.WriteLine ("Error loading '{0}'", fileName);
@@ -94,30 +97,56 @@ namespace Mono.WebServer.HyperFastCgi.Config
 			return applist;
 		}
 
-		static WebAppConfig GetApplicationFromElement (XmlElement el)
+		public static List<ConfigInfo> GetConfigsFromFile (string filename, string xmlnode, Type defaultType)
 		{
-			XmlNode n;
+			List<ConfigInfo> configs = new List<ConfigInfo> ();
+			XmlDocument doc = new XmlDocument();
 
-			n = el.SelectSingleNode ("enabled");
-			if (n != null && n.InnerText.Trim () == "false")
-				return null;
+			try {
+				doc.Load(filename);
+			} catch {
+				Console.WriteLine ("Error loading '{0}'", filename);
+				throw;
+			}
 
-			string vpath = el.SelectSingleNode ("vpath").InnerText;
-			string path = el.SelectSingleNode ("path").InnerText;
+			foreach (XmlElement node in doc.SelectNodes("//"+xmlnode)) {
+				ConfigInfo configInfo = null;
+				XmlAttribute attrType = node.Attributes ["type"];
 
-			string vhost = null;
-			n = el.SelectSingleNode ("vhost");
-			if (n != null)
-				vhost = n.InnerText;
+				if (attrType != null && !String.IsNullOrEmpty (attrType.Value)) {
+					Type t=Type.GetType (attrType.Value);
 
-			int vport = -1;
-			n = el.SelectSingleNode ("vport");
-			if (n != null)
-				vport = Convert.ToInt32 (n.InnerText);
+					object[] attrs=t.GetCustomAttributes (typeof(ConfigAttribute), false);
 
-			return new WebAppConfig () {VHost = vhost, VPort = vport , VPath = vpath, RealPath = path};
+					if (attrs != null && attrs.Length > 0) {
+						configInfo = new ConfigInfo () {
+							Type = t,
+							Config = GetConfigFromElement (((ConfigAttribute)attrs [0]).Type, node)
+						};
+					} 
+				}
+
+				if (configInfo == null) {
+					configInfo = new ConfigInfo () {
+						Type = null,
+						Config = GetConfigFromElement (defaultType, node)
+					};
+				}
+
+				configs.Add (configInfo);
+			}
+
+			return configs;
 		}
 
+		static object GetConfigFromElement(Type configType, XmlElement el)
+		{
+			XmlSerializer ser = new XmlSerializer (configType);
+
+			using (XmlReader rdr = new XmlNodeReader (el)) {
+				return ser.Deserialize (rdr);
+			}
+		}
 
 	}
 }
