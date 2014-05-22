@@ -10,6 +10,7 @@ before_install:
     - sudo apt-get update
     #install mono
     - sudo apt-get install mono-devel
+    - sudo apt-get install libevent libevent_pthreads
 
 script:
     - ./autogen.sh --prefix=/usr
