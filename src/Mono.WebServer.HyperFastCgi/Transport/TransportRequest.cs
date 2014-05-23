@@ -1,22 +1,29 @@
 ﻿using System;
 using Mono.WebServer.HyperFastCgi.Interfaces;
+using System.Threading;
 
 namespace Mono.WebServer.HyperFastCgi.Transport
 {
 	public class TransportRequest
 	{
+		private static int nreq;
+
+		public ulong Hash;
+		public uint fd;
 		public ushort RequestId;
+		public int RequestNumber;
 		public byte[] Header;
 		public byte[] Body;
-		public FastCgiAppHostTransport Transport;
+		public bool StdOutSent;
+		public bool KeepAlive;
 
-		public TransportRequest()
-		{
-		}
+
+		public INativeTransport Transport;
 
 		public TransportRequest(ushort requestId, byte[] header, byte[] body)
 		{
 			this.RequestId = requestId;
+			this.RequestNumber = Interlocked.Increment (ref nreq);
 			this.Header = (byte [])header.Clone();
 			this.Body = (byte[] )body.Clone();
 		}

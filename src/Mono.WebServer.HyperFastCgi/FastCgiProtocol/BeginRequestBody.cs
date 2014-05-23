@@ -72,6 +72,12 @@ namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol
 			flags = (BeginRequestFlags)body [2];
 		}
 
+		public BeginRequestBody (byte[] body)
+		{
+			role = (Role)Record.ReadUInt16 (body, 0);
+			flags = (BeginRequestFlags)body [2];
+		}
+
 		#endregion
 
 		#region Public Properties

@@ -101,12 +101,6 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 
 		}
 
-		private void ProcessInternal(object state)
-		{
-			AspNetNativeWebRequest req=(AspNetNativeWebRequest)state;
-			req.Process (req);
-		}
-
 		public void Process (ulong requestId, int requestNumber)
 		{
 //			Console.WriteLine ("Remove ReqId={0}", requestId);

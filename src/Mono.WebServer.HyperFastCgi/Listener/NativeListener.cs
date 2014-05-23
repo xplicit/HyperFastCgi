@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using Mono.WebServer.HyperFastCgi.Interfaces;
 using Mono.WebServer.HyperFastCgi.Config;
+using Mono.WebServer.HyperFastCgi.Transport;
 
 namespace Mono.WebServer.HyperFastCgi.Listener
 {
@@ -27,13 +28,16 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 			throw new NotImplementedException ();
 		}
 
-		public IListenerTransport Transport {
-			get;
-			set;
-		}
-
 		public IApplicationServer Server {
 			get { return server;}
+		}
+
+		public IListenerTransport Transport {
+			get { return null; }
+		}
+
+		public Type AppHostTransportType {
+			get { return typeof(NativeTransport); }
 		}
 
 		#endregion

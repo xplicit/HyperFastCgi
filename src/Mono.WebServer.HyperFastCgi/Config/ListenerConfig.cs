@@ -10,6 +10,12 @@ namespace Mono.WebServer.HyperFastCgi.Config
 		[XmlAttribute("type")]
 		public string Type { get; set;}
 
+		[XmlElement("listener-transport")]
+		public string ListenerTransportType { get; set;}
+
+		[XmlElement("apphost-transport")]
+		public string AppHostTransportType { get; set;}
+
 		[XmlElement("protocol")]
 		public AddressFamily Family { get; set;}
 
@@ -18,9 +24,6 @@ namespace Mono.WebServer.HyperFastCgi.Config
 
 		[XmlElement("port")]
 		public int Port { get; set;}
-
-		[XmlElement("apphost-transport")]
-		public string AppHostTransportType { get; set;}
 
 	}
 }

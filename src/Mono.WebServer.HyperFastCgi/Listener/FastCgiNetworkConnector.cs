@@ -36,6 +36,7 @@ using System.Net;
 using Mono.WebServer.HyperFastCgi.FastCgiProtocol;
 using Mono.WebServer.HyperFastCgi.Logging;
 using Mono.WebServer.HyperFastCgi.Transport;
+using Mono.WebServer.HyperFastCgi.Interfaces;
 
 namespace Mono.WebServer.HyperFastCgi.Listener
 {
@@ -90,6 +91,11 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 		#pragma warning disable 414
 		uint cn = 0;
 		#pragma warning restore
+		bool debugEnabled = false; 
+
+		static Dictionary <uint,FastCgiNetworkConnector> connectors = new Dictionary<uint, FastCgiNetworkConnector> (100);
+		static object connectorsLock = new object ();
+
 
 		public bool UseThreadPool {
 			get { return useThreadPool; }
@@ -101,7 +107,7 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 			set { keepAlive = value; }
 		}
 
-		public FastCgiListenerTransport Transport {
+		public IListenerTransport Transport {
 			get;
 			set;
 		}
@@ -119,8 +125,11 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 				Interlocked.Increment (ref threadName);
 				Thread.CurrentThread.Name = "t" + threadName.ToString ();
 			}
-			Interlocked.Increment (ref nConnect);
-			cn = (uint)nConnect;
+			cn = (uint)Interlocked.Increment (ref nConnect);
+
+			lock (connectorsLock) {
+				connectors.Add (cn, this);
+			}
 		}
 
 		public FastCgiNetworkConnector (Socket client) : this ()
@@ -128,10 +137,22 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 			this.client = client;
 		}
 
-		public FastCgiNetworkConnector (Socket client, ManagedFastCgiListener listener) : this (client)
+		public FastCgiNetworkConnector (Socket client, IWebListener listener) : this (client)
 		{
-			this.Transport = new FastCgiListenerTransport (){Listener=listener};
+			this.Transport = listener.Transport;
 		}
+
+		public static FastCgiNetworkConnector GetConnector(uint listenerTag)
+		{
+			FastCgiNetworkConnector connector = null;
+
+			lock (connectorsLock) {
+				connectors.TryGetValue (listenerTag,out connector);
+			}
+
+			return connector;
+		}
+
 
 		public void Receive ()
 		{
@@ -261,8 +282,10 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 
 		public void ProcessRecord (byte[] header, byte[] body)
 		{
-			Logger.Write (LogLevel.Debug, "cn={0} read header={1} reqId={2}", cn, header [1], (ushort)((header [2] << 8) + header [3]));
-			Transport.ProcessRecord (Tag, header, body);
+			if (debugEnabled) {
+				Logger.Write (LogLevel.Debug, "cn={0} read header={1} reqId={2}", cn, header [1], (ushort)((header [2] << 8) + header [3]));
+			}
+			Transport.Process (Tag, 0,  header, body);
 		}
 
 		private void StartSendPackets ()
@@ -283,7 +306,9 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 					}
 				}
 
-				Logger.Write (LogLevel.Debug, "cn={0} write header={1}, reqId={2}", cn, packet.Type, packet.RequestId);
+				if (debugEnabled) {
+					Logger.Write (LogLevel.Debug, "cn={0} write header={1}, reqId={2}", cn, packet.Type, packet.RequestId);
+				}
 
 				if (hasPacket) {
 					if (packet.Type == RecordType.EndRequest || packet.Type == RecordType.AbortRequest) {
@@ -435,6 +460,10 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 
 		protected void OnDisconnected ()
 		{
+			lock (connectorsLock) {
+				connectors.Remove (this.Tag);
+			}
+
 			if (!isDisconnected) {
 				isDisconnected = true;
 				EventHandler Disconnected = this.Disconnected;

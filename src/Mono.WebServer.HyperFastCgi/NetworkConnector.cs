@@ -116,8 +116,7 @@ namespace Mono.WebServer.HyperFastCgi
 				Interlocked.Increment (ref threadName);
 				Thread.CurrentThread.Name = "t" + threadName.ToString ();
 			}
-			Interlocked.Increment (ref nConnect);
-			cn = nConnect;
+			cn = Interlocked.Increment (ref nConnect);
 			if (cn % 10 == 0)
 				Logger.Write (LogLevel.All, "cn={0}", cn);
 		}

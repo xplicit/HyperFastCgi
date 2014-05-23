@@ -5,9 +5,11 @@ namespace Mono.WebServer.HyperFastCgi.Interfaces
 {
 	public interface IWebListener
 	{
-		IListenerTransport Transport { get; set;}
-
 		IApplicationServer Server { get; }
+
+		IListenerTransport Transport { get; }
+
+		Type AppHostTransportType { get; }
 
 		void Configure (IApplicationServer server, object config);
 

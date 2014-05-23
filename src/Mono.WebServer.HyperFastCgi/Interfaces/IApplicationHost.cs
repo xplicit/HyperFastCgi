@@ -16,7 +16,7 @@ namespace Mono.WebServer.HyperFastCgi.Interfaces
 		/// <param name="transportConfig">Transport config.</param>
 		/// <remarks>This method is called by Application Server from other AppDomain.
 		/// </remarks>
-		void Init (IApplicationServer appServer, Type transportType, object transportConfig);
+		void Configure (IApplicationServer appServer, IListenerTransport listenerTransport, Type transportType, object transportConfig);
 
 		/// <summary>
 		/// Creates the request.
@@ -41,9 +41,9 @@ namespace Mono.WebServer.HyperFastCgi.Interfaces
 
 		void ProcessRequest (IWebRequest request);
 
-		IListenerTransport GetAppHostTransport();
+		INativeTransport AppHostTransport { get; }
 
-		IListenerTransport GetListenerTransport (); 
+		IListenerTransport ListenerTransport { get; } 
 
 		IApplicationServer Server { get; }
 	}

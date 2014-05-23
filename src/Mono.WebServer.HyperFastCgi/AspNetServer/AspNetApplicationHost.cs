@@ -10,7 +10,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 		#region IApplicationHost implementation
 		string path;
 		string vpath;
-		IListenerTransport transport;
+		IListenerTransport listenerTransport;
 		INativeTransport t;
 		IApplicationServer appServer;
 
@@ -36,31 +36,16 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 			get { return AppDomain.CurrentDomain; }
 		}
 
-
-		public IListenerTransport GetAppHostTransport ()
-		{
-			if (transport == null) {
-				//TODO: create instance
-				transport = new FastCgiAppHostTransport(){AppHost=this};
-			}
-
-			return transport;
-		}
-
 		public IApplicationServer Server {
 			get {return appServer;}
 		}
 
-		private IListenerTransport listenerTransport;
-
-		public void SetListenerTransport(IListenerTransport transport)
-		{
-			listenerTransport = transport;
+		public IListenerTransport ListenerTransport {
+			get { return listenerTransport; }
 		}
 
-		public IListenerTransport GetListenerTransport()
-		{
-			return listenerTransport;
+		public INativeTransport AppHostTransport {
+			get { return t; }
 		}
 
 		public IWebRequest CreateRequest (ulong requestId, int requestNumber, object arg)
@@ -78,15 +63,15 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 			throw new NotImplementedException ();
 		}
 
-
 		#endregion
 		public AspNetApplicationHost()
 		{
 		}
 
-		public void Init(IApplicationServer server, Type transportType, object transportConfig)
+		public void Configure (IApplicationServer server, IListenerTransport listenerTransport, Type transportType, object transportConfig)
 		{
 			appServer = server;
+			this.listenerTransport = listenerTransport;
 			t = (INativeTransport) Activator.CreateInstance (transportType);
 			t.Configure (this, null);
 		}

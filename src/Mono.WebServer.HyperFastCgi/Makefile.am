@@ -79,6 +79,7 @@ FILES =  \
 	Config/WebAppConfig.cs \
 	FastCgiProtocol/BeginRequestBody.cs \
 	FastCgiProtocol/EndRequestBody.cs \
+	FastCgiProtocol/FcgiUtils.cs \
 	FastCgiProtocol/Record.cs \
 	FastCgiProtocol/UnknownTypeBody.cs \
 	Interfaces/IApplicationHost.cs \
@@ -108,9 +109,9 @@ FILES =  \
 	Sockets/UnixSocket.cs \
 	Strings.cs \
 	TestResponse.cs \
-	Transport/FastCgiAppHostTransport.cs \
 	Transport/FastCgiListenerTransport.cs \
 	Transport/FastCgiRecordQueue.cs \
+	Transport/ManagedAppHostTransport.cs \
 	Transport/NativeTransport.cs \
 	Transport/TransportRequest.cs \
 	Utils/HostUtils.cs \

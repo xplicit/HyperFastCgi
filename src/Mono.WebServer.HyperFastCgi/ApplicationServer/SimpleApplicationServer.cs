@@ -18,11 +18,12 @@ namespace Mono.WebServer.HyperFastCgi.ApplicationServers
 			return singleHost;
 		}
 
-		public IApplicationHost CreateApplicationHost(string vhost, int vport, string vpath, string path, Type transportType, object transportConfig)
+		public IApplicationHost CreateApplicationHost(string vhost, int vport, string vpath, string path, 
+			IListenerTransport listenerTransport, Type transportType, object transportConfig)
 		{
 			AspNetApplicationHostFactory factory = new AspNetApplicationHostFactory ();
 			IApplicationHost host = factory.CreateApplicationHost (vhost, vport, vpath, path);
-			host.Init (this, transportType, transportConfig);
+			host.Configure (this, listenerTransport, transportType, transportConfig);
 
 			singleHost = host;
 

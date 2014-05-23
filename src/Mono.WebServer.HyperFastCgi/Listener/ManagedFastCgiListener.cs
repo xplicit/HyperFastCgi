@@ -6,34 +6,46 @@ using System.Net;
 using Mono.WebServer.HyperFastCgi.Logging;
 using System.Collections.Generic;
 using Mono.WebServer.HyperFastCgi.Transport;
+using Mono.WebServer.HyperFastCgi.Config;
 
 namespace Mono.WebServer.HyperFastCgi.Listener
 {
+	[Config(typeof(ListenerConfig))]
 	public class ManagedFastCgiListener : IWebListener
 	{
 		bool keepAlive;
 		bool useThreadPool;
 		GeneralSocket listener;
 		AsyncCallback accept;
-		Dictionary <uint,FastCgiNetworkConnector> connectors = new Dictionary<uint, FastCgiNetworkConnector> ();
-		object connectorsLock = new object ();
 
 		IApplicationServer server;
+		IListenerTransport transport;
+		Type appHostTransportType;
 
 		#region IWebListener implementation
-
-		public IListenerTransport Transport {
-			get;
-			set;
-		}
 
 		public IApplicationServer Server {
 			get { return server; }
 		}
 
-		public void Configure(IApplicationServer server, object config)
+		public IListenerTransport Transport {
+			get { return transport; }
+		}
+
+		public Type AppHostTransportType {
+			get { return appHostTransportType; }
+		}
+
+		public void Configure(IApplicationServer server, object conf)
 		{
 			this.server = server;
+
+			ListenerConfig config = (ListenerConfig)conf;
+			Type transportType = Type.GetType (config.ListenerTransportType);
+			transport = (IListenerTransport)Activator.CreateInstance (transportType);
+			transport.Configure (this, null);
+
+			appHostTransportType = Type.GetType (config.AppHostTransportType);
 		}
 
 		public int Listen (AddressFamily family, string host, int port)
@@ -100,9 +112,6 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 				connector.KeepAlive = keepAlive;
 				connector.UseThreadPool = useThreadPool;
 				connector.Disconnected += OnDisconnect;
-				lock (connectorsLock) {
-					connectors.Add (connector.Tag, connector);
-				}
 
 				connector.Receive ();
 			}
@@ -111,18 +120,6 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 		public ManagedFastCgiListener ()
 		{
 			accept = new AsyncCallback (acceptCallback);
-			Transport = new FastCgiListenerTransport () {Listener=this};
-		}
-
-		public FastCgiNetworkConnector GetConnector(uint listenerTag)
-		{
-			FastCgiNetworkConnector connector = null;
-
-			lock (connectorsLock) {
-				connectors.TryGetValue (listenerTag,out connector);
-			}
-
-			return connector;
 		}
 
 		protected void OnDisconnect (object sender, EventArgs args)
@@ -130,9 +127,6 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 			FastCgiNetworkConnector connector = sender as FastCgiNetworkConnector;
 
 			connector.Dispose ();
-			lock (connectorsLock) {
-				connectors.Remove (connector.Tag);
-			}
 		}
 
 	}

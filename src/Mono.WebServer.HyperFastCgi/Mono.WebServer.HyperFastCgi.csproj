@@ -9,7 +9,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Mono.WebServer.HyperFastCgi</RootNamespace>
     <AssemblyName>Mono.WebServer.HyperFastCgi</AssemblyName>
-    <ReleaseVersion>0.3</ReleaseVersion>
+    <ReleaseVersion>0.4</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -25,7 +25,7 @@
         <Variable name="MONO_PATH" value="." />
       </EnvironmentVariables>
     </EnvironmentVariables>
-    <Commandlineparameters>/configfile=../../../../samples/server.config  /applications=ssbench3:81:/:/var/www/nginx-mono /socket=tcp:127.0.0.1:9000 /loglevels=All /printlog /addtrailingslash=true</Commandlineparameters>
+    <Commandlineparameters>/configfile=../../../../samples/managed.config  /applications=ssbench3:81:/:/var/www/nginx-mono /socket=tcp:127.0.0.1:9000 /loglevels=All /printlog /addtrailingslash=true</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -88,7 +88,6 @@
     <Compile Include="Interfaces\IApplicationHostTransport.cs" />
     <Compile Include="Transport\TransportRequest.cs" />
     <Compile Include="Transport\FastCgiListenerTransport.cs" />
-    <Compile Include="Transport\FastCgiAppHostTransport.cs" />
     <Compile Include="AspNetServer\MonoWorkerRequest.cs" />
     <Compile Include="Interfaces\IApplicationServer.cs" />
     <Compile Include="ApplicationServer\SimpleApplicationServer.cs" />
@@ -104,6 +103,8 @@
     <Compile Include="Config\AppHostConfig.cs" />
     <Compile Include="Config\ConfigAttribute.cs" />
     <Compile Include="Config\ConfigInfo.cs" />
+    <Compile Include="FastCgiProtocol\FcgiUtils.cs" />
+    <Compile Include="Transport\ManagedAppHostTransport.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -368,7 +368,7 @@ namespace Mono.WebServer.HyperFastCgi
 
 			foreach (WebAppConfig app in webapps) {
 				srv.CreateApplicationHost (app.VHost, app.VPort, app.VPath, app.RealPath,
-					typeof(NativeTransport), null);
+					listener.Transport, listener.AppHostTransportType, null);
 			}
 			NativeTransport.RegisterTransport (typeof(NativeTransport));
 			listener.Listen (sockType, address, port);
