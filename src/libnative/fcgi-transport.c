@@ -279,8 +279,8 @@ parse_params(Request *req, FCGI_Header *header, guint8 *data)
                 i++;
             }
             //call add header function
-//            if (host)
-//                add_header(host, req->hash, req->request_num, name, nlen, value, vlen);
+            if (host)
+                add_header(host, req->hash, req->request_num, name, nlen, value, vlen);
             //TODO: save to temp array
         }
         else { /* server variable */
