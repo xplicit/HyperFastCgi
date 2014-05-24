@@ -99,16 +99,8 @@ namespace Mono.WebServer.HyperFastCgi
 		private static ushort port=0;
 		private static bool keepAlive; 
 		private static bool useThreadPool;
-		delegate int HideFromJit(string[] argc);    
-		private static HideFromJit d=MainFunc;
 
 		public static int Main (string[] args)
-		{
-			NativeTransport.RegisterIcall ();
-			return d (args);
-		}
-
-		public static int MainFunc(string[] args)
 		{
 			// Load the configuration file stored in the
 			// executable's resources.
@@ -370,7 +362,6 @@ namespace Mono.WebServer.HyperFastCgi
 				srv.CreateApplicationHost (app.VHost, app.VPort, app.VPath, app.RealPath,
 					listener.Transport, listener.AppHostTransportType, null);
 			}
-			NativeTransport.RegisterTransport (typeof(NativeTransport));
 			listener.Listen (sockType, address, port);
 
 			configmanager = null;

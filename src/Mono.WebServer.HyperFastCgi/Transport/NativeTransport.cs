@@ -127,9 +127,13 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 		byte[] header=Encoding.ASCII.GetBytes(TestResponse.Header);
 		byte[] content=Encoding.ASCII.GetBytes(TestResponse.Response);
 
-		public NativeTransport ()
-		{
+		delegate void HideFromJit(Type t);    
+		private static HideFromJit d=RegisterTransport;
 
+		static NativeTransport ()
+		{
+			NativeTransport.RegisterIcall ();
+			d (typeof(NativeTransport));
 		}
 
 	}
