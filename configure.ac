@@ -4,8 +4,9 @@ AC_PREREQ([2.54])
 AC_INIT([HyperFastCgi], [0.4])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_MACRO_DIR([build/m4])
-AM_INIT_AUTOMAKE([foreign])
+AM_INIT_AUTOMAKE([silent-rules foreign])
 AM_MAINTAINER_MODE
+AM_SILENT_RULES([yes])
 
 AC_SUBST([ACLOCAL_AMFLAGS], ["-I build/m4/shamrock -I build/m4/shave \${ACLOCAL_FLAGS}"])
 
@@ -115,7 +116,7 @@ AM_COND_IF([NET_4_0],[AC_CONFIG_FILES([src/Mono.WebServer.HyperFastCgi/scripts/m
 AM_COND_IF([NET_2_0],[AC_CONFIG_FILES([src/Mono.WebServer.HyperFastCgi/scripts/mono-server-hyperfastcgi2])])
 
 
-SHAVE_INIT([build/m4/shave], [enable])
+#SHAVE_INIT([build/m4/shave], [enable])
 AC_OUTPUT
 
 TARGET_FRAMEWORKS=""
