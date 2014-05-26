@@ -67,7 +67,6 @@ FILES =  \
 	AspNetServer/AspNetApplicationHost.cs \
 	AspNetServer/AspNetApplicationHostFactory.cs \
 	AspNetServer/AspNetNativeWebRequest.cs \
-	AspNetServer/AspNetWebRequest.cs \
 	AspNetServer/MonoWorkerRequest.cs \
 	Config/AppHostConfig.cs \
 	Config/AppServerConfig.cs \
@@ -108,7 +107,6 @@ FILES =  \
 	Transport/CombinedAppHostTransport.cs \
 	Transport/CombinedListenerTransport.cs \
 	Transport/FastCgiListenerTransport.cs \
-	Transport/FastCgiRecordQueue.cs \
 	Transport/ManagedAppHostTransport.cs \
 	Transport/NativeTransport.cs \
 	Transport/TransportRequest.cs \

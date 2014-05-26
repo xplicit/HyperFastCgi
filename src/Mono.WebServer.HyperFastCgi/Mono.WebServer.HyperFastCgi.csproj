@@ -67,7 +67,6 @@
     <Compile Include="Interfaces\IWebListener.cs" />
     <Compile Include="Listener\ManagedFastCgiListener.cs" />
     <Compile Include="Listener\FastCgiNetworkConnector.cs" />
-    <Compile Include="AspNetServer\AspNetWebRequest.cs" />
     <Compile Include="Interfaces\IWebResponse.cs" />
     <Compile Include="Interfaces\IListenerTransport.cs" />
     <Compile Include="Interfaces\IApplicationHostTransport.cs" />
@@ -110,11 +109,9 @@
     <Folder Include="WebServer\Events\" />
     <Folder Include="Interfaces\" />
     <Folder Include="AspNetServer\" />
-    <Folder Include="Utils\" />
     <Folder Include="Transport\" />
     <Folder Include="Listener\" />
     <Folder Include="ApplicationServer\" />
-    <Folder Include="Requests\" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
