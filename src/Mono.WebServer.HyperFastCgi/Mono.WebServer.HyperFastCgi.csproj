@@ -25,7 +25,7 @@
         <Variable name="MONO_PATH" value="." />
       </EnvironmentVariables>
     </EnvironmentVariables>
-    <Commandlineparameters>/configfile=../../../../samples/server.config  /applications=ssbench3:81:/:/var/www/nginx-mono /socket=tcp:127.0.0.1:9000 /loglevels=All /printlog /addtrailingslash=true</Commandlineparameters>
+    <Commandlineparameters>/config=../../../../samples/server.config  /applications=ssbench3:81:/:/var/www/nginx-mono /socket=tcp:127.0.0.1:9000 /loglevels=All /printlog /addtrailingslash=true</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>

@@ -122,14 +122,21 @@ namespace Mono.WebServer.HyperFastCgi
 				ShowVersion ();
 				return 0;
 			}
-			string config_file;
+
+			string config = (string) configmanager ["config"];
+
+			if (config == null) {
+				Console.WriteLine ("You must pass /config=<filename> option. See 'help' for more info");
+				return 1;
+			}
+
 
 			try {
-				config_file = (string)
+				string config_file = (string)
 				                     configmanager ["configfile"];
-//				if (config_file != null)
-//					configmanager.LoadXmlConfig (
-//						config_file);
+				if (config_file != null)
+					configmanager.LoadXmlConfig (
+						config_file);
 			} catch (ApplicationException e) {
 				Console.WriteLine (e.Message);
 				return 1;
@@ -349,7 +356,7 @@ namespace Mono.WebServer.HyperFastCgi
 
 			SimpleApplicationServer srv = new SimpleApplicationServer (root_dir);
 
-			List<ConfigInfo> listenerConfigs = ConfigUtils.GetConfigsFromFile (config_file, "listener", typeof(ListenerConfig));
+			List<ConfigInfo> listenerConfigs = ConfigUtils.GetConfigsFromFile (config, "listener", typeof(ListenerConfig));
 			if (listenerConfigs.Count != 1) {
 				Console.WriteLine ("Only one listener are supported");
 				return 1;

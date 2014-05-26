@@ -39,6 +39,12 @@
 		</Description>
 	</Setting>
 	
+	<Setting Name="config" Type="File" ConsoleVisible="True">
+		<Description>
+			<para>Specifies a file containing server configuration 
+			options. Examples of configuration you can find in ./samples directory</para>
+		</Description>
+	</Setting>
 	<!-- SOCKET SETTINGS -->
 	
 	<Setting Name="socket" Type="String" AppSetting="MonoSocketType"
