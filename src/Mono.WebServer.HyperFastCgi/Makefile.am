@@ -71,11 +71,13 @@ FILES =  \
 	AspNetServer/AspNetWebRequest.cs \
 	AspNetServer/MonoWorkerRequest.cs \
 	Config/AppHostConfig.cs \
+	Config/AppServerConfig.cs \
 	Config/ConfigAttribute.cs \
 	Config/ConfigInfo.cs \
 	Config/ConfigurationManager.cs \
 	Config/ConfigUtils.cs \
 	Config/ListenerConfig.cs \
+	Config/TransportConfig.cs \
 	Config/WebAppConfig.cs \
 	FastCgiProtocol/BeginRequestBody.cs \
 	FastCgiProtocol/EndRequestBody.cs \
@@ -112,10 +114,10 @@ FILES =  \
 	Transport/CombinedAppHostTransport.cs \
 	Transport/CombinedListenerTransport.cs \
 	Transport/FastCgiListenerTransport.cs \
+	Transport/FastCgiRecordQueue.cs \
 	Transport/ManagedAppHostTransport.cs \
 	Transport/NativeTransport.cs \
 	Transport/TransportRequest.cs \
-	Utils/HostUtils.cs \
 	WebServer/ApplicationServer.cs \
 	WebServer/BaseApplicationHost.cs \
 	WebServer/EndOfRequestHandler.cs \

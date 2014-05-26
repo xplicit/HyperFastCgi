@@ -76,7 +76,6 @@
     <Compile Include="Interfaces\IWebRequest.cs" />
     <Compile Include="Interfaces\IApplicationHostFactory.cs" />
     <Compile Include="AspNetServer\AspNetApplicationHostFactory.cs" />
-    <Compile Include="Utils\HostUtils.cs" />
     <Compile Include="AspNetServer\AspNetApplicationHost.cs" />
     <Compile Include="WebServer\IApplicationHost1.cs" />
     <Compile Include="Interfaces\IWebListener.cs" />
@@ -106,6 +105,8 @@
     <Compile Include="Transport\ManagedAppHostTransport.cs" />
     <Compile Include="Transport\CombinedAppHostTransport.cs" />
     <Compile Include="Transport\CombinedListenerTransport.cs" />
+    <Compile Include="Config\TransportConfig.cs" />
+    <Compile Include="Config\AppServerConfig.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

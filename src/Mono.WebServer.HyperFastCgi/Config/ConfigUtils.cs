@@ -97,19 +97,11 @@ namespace Mono.WebServer.HyperFastCgi.Config
 			return applist;
 		}
 
-		public static List<ConfigInfo> GetConfigsFromFile (string filename, string xmlnode, Type defaultType)
+		public static List<ConfigInfo> GetConfigsFromElement(XmlNode root, string xmlnode, Type defaultType)
 		{
 			List<ConfigInfo> configs = new List<ConfigInfo> ();
-			XmlDocument doc = new XmlDocument();
 
-			try {
-				doc.Load(filename);
-			} catch {
-				Console.WriteLine ("Error loading '{0}'", filename);
-				throw;
-			}
-
-			foreach (XmlElement node in doc.SelectNodes("//"+xmlnode)) {
+			foreach (XmlElement node in root.SelectNodes(xmlnode)) {
 				ConfigInfo configInfo = null;
 				XmlAttribute attrType = node.Attributes ["type"];
 
@@ -133,15 +125,42 @@ namespace Mono.WebServer.HyperFastCgi.Config
 					};
 				}
 
+				//special thing for 'listener' node
+				if (node.Name == "listener") {
+					List<ConfigInfo> transports = GetConfigsFromElement (node, "listener-transport", typeof(TransportConfig));
+					if (transports != null && transports.Count > 0) {
+						configInfo.ListenerTransport = transports [0];
+					}
+					transports = GetConfigsFromElement (node, "apphost-transport", typeof(TransportConfig));
+					if (transports != null && transports.Count > 0) {
+						configInfo.AppHostTransport = transports [0];
+					}
+				}
+
 				configs.Add (configInfo);
 			}
 
 			return configs;
+
+		}
+
+		public static List<ConfigInfo> GetConfigsFromFile (string filename, string xmlnode, Type defaultType)
+		{
+			XmlDocument doc = new XmlDocument();
+
+			try {
+				doc.Load(filename);
+			} catch {
+				Console.WriteLine ("Error loading '{0}'", filename);
+				throw;
+			}
+
+			return GetConfigsFromElement(doc.SelectSingleNode("/"), xmlnode, defaultType);
 		}
 
 		static object GetConfigFromElement(Type configType, XmlElement el)
 		{
-			XmlSerializer ser = new XmlSerializer (configType);
+			XmlSerializer ser = new XmlSerializer (configType, new XmlRootAttribute(el.Name));
 
 			using (XmlReader rdr = new XmlNodeReader (el)) {
 				return ser.Deserialize (rdr);

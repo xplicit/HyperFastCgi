@@ -358,7 +358,11 @@ namespace Mono.WebServer.HyperFastCgi
 
 			List<ConfigInfo> listenerConfigs = ConfigUtils.GetConfigsFromFile (config, "listener", typeof(ListenerConfig));
 			if (listenerConfigs.Count != 1) {
-				Console.WriteLine ("Only one listener are supported");
+				if (listenerConfigs.Count == 0) {
+					Console.WriteLine ("Can't find <listener> node in file '{0}'", config); 
+				} else {
+					Console.WriteLine ("Only one listener are supported currently. Please remove redudant <listener> node from file '{0}'", config);
+				}
 				return 1;
 			}
 
