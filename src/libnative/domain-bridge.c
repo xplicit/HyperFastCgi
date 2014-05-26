@@ -44,7 +44,8 @@ domain_bridge_register_host (MonoObject* host, MonoString *virtual_path, MonoStr
     app.host = mono_gchandle_get_target(mono_gchandle_new(host,TRUE));
     app.virtual_path = virtual_path;
     app.path = path;
-    INFO_OUT("registering host %ls %p", mono_string_chars(virtual_path), app.host);
+    INFO_OUT("registering host %s %s %p\n", mono_string_to_utf8(virtual_path), mono_string_to_utf8(path), app.host);
+
 }
 
 HostInfo *
