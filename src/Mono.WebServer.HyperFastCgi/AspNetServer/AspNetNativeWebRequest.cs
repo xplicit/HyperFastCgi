@@ -39,7 +39,6 @@ using System.IO;
 using Mono.WebServer.HyperFastCgi.FastCgiProtocol;
 using Mono.WebServer.HyperFastCgi.Interfaces;
 using Mono.WebServer.HyperFastCgi.Transport;
-using Mono.WebServer.HyperFastCgi.Requests;
 using System.Web;
 
 namespace Mono.WebServer.HyperFastCgi.AspNetServer

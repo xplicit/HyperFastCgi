@@ -1,7 +1,6 @@
 ﻿using System;
 using Mono.WebServer.HyperFastCgi.Interfaces;
 using System.Collections.Generic;
-using Mono.WebServer.HyperFastCgi.Requests;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using Mono.WebServer.HyperFastCgi.AspNetServer;

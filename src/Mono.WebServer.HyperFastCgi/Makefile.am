@@ -99,7 +99,6 @@ FILES =  \
 	Logging/LogLevel.cs \
 	Main.cs \
 	Properties/AssemblyInfo.cs \
-	Requests/NativeRequest.cs \
 	Sockets/GeneralSocket.cs \
 	Sockets/GeneralSocketType.cs \
 	Sockets/TcpSocket.cs \
