@@ -41,15 +41,9 @@
     <Commandlineparameters>/applications=ssbench3:/:/var/www/ssbench3 /socket=tcp:127.0.0.1:9000 /minthreads=20,8 /loglevels=Debug</Commandlineparameters>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Strings.cs" />
-    <Compile Include="Server.cs" />
-    <Compile Include="NetworkConnector.cs" />
-    <Compile Include="Request.cs" />
     <Compile Include="TestResponse.cs" />
-    <Compile Include="ApplicationHost.cs" />
-    <Compile Include="WorkerRequest.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="FastCgiProtocol\BeginRequestBody.cs" />
     <Compile Include="FastCgiProtocol\EndRequestBody.cs" />
@@ -62,22 +56,14 @@
     <Compile Include="Logging\Logger.cs" />
     <Compile Include="Logging\LogLevel.cs" />
     <Compile Include="Sockets\GeneralSocketType.cs" />
-    <Compile Include="WebServer\ApplicationServer.cs" />
-    <Compile Include="WebServer\BaseApplicationHost.cs" />
-    <Compile Include="WebServer\EndOfRequestHandler.cs" />
     <Compile Include="WebServer\HttpErrors.cs" />
-    <Compile Include="WebServer\MonoWorkerRequest.cs" />
     <Compile Include="WebServer\VPathToHost.cs" />
-    <Compile Include="WebServer\WebTrace.cs" />
-    <Compile Include="WebServer\Events\MapPathEventArgs.cs" />
-    <Compile Include="WebServer\Events\MapPathEventHandler.cs" />
     <Compile Include="WebServer\Events\DomainReloadEventArgs.cs" />
     <Compile Include="Interfaces\IApplicationHost.cs" />
     <Compile Include="Interfaces\IWebRequest.cs" />
     <Compile Include="Interfaces\IApplicationHostFactory.cs" />
     <Compile Include="AspNetServer\AspNetApplicationHostFactory.cs" />
     <Compile Include="AspNetServer\AspNetApplicationHost.cs" />
-    <Compile Include="WebServer\IApplicationHost1.cs" />
     <Compile Include="Interfaces\IWebListener.cs" />
     <Compile Include="Listener\ManagedFastCgiListener.cs" />
     <Compile Include="Listener\FastCgiNetworkConnector.cs" />
@@ -107,6 +93,8 @@
     <Compile Include="Transport\CombinedListenerTransport.cs" />
     <Compile Include="Config\TransportConfig.cs" />
     <Compile Include="Config\AppServerConfig.cs" />
+    <Compile Include="WebServer\Events\MapPathEventHandler.cs" />
+    <Compile Include="WebServer\Events\MapPathEventArgs.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

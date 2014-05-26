@@ -63,7 +63,6 @@ RESGEN=resgen2
 all: $(ASSEMBLY2) $(ASSEMBLY4) $(PROGRAMFILES) $(BINARIES) 
 
 FILES =  \
-	ApplicationHost.cs \
 	ApplicationServer/SimpleApplicationServer.cs \
 	AspNetServer/AspNetApplicationHost.cs \
 	AspNetServer/AspNetApplicationHostFactory.cs \
@@ -99,12 +98,8 @@ FILES =  \
 	Logging/Logger.cs \
 	Logging/LogLevel.cs \
 	Main.cs \
-	NetworkConnector.cs \
-	Program.cs \
 	Properties/AssemblyInfo.cs \
-	Request.cs \
 	Requests/NativeRequest.cs \
-	Server.cs \
 	Sockets/GeneralSocket.cs \
 	Sockets/GeneralSocketType.cs \
 	Sockets/TcpSocket.cs \
@@ -118,18 +113,11 @@ FILES =  \
 	Transport/ManagedAppHostTransport.cs \
 	Transport/NativeTransport.cs \
 	Transport/TransportRequest.cs \
-	WebServer/ApplicationServer.cs \
-	WebServer/BaseApplicationHost.cs \
-	WebServer/EndOfRequestHandler.cs \
 	WebServer/Events/DomainReloadEventArgs.cs \
 	WebServer/Events/MapPathEventArgs.cs \
 	WebServer/Events/MapPathEventHandler.cs \
 	WebServer/HttpErrors.cs \
-	WebServer/IApplicationHost1.cs \
-	WebServer/MonoWorkerRequest.cs \
-	WebServer/VPathToHost.cs \
-	WebServer/WebTrace.cs \
-	WorkerRequest.cs 
+	WebServer/VPathToHost.cs 
 
 DATA_FILES = 
 

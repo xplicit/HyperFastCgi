@@ -49,7 +49,6 @@ namespace Mono.WebServer
 		public readonly string vpath;
 		public string realPath;
 		public readonly bool haveWildcard;
-		public IApplicationHost1 AppHost;
 
 		public VPathToHost (string vhost, int vport, string vpath, string realPath)
 		{
@@ -61,31 +60,11 @@ namespace Mono.WebServer
 					"vpath");
 
 			this.realPath = realPath;
-			this.AppHost = null;
 			if (vhost != null && this.vhost.Length != 0 && this.vhost [0] == '*') {
 				haveWildcard = true;
 				if (this.vhost.Length > 2 && this.vhost [1] == '.')
 					this.vhost = this.vhost.Substring (2);
 			}
-		}
-
-		public bool TryClearHost (IApplicationHost1 host)
-		{
-			if (this.AppHost == host) {
-				this.AppHost = null;
-				return true;
-			}
-
-			return false;
-		}
-
-		public void UnloadHost ()
-		{
-			Console.WriteLine ("AppHost unloaded");
-			if (AppHost != null)
-				AppHost.Unload ();
-
-			AppHost = null;
 		}
 
 		public bool Redirect (string path, out string redirect)
@@ -139,16 +118,16 @@ namespace Mono.WebServer
 			return (vpath.StartsWith (this.vpath));
 		}
 
-		public void CreateHost (ApplicationServer server, Type applicationHostType)
-		{
-			string v = vpath;
-			if (v != "/" && v.EndsWith ("/")) {
-				v = v.Substring (0, v.Length - 1);
-			}
-
-			AppHost = ApplicationHost.CreateApplicationHost (applicationHostType, v, realPath) as IApplicationHost1;
-			AppHost.Server = server;
-
-		}
+//		public void CreateHost (ApplicationServer server, Type applicationHostType)
+//		{
+//			string v = vpath;
+//			if (v != "/" && v.EndsWith ("/")) {
+//				v = v.Substring (0, v.Length - 1);
+//			}
+//
+//			AppHost = ApplicationHost.CreateApplicationHost (applicationHostType, v, realPath) as IApplicationHost1;
+//			AppHost.Server = server;
+//
+//		}
 	}
 }

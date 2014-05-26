@@ -91,7 +91,6 @@ namespace Mono.WebServer.HyperFastCgi
 			configmanager.PrintHelp ();
 		}
 
-		private static ApplicationServer appserver;
 		private static ConfigurationManager configmanager;
 
 		private static AddressFamily sockType;
@@ -105,7 +104,7 @@ namespace Mono.WebServer.HyperFastCgi
 			// Load the configuration file stored in the
 			// executable's resources.
 			configmanager = new ConfigurationManager (
-				typeof(Server).Assembly,
+				typeof(MainClass).Assembly,
 				"ConfigurationManager.xml");
 
 			configmanager.LoadCommandLineArgs (args);
@@ -269,9 +268,9 @@ namespace Mono.WebServer.HyperFastCgi
 			root_dir = Environment.CurrentDirectory;
 			bool auto_map = false; //(bool) configmanager ["automappaths"];
 
-			appserver = new ApplicationServer (typeof(ApplicationHost), root_dir);
-			appserver.Verbose = (bool)configmanager ["verbose"];
-			appserver.DomainReloadEvent +=DomainReloadEventHandler;
+//			appserver = new ApplicationServer (typeof(ApplicationHost), root_dir);
+//			appserver.Verbose = (bool)configmanager ["verbose"];
+//			appserver.DomainReloadEvent +=DomainReloadEventHandler;
 
 			string applications = (string)
 			                      configmanager ["applications"];
