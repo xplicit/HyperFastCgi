@@ -3,12 +3,7 @@
 
 #include <glib.h>
 #include <mono/metadata/object.h>
-
-typedef struct {
-    MonoObject *host;
-    MonoString *virtual_path;
-    MonoString *path;
-} HostInfo;
+#include "mono-bridge-def.h"
 
 void
 register_transport (MonoReflectionType *transport_type);

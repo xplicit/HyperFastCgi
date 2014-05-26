@@ -134,7 +134,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 			//			}
 		}
 
-		public void AddServerVariable(string name, string value)
+		public new void AddServerVariable(string name, string value)
 		{
 			parameter_table.Add (name, value);
 		}

@@ -2,12 +2,12 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="libnative" />
+		<Option title="libhfc-native" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="../Mono.WebServer.HyperFastCgi/bin/Debug/libnative" prefix_auto="1" extension_auto="1" />
+				<Option output="../Mono.WebServer.HyperFastCgi/bin/Debug/libhfc-native" prefix_auto="1" extension_auto="1" />
 				<Option object_output="../Mono.WebServer.HyperFastCgi/obj/Debug/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
@@ -48,6 +48,9 @@
 			<Add directory="/usr/include/glib-2.0" />
 			<Add directory="/usr/lib/i386-linux-gnu/glib-2.0/include" />
 		</Compiler>
+		<Unit filename="domain-bridge.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="fcgi-transport.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -60,9 +63,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="libev.h" />
-		<Unit filename="main.c">
+		<Unit filename="mono-bridge-def.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="mono-bridge-def.h" />
 		<Unit filename="mono-bridge.c">
 			<Option compilerVar="CC" />
 		</Unit>

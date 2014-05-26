@@ -109,8 +109,9 @@ FILES =  \
 	Sockets/UnixSocket.cs \
 	Strings.cs \
 	TestResponse.cs \
+	Transport/CombinedAppHostTransport.cs \
+	Transport/CombinedListenerTransport.cs \
 	Transport/FastCgiListenerTransport.cs \
-	Transport/FastCgiRecordQueue.cs \
 	Transport/ManagedAppHostTransport.cs \
 	Transport/NativeTransport.cs \
 	Transport/TransportRequest.cs \

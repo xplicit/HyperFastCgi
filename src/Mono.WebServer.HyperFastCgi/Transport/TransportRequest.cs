@@ -18,6 +18,8 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 		public bool KeepAlive;
 
 
+		//use 'host' for unmanaged transport
+		public IntPtr Host;
 		public INativeTransport Transport;
 
 		public TransportRequest(ushort requestId, byte[] header, byte[] body)

@@ -15,4 +15,7 @@ sources = \
 	socket-helper.h		\
 	socket-helper.c		\
 	mono-bridge.h		\
-	mono-bridge.c
+	mono-bridge.c		\
+	mono-bridge-def.h	\
+	mono-bridge-def.c	\
+	domain-bridge.c
