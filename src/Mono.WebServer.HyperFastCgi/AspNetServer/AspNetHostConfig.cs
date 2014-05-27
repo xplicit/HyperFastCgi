@@ -1,21 +1,22 @@
 ﻿using System;
 using System.Xml.Serialization;
-using Mono.WebServer.HyperFastCgi.Logging;
+using Mono.WebServer.HyperFastCgi.Configuration;
 
-namespace Mono.WebServer.HyperFastCgi.Config
+namespace Mono.WebServer.HyperFastCgi.AspNetServer
 {
+	[Serializable]
 	[XmlRoot("apphost")]
-	public class AppHostConfig
+	public class AspNetHostConfig
 	{
 		[XmlAttribute("type")]
 		public string Type { get; set;}
 
-		[XmlElement("loglevel")]
-		public LogLevel LogLevel { get; set;}
+		[XmlElement("log")]
+		public LogConfig Log { get; set;}
 
 		[XmlElement("add-trailing-slash")]
 		public bool AddTrailingSlash { get; set;} 
-
 	}
+
 }
 

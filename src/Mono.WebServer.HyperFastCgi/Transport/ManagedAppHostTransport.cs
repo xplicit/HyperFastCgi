@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Mono.WebServer.HyperFastCgi.Transport
 {
-	public class ManagedAppHostTransport : MarshalByRefObject, INativeTransport
+	public class ManagedAppHostTransport : MarshalByRefObject, IApplicationHostTransport
 	{
 		Dictionary<ulong, IWebRequest> requests = new Dictionary<ulong, IWebRequest> ();
 		object requestsLock = new object ();

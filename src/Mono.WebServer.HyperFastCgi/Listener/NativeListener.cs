@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using Mono.WebServer.HyperFastCgi.Interfaces;
-using Mono.WebServer.HyperFastCgi.Config;
+using Mono.WebServer.HyperFastCgi.Configuration;
 using Mono.WebServer.HyperFastCgi.Transport;
 
 namespace Mono.WebServer.HyperFastCgi.Listener

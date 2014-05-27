@@ -40,6 +40,7 @@ using Mono.WebServer.HyperFastCgi.FastCgiProtocol;
 using Mono.WebServer.HyperFastCgi.Interfaces;
 using Mono.WebServer.HyperFastCgi.Transport;
 using System.Web;
+using Mono.WebServer.HyperFastCgi.Logging;
 
 namespace Mono.WebServer.HyperFastCgi.AspNetServer
 {
@@ -62,7 +63,7 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 		string uri_path = null;
 		private bool addTrailingSlash;
 		//		string path_info;
-		INativeTransport transport;
+		IApplicationHostTransport transport;
 
 		//CGI requests
 		private ulong requestId;
@@ -116,14 +117,16 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 			get { return this;}
 		}
 
-		public AspNetNativeWebRequest (ulong requestId, int requestNumber, IApplicationHost appHost, INativeTransport transport) : base (appHost)
+		public AspNetNativeWebRequest (ulong requestId, int requestNumber, IApplicationHost appHost, IApplicationHostTransport transport,
+			bool addTrailingSlash) : base (appHost)
 		{
 			this.requestId = requestId;
 			this.requestNumber = requestNumber;
 			knownHeaders = new string[HttpWorkerRequest.RequestHeaderMaximum];
 
 			this.transport = transport;
-			//			addTrailingSlash = appHost.AddTrailingSlash;
+			this.addTrailingSlash = addTrailingSlash;
+			Logger.Write (LogLevel.Debug, "Hello from request!");
 			//			try {
 			//				//TODO: cache paths
 			//				Paths.GetPathsFromUri (appHost, GetHttpVerbName (), GetFilePath (), out file_path, out path_info);

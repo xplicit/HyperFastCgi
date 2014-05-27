@@ -50,7 +50,7 @@ using Mono.WebServer.HyperFastCgi.Transport;
 using Mono.WebServer.HyperFastCgi.Listener;
 using System.Net.Sockets;
 using System.Collections.Generic;
-using Mono.WebServer.HyperFastCgi.Config;
+using Mono.WebServer.HyperFastCgi.Configuration;
 using Mono.WebServer.HyperFastCgi.Interfaces;
 
 namespace Mono.WebServer.HyperFastCgi
@@ -364,13 +364,21 @@ namespace Mono.WebServer.HyperFastCgi
 				}
 				return 1;
 			}
+			List<ConfigInfo> hostConfigs = ConfigUtils.GetConfigsFromFile (config, "apphost", typeof(AppHostConfig));
+			if (hostConfigs.Count == 0) {
+				Console.WriteLine ("Can't find <apphost> node in file '{0}'", config);
+				return 1;
+			}
 
 			IWebListener listener = (IWebListener)Activator.CreateInstance(listenerConfigs[0].Type);
 			listener.Configure (srv, listenerConfigs[0].Config);
 
 			foreach (WebAppConfig app in webapps) {
-				srv.CreateApplicationHost (app.VHost, app.VPort, app.VPath, app.RealPath,
-					listener.Transport, listener.AppHostTransportType, null);
+				srv.CreateApplicationHost (
+					hostConfigs[0].Type, hostConfigs[0].Config,
+					app.VHost, app.VPort, app.VPath, app.RealPath, 
+					listener.Transport, listener.AppHostTransportType, 
+					listenerConfigs[0].AppHostTransport != null ? listenerConfigs[0].AppHostTransport.Config: null);
 			}
 			listener.Listen (sockType, address, port);
 

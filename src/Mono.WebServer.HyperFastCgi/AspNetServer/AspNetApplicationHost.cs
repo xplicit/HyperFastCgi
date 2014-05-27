@@ -2,16 +2,18 @@
 using Mono.WebServer.HyperFastCgi.Interfaces;
 using Mono.WebServer.HyperFastCgi.Transport;
 using Mono.WebServer.HyperFastCgi.Logging;
+using Mono.WebServer.HyperFastCgi.Configuration;
 
 namespace Mono.WebServer.HyperFastCgi.AspNetServer
 {
+	[Config(typeof(AspNetHostConfig))]
 	public class AspNetApplicationHost : MarshalByRefObject, IApplicationHost
 	{
 		#region IApplicationHost implementation
 		string path;
 		string vpath;
 		IListenerTransport listenerTransport;
-		INativeTransport t;
+		IApplicationHostTransport t;
 		IApplicationServer appServer;
 
 		public string Path {
@@ -44,13 +46,13 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 			get { return listenerTransport; }
 		}
 
-		public INativeTransport AppHostTransport {
+		public IApplicationHostTransport AppHostTransport {
 			get { return t; }
 		}
 
 		public IWebRequest CreateRequest (ulong requestId, int requestNumber, object arg)
 		{
-			return new AspNetNativeWebRequest (requestId, requestNumber, this, t);
+			return new AspNetNativeWebRequest (requestId, requestNumber, this, t, AddTrailingSlash);
 		}
 
 		public IWebResponse GetResponse (IWebRequest request, object arg)
@@ -63,18 +65,25 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 			throw new NotImplementedException ();
 		}
 
-		#endregion
-		public AspNetApplicationHost()
+		public void Configure (IApplicationServer server, 
+			IListenerTransport listenerTransport, 
+			Type appHostTransportType, object transportConfig,
+			object appHostConfig)
 		{
-		}
+			AspNetHostConfig config = appHostConfig as AspNetHostConfig;
 
-		public void Configure (IApplicationServer server, IListenerTransport listenerTransport, Type transportType, object transportConfig)
-		{
+			if (config != null) {
+				LogLevel = config.Log.Level;
+				LogToConsole = config.Log.WriteToConsole;
+				AddTrailingSlash = config.AddTrailingSlash;
+			}
+
 			appServer = server;
 			this.listenerTransport = listenerTransport;
-			t = (INativeTransport) Activator.CreateInstance (transportType);
-			t.Configure (this, null);
+			t = (IApplicationHostTransport) Activator.CreateInstance (appHostTransportType);
+			t.Configure (this, transportConfig);
 		}
+		#endregion
 
 		public LogLevel LogLevel {
 			get { return Logger.Level; }
@@ -85,6 +94,8 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 			get { return Logger.WriteToConsole; }
 			set { Logger.WriteToConsole = value; }
 		}
+
+		public bool AddTrailingSlash { get; set;}
 
 	}
 }

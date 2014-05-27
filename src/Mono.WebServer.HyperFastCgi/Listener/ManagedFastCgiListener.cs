@@ -6,7 +6,7 @@ using System.Net;
 using Mono.WebServer.HyperFastCgi.Logging;
 using System.Collections.Generic;
 using Mono.WebServer.HyperFastCgi.Transport;
-using Mono.WebServer.HyperFastCgi.Config;
+using Mono.WebServer.HyperFastCgi.Configuration;
 
 namespace Mono.WebServer.HyperFastCgi.Listener
 {

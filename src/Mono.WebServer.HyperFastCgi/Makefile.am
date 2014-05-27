@@ -66,17 +66,19 @@ FILES =  \
 	ApplicationServer/SimpleApplicationServer.cs \
 	AspNetServer/AspNetApplicationHost.cs \
 	AspNetServer/AspNetApplicationHostFactory.cs \
+	AspNetServer/AspNetHostConfig.cs \
 	AspNetServer/AspNetNativeWebRequest.cs \
 	AspNetServer/MonoWorkerRequest.cs \
-	Config/AppHostConfig.cs \
-	Config/AppServerConfig.cs \
-	Config/ConfigAttribute.cs \
-	Config/ConfigInfo.cs \
-	Config/ConfigurationManager.cs \
-	Config/ConfigUtils.cs \
-	Config/ListenerConfig.cs \
-	Config/TransportConfig.cs \
-	Config/WebAppConfig.cs \
+	Configuration/AppHostConfig.cs \
+	Configuration/AppServerConfig.cs \
+	Configuration/ConfigAttribute.cs \
+	Configuration/ConfigInfo.cs \
+	Configuration/ConfigurationManager.cs \
+	Configuration/ConfigUtils.cs \
+	Configuration/ListenerConfig.cs \
+	Configuration/LogConfig.cs \
+	Configuration/TransportConfig.cs \
+	Configuration/WebAppConfig.cs \
 	FastCgiProtocol/BeginRequestBody.cs \
 	FastCgiProtocol/EndRequestBody.cs \
 	FastCgiProtocol/FcgiUtils.cs \
@@ -87,7 +89,6 @@ FILES =  \
 	Interfaces/IApplicationHostTransport.cs \
 	Interfaces/IApplicationServer.cs \
 	Interfaces/IListenerTransport.cs \
-	Interfaces/INativeTransport.cs \
 	Interfaces/IWebListener.cs \
 	Interfaces/IWebRequest.cs \
 	Interfaces/IWebResponse.cs \
@@ -118,7 +119,7 @@ FILES =  \
 
 DATA_FILES = 
 
-RESOURCES = Config/ConfigurationManager.xml 
+RESOURCES = Configuration/ConfigurationManager.xml 
 
 EXTRAS = \
 	FastCgiProtocol \

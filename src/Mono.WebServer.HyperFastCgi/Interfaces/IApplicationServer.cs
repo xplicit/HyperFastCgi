@@ -8,7 +8,9 @@ namespace Mono.WebServer.HyperFastCgi.Interfaces
 
 		IApplicationHost GetRoute(string path);
 
-		IApplicationHost CreateApplicationHost(string vhost, int vport, string vpath, string path, 
+		IApplicationHost CreateApplicationHost(
+			Type appHostType, object appHostConfig, 
+			string vhost, int vport, string vpath, string path, 
 			IListenerTransport listenerTransport, Type transport, object transportConfig);
 	}
 }
