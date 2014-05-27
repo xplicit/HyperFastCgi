@@ -338,7 +338,9 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 
 		public CombinedListenerTransport()
 		{
-			CombinedAppHostTransport t = new CombinedAppHostTransport ();
+			//we have to create instance of the transport,
+			//otherwise jit can't find its methods 
+			new CombinedAppHostTransport ();
 			d (this, typeof(CombinedAppHostTransport));
 		}
 
