@@ -1,7 +1,11 @@
 [![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=xplicit-ru&url=https://github.com/xplicit/HyperFastCgi&title=HyperFastCgi&language=&tags=github&category=software)
 # HyperFastCgi
 
-Performant nginx to mono fastcgi server  
+HyperFastCgi hosts mono web applications with nginx. It's a primary replacement of mono-server-fastcgi for linux platform.
+
+Key features:
+* Does not leak memory
+* Serves requests much faster. [See performance comparison](http://forcedtoadmin.blogspot.ru/2013/11/servicestack-performance-in-mono-p2.html#stat)
 
 ## Installation
 
@@ -31,6 +35,10 @@ Most of the arguments are the same as in mono-server-fastcgi. Some additional ar
 
 * `/addtrailingslash=[true|false]` Adds trailing slash if path to directory does not end with '/'. Default is 'false'. This option were added for compatibility with mono-fastcgi-server. For performance reasons it's recommended to use nginx 'rewrite' command instead, i. e.
     rewrite ^([^.]*[^/])$ $1/ permanent;
+
+### Config file parameters
+
+To be documented
 
 ### Nginx configuration
 
