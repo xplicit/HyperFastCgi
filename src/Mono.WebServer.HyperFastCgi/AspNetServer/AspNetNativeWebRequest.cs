@@ -126,7 +126,6 @@ namespace Mono.WebServer.HyperFastCgi.AspNetServer
 
 			this.transport = transport;
 			this.addTrailingSlash = addTrailingSlash;
-			Logger.Write (LogLevel.Debug, "Hello from request!");
 			//			try {
 			//				//TODO: cache paths
 			//				Paths.GetPathsFromUri (appHost, GetHttpVerbName (), GetFilePath (), out file_path, out path_info);
