@@ -63,12 +63,13 @@ RESGEN=resgen2
 all: $(ASSEMBLY2) $(ASSEMBLY4) $(PROGRAMFILES) $(BINARIES) 
 
 FILES =  \
+	AppHosts/AppHostBase.cs \
+	AppHosts/AspNet/AspNetApplicationHost.cs \
+	AppHosts/AspNet/AspNetApplicationHostFactory.cs \
+	AppHosts/AspNet/AspNetHostConfig.cs \
+	AppHosts/AspNet/AspNetNativeWebRequest.cs \
+	AppHosts/AspNet/MonoWorkerRequest.cs \
 	ApplicationServer/SimpleApplicationServer.cs \
-	AspNetServer/AspNetApplicationHost.cs \
-	AspNetServer/AspNetApplicationHostFactory.cs \
-	AspNetServer/AspNetHostConfig.cs \
-	AspNetServer/AspNetNativeWebRequest.cs \
-	AspNetServer/MonoWorkerRequest.cs \
 	Configuration/AppHostConfig.cs \
 	Configuration/AppServerConfig.cs \
 	Configuration/ConfigAttribute.cs \

@@ -42,7 +42,7 @@ using Mono.WebServer.HyperFastCgi.Transport;
 using System.Web;
 using Mono.WebServer.HyperFastCgi.Logging;
 
-namespace Mono.WebServer.HyperFastCgi.AspNetServer
+namespace Mono.WebServer.HyperFastCgi.AppHosts.AspNet
 {
 	public class AspNetNativeWebRequest : MonoWorkerRequest, IWebRequest, IWebResponse
 	{

@@ -2,7 +2,7 @@
 using System.Xml.Serialization;
 using Mono.WebServer.HyperFastCgi.Configuration;
 
-namespace Mono.WebServer.HyperFastCgi.AspNetServer
+namespace Mono.WebServer.HyperFastCgi.AppHosts.AspNet
 {
 	[Serializable]
 	[XmlRoot("apphost")]

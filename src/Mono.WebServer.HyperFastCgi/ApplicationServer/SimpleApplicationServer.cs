@@ -1,6 +1,6 @@
 ﻿using System;
 using Mono.WebServer.HyperFastCgi.Interfaces;
-using Mono.WebServer.HyperFastCgi.AspNetServer;
+using Mono.WebServer.HyperFastCgi.AppHosts.AspNet;
 
 namespace Mono.WebServer.HyperFastCgi.ApplicationServers
 {

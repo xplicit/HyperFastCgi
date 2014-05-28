@@ -3,7 +3,7 @@ using Mono.WebServer.HyperFastCgi.Interfaces;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
-using Mono.WebServer.HyperFastCgi.AspNetServer;
+using Mono.WebServer.HyperFastCgi.AppHosts.AspNet;
 using System.Threading;
 using System.Text;
 #if !NET_2_0

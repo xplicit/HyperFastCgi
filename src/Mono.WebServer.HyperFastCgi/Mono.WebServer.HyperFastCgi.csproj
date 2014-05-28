@@ -25,7 +25,7 @@
         <Variable name="MONO_PATH" value="." />
       </EnvironmentVariables>
     </EnvironmentVariables>
-    <Commandlineparameters>/config=../../../../samples/combined.config  /applications=ssbench3:81:/test:/var/www/nginx-mono /socket=tcp:127.0.0.1:9000 /loglevels=All /printlog /addtrailingslash=true</Commandlineparameters>
+    <Commandlineparameters>/config=../../../../samples/server.config  /applications=ssbench3:81:/:/var/www/nginx-mono /socket=tcp:127.0.0.1:9000 /loglevels=All /printlog /addtrailingslash=true</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -61,8 +61,6 @@
     <Compile Include="Interfaces\IApplicationHost.cs" />
     <Compile Include="Interfaces\IWebRequest.cs" />
     <Compile Include="Interfaces\IApplicationHostFactory.cs" />
-    <Compile Include="AspNetServer\AspNetApplicationHostFactory.cs" />
-    <Compile Include="AspNetServer\AspNetApplicationHost.cs" />
     <Compile Include="Interfaces\IWebListener.cs" />
     <Compile Include="Listener\ManagedFastCgiListener.cs" />
     <Compile Include="Listener\FastCgiNetworkConnector.cs" />
@@ -70,19 +68,16 @@
     <Compile Include="Interfaces\IListenerTransport.cs" />
     <Compile Include="Transport\TransportRequest.cs" />
     <Compile Include="Transport\FastCgiListenerTransport.cs" />
-    <Compile Include="AspNetServer\MonoWorkerRequest.cs" />
     <Compile Include="Interfaces\IApplicationServer.cs" />
     <Compile Include="ApplicationServer\SimpleApplicationServer.cs" />
     <Compile Include="Transport\NativeTransport.cs" />
     <Compile Include="Listener\NativeListener.cs" />
-    <Compile Include="AspNetServer\AspNetNativeWebRequest.cs" />
     <Compile Include="FastCgiProtocol\FcgiUtils.cs" />
     <Compile Include="Transport\ManagedAppHostTransport.cs" />
     <Compile Include="Transport\CombinedAppHostTransport.cs" />
     <Compile Include="Transport\CombinedListenerTransport.cs" />
     <Compile Include="WebServer\Events\MapPathEventHandler.cs" />
     <Compile Include="WebServer\Events\MapPathEventArgs.cs" />
-    <Compile Include="AspNetServer\AspNetHostConfig.cs" />
     <Compile Include="Configuration\ConfigurationManager.cs" />
     <Compile Include="Configuration\WebAppConfig.cs" />
     <Compile Include="Configuration\ConfigUtils.cs" />
@@ -94,6 +89,12 @@
     <Compile Include="Configuration\AppServerConfig.cs" />
     <Compile Include="Configuration\LogConfig.cs" />
     <Compile Include="Interfaces\IApplicationHostTransport.cs" />
+    <Compile Include="AppHosts\AspNet\AspNetApplicationHost.cs" />
+    <Compile Include="AppHosts\AspNet\AspNetApplicationHostFactory.cs" />
+    <Compile Include="AppHosts\AspNet\AspNetHostConfig.cs" />
+    <Compile Include="AppHosts\AspNet\AspNetNativeWebRequest.cs" />
+    <Compile Include="AppHosts\AspNet\MonoWorkerRequest.cs" />
+    <Compile Include="AppHosts\AppHostBase.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -108,7 +109,6 @@
     <Folder Include="WebServer\" />
     <Folder Include="WebServer\Events\" />
     <Folder Include="Interfaces\" />
-    <Folder Include="AspNetServer\" />
     <Folder Include="Transport\" />
     <Folder Include="Listener\" />
     <Folder Include="ApplicationServer\" />

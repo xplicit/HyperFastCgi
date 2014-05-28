@@ -48,7 +48,7 @@ using System.Threading;
 using System.Web;
 using System.Web.Hosting;
 
-namespace Mono.WebServer.HyperFastCgi.AspNetServer
+namespace Mono.WebServer.HyperFastCgi.AppHosts.AspNet
 {
 	public delegate void EndOfRequestHandler (MonoWorkerRequest request);
 

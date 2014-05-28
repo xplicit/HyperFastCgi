@@ -3,7 +3,7 @@ using Mono.WebServer.HyperFastCgi.Interfaces;
 using Mono.WebServer.HyperFastCgi.FastCgiProtocol;
 using System.Collections.Generic;
 using Mono.WebServer.HyperFastCgi.Listener;
-using Mono.WebServer.HyperFastCgi.AspNetServer;
+using Mono.WebServer.HyperFastCgi.AppHosts.AspNet;
 using System.Threading;
 using Mono.WebServer.HyperFastCgi.Logging;
 
