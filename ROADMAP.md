@@ -10,7 +10,7 @@
 ### AppHosts
 * [ ] Implement general app factory for general application host
 * [ ] Implement Plain 'Hello, World' 'no System.Web' AppHost
-* [ ] Implement abstract AppHostBase class with common methods
+* [X] Implement abstract AppHostBase class with common methods
 
 ### GetRoute
 * [ ] Implement GetRoute() for managed classes
