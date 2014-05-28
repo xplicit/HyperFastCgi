@@ -11,7 +11,10 @@ namespace Mono.WebServer.HyperFastCgi.Interfaces
 
 		Type AppHostTransportType { get; }
 
-		void Configure (IApplicationServer server, object config);
+		void Configure (object listenerConfig, IApplicationServer server,
+			Type listenerTransport, object listenerTransportConfig,
+			Type appHostTransport, object appHostTransportConfig
+		);
 
 		int Listen (AddressFamily family, string host, int port);
 

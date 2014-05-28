@@ -36,16 +36,17 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 			get { return appHostTransportType; }
 		}
 
-		public void Configure(IApplicationServer server, object conf)
+		public void Configure(object conf, IApplicationServer server, 
+			Type listenerTransport, object listenerTransportConfig,
+			Type appHostTransport, object appHostTransportConfig)
 		{
 			this.server = server;
 
 			ListenerConfig config = (ListenerConfig)conf;
-			Type transportType = Type.GetType (config.ListenerTransportType);
-			transport = (IListenerTransport)Activator.CreateInstance (transportType);
-			transport.Configure (this, null);
+			transport = (IListenerTransport)Activator.CreateInstance (listenerTransport);
+			transport.Configure (this, listenerTransportConfig);
 
-			appHostTransportType = Type.GetType (config.AppHostTransportType);
+			appHostTransportType = appHostTransport;
 		}
 
 		public int Listen (AddressFamily family, string host, int port)

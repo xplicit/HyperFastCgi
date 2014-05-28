@@ -13,7 +13,10 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 
 		#region IWebListener implementation
 
-		public void Configure(IApplicationServer server, object config)
+		public void Configure(object config, IApplicationServer server,
+			Type listenerTransport, object listenerTransportConfig,
+			Type appHostTransport, object appHostTransportConfig
+		)
 		{
 			this.server = server;
 		}

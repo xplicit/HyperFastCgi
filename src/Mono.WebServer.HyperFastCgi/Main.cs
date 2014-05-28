@@ -371,7 +371,12 @@ namespace Mono.WebServer.HyperFastCgi
 			}
 
 			IWebListener listener = (IWebListener)Activator.CreateInstance(listenerConfigs[0].Type);
-			listener.Configure (srv, listenerConfigs[0].Config);
+			listener.Configure (listenerConfigs[0].Config, srv, 
+				listenerConfigs[0].ListenerTransport != null? listenerConfigs[0].ListenerTransport.Type: null,
+				listenerConfigs[0].ListenerTransport != null? listenerConfigs[0].ListenerTransport.Config: null,
+				listenerConfigs[0].AppHostTransport != null? listenerConfigs[0].AppHostTransport.Type: null,
+				listenerConfigs[0].AppHostTransport != null? listenerConfigs[0].AppHostTransport.Config: null
+			);
 
 			foreach (WebAppConfig app in webapps) {
 				srv.CreateApplicationHost (

@@ -5,6 +5,7 @@ using System.IO;
 using System.Xml.Serialization;
 using System.Reflection;
 using Mono.WebServer.HyperFastCgi.Configuration;
+using Mono.WebServer.HyperFastCgi.Logging;
 
 namespace Mono.WebServer.HyperFastCgi.Configuration
 {
@@ -107,16 +108,28 @@ namespace Mono.WebServer.HyperFastCgi.Configuration
 				XmlAttribute attrType = node.Attributes ["type"];
 
 				if (attrType != null && !String.IsNullOrEmpty (attrType.Value)) {
-					Type t=Type.GetType (attrType.Value);
+					Type t = Type.GetType (attrType.Value);
 
-					object[] attrs=t.GetCustomAttributes (typeof(ConfigAttribute), false);
+					if (t == null) {
+						Logger.Write (LogLevel.Error, 
+							"Could not load type '{0}' from node '{1}'. Skipping. ",
+							attrType.Value, node.Name, defaultType);
+						continue;
+					}
+
+					configInfo = new ConfigInfo () {
+						Type = t
+					};
+
+					object[] attrs = t.GetCustomAttributes (typeof(ConfigAttribute), false);
 
 					if (attrs != null && attrs.Length > 0) {
-						configInfo = new ConfigInfo () {
-							Type = t,
-							Config = GetConfigFromElement (((ConfigAttribute)attrs [0]).Type, node)
-						};
-					} 
+						configInfo.Config = GetConfigFromElement (((ConfigAttribute)attrs [0]).Type, node);
+					}
+					else {
+						configInfo.Config = GetConfigFromElement (defaultType, node);
+					}
+
 				}
 
 				if (configInfo == null) {
@@ -125,6 +138,7 @@ namespace Mono.WebServer.HyperFastCgi.Configuration
 						Config = GetConfigFromElement (defaultType, node)
 					};
 				}
+
 
 				//special thing for 'listener' node
 				if (node.Name == "listener") {
