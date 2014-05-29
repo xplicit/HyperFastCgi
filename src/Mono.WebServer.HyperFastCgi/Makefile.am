@@ -69,6 +69,10 @@ FILES =  \
 	AppHosts/AspNet/AspNetHostConfig.cs \
 	AppHosts/AspNet/AspNetNativeWebRequest.cs \
 	AppHosts/AspNet/MonoWorkerRequest.cs \
+	AppHosts/Raw/BaseRawRequest.cs \
+	AppHosts/Raw/HelloWorldRequest.cs \
+	AppHosts/Raw/RawHost.cs \
+	AppHosts/Raw/RawHostConfig.cs \
 	ApplicationServer/SimpleApplicationServer.cs \
 	Configuration/AppHostConfig.cs \
 	Configuration/AppServerConfig.cs \

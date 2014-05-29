@@ -52,7 +52,11 @@ namespace Mono.WebServer.HyperFastCgi.Interfaces
 		/// When all data is read Process() called</remarks>
 		void AddBodyPart (byte[] data);
 
-		IDictionary<string,string> RequestHeaders { get; set; }
+		/// <summary>
+		/// Headers collection
+		/// </summary>
+		/// <value>The request headers.</value>
+		IDictionary<string,string> RequestHeaders { get; }
 
 		/// <summary>
 		/// Processes the request.

@@ -8,9 +8,12 @@
 * [ ] Server configuration (select AppHostFactory)
 
 ### AppHosts
-* [ ] Implement general app factory for general application host
-* [ ] Implement Plain 'Hello, World' 'no System.Web' AppHost
+* [X] Implement general app factory for general application host
+* [X] Implement Plain 'Hello, World' 'no System.Web' AppHost
 * [X] Implement abstract AppHostBase class with common methods
+
+### AppHostTransport
+* [ ] Implement threadpooling/tasks/singlethread support
 
 ### GetRoute
 * [ ] Implement GetRoute() for managed classes

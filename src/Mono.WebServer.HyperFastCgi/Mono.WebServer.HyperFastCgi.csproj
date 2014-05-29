@@ -25,7 +25,7 @@
         <Variable name="MONO_PATH" value="." />
       </EnvironmentVariables>
     </EnvironmentVariables>
-    <Commandlineparameters>/config=../../../../samples/server.config  /applications=ssbench3:81:/:/var/www/nginx-mono /socket=tcp:127.0.0.1:9000 /loglevels=All /printlog /addtrailingslash=true</Commandlineparameters>
+    <Commandlineparameters>/config=../../../../samples/hello-world.config  /applications=ssbench3:81:/:/var/www/nginx-mono /socket=tcp:127.0.0.1:9000 /loglevels=All /printlog /addtrailingslash=true</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -95,6 +95,10 @@
     <Compile Include="AppHosts\AspNet\AspNetNativeWebRequest.cs" />
     <Compile Include="AppHosts\AspNet\MonoWorkerRequest.cs" />
     <Compile Include="AppHosts\AppHostBase.cs" />
+    <Compile Include="AppHosts\Raw\RawHost.cs" />
+    <Compile Include="AppHosts\Raw\RawHostConfig.cs" />
+    <Compile Include="AppHosts\Raw\BaseRawRequest.cs" />
+    <Compile Include="AppHosts\Raw\HelloWorldRequest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -113,6 +117,7 @@
     <Folder Include="Listener\" />
     <Folder Include="ApplicationServer\" />
     <Folder Include="Configuration\" />
+    <Folder Include="AppHosts\Raw\" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
