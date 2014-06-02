@@ -39,21 +39,21 @@ using System.Net;
 using System.Reflection;
 using System.Web.Hosting;
 using Mono.WebServer;
-using System.Configuration;
+//using System.Configuration;
 using Mono.Unix;
 using Mono.Unix.Native;
-using Mono.WebServer.HyperFastCgi.Logging;
-using Mono.WebServer.HyperFastCgi.Sockets;
+using HyperFastCgi.Logging;
+using HyperFastCgi.Sockets;
 using System.Threading;
-using Mono.WebServer.HyperFastCgi.ApplicationServers;
-using Mono.WebServer.HyperFastCgi.Transport;
-using Mono.WebServer.HyperFastCgi.Listener;
+using HyperFastCgi.ApplicationServers;
+using HyperFastCgi.Transports;
+using HyperFastCgi.Listeners;
 using System.Net.Sockets;
 using System.Collections.Generic;
-using Mono.WebServer.HyperFastCgi.Configuration;
-using Mono.WebServer.HyperFastCgi.Interfaces;
+using HyperFastCgi.Configuration;
+using HyperFastCgi.Interfaces;
 
-namespace Mono.WebServer.HyperFastCgi
+namespace HyperFastCgi
 {
 	public class MainClass
 	{

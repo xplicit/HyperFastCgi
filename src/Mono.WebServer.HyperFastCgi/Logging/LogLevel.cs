@@ -27,7 +27,7 @@
 //
 using System;
 
-namespace Mono.WebServer.HyperFastCgi.Logging
+namespace HyperFastCgi.Logging
 {
 	[Flags]
 	public enum LogLevel

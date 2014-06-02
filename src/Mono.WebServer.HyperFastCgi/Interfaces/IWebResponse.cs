@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Mono.WebServer.HyperFastCgi.Interfaces
+namespace HyperFastCgi.Interfaces
 {
 	public interface IWebResponse
 	{

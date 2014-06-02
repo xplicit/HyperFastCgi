@@ -1,9 +1,9 @@
 ﻿using System;
-using Mono.WebServer.HyperFastCgi.Interfaces;
-using Mono.WebServer.HyperFastCgi.Configuration;
+using HyperFastCgi.Interfaces;
+using HyperFastCgi.Configuration;
 using System.Reflection.Emit;
 
-namespace Mono.WebServer.HyperFastCgi.AppHosts.Raw
+namespace HyperFastCgi.AppHosts.Raw
 {
 	[Config(typeof(RawHostConfig))]
 	public class RawHost : AppHostBase

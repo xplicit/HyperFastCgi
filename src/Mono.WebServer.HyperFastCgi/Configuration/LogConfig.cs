@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Xml.Serialization;
-using Mono.WebServer.HyperFastCgi.Logging;
+using HyperFastCgi.Logging;
 
-namespace Mono.WebServer.HyperFastCgi.Configuration
+namespace HyperFastCgi.Configuration
 {
 	[Serializable]
 	[XmlRoot("log")]

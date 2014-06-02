@@ -211,19 +211,19 @@ domain_bridge_end_request(MonoObject *transport, guint64 requestId, int request_
 
 void domain_bridge_register_icall ()
 {
-    mono_add_internal_call ("Mono.WebServer.HyperFastCgi.Transport.CombinedListenerTransport::GetRoute",domain_bridge_find_host_by_path);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::GetRoute",domain_bridge_find_host_by_path);
 
-    mono_add_internal_call ("Mono.WebServer.HyperFastCgi.Transport.CombinedListenerTransport::RegisterTransport",domain_bridge_register_transport);
-    mono_add_internal_call ("Mono.WebServer.HyperFastCgi.Transport.CombinedListenerTransport::AppHostTransportCreateRequest",domain_bridge_create_request);
-    mono_add_internal_call ("Mono.WebServer.HyperFastCgi.Transport.CombinedListenerTransport::AppHostTransportAddHeader",domain_bridge_add_header);
-    mono_add_internal_call ("Mono.WebServer.HyperFastCgi.Transport.CombinedListenerTransport::AppHostTransportAddServerVariable",domain_bridge_add_server_variable);
-    mono_add_internal_call ("Mono.WebServer.HyperFastCgi.Transport.CombinedListenerTransport::AppHostTransportHeadersSent",domain_bridge_headers_sent);
-    mono_add_internal_call ("Mono.WebServer.HyperFastCgi.Transport.CombinedListenerTransport::AppHostTransportAddBodyPart",domain_bridge_add_body_part);
-    mono_add_internal_call ("Mono.WebServer.HyperFastCgi.Transport.CombinedListenerTransport::AppHostTransportProcess",domain_bridge_process);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::RegisterTransport",domain_bridge_register_transport);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::AppHostTransportCreateRequest",domain_bridge_create_request);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::AppHostTransportAddHeader",domain_bridge_add_header);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::AppHostTransportAddServerVariable",domain_bridge_add_server_variable);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::AppHostTransportHeadersSent",domain_bridge_headers_sent);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::AppHostTransportAddBodyPart",domain_bridge_add_body_part);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::AppHostTransportProcess",domain_bridge_process);
 
-    mono_add_internal_call ("Mono.WebServer.HyperFastCgi.Transport.CombinedAppHostTransport::RegisterHost",domain_bridge_register_host);
-    mono_add_internal_call ("Mono.WebServer.HyperFastCgi.Transport.CombinedAppHostTransport::SendOutput",domain_bridge_send_output);
-    mono_add_internal_call ("Mono.WebServer.HyperFastCgi.Transport.CombinedAppHostTransport::EndRequest",domain_bridge_end_request);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedAppHostTransport::RegisterHost",domain_bridge_register_host);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedAppHostTransport::SendOutput",domain_bridge_send_output);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedAppHostTransport::EndRequest",domain_bridge_end_request);
 
 }
 

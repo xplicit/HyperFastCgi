@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Xml.Serialization;
-using Mono.WebServer.HyperFastCgi.Configuration;
+using HyperFastCgi.Configuration;
 
-namespace Mono.WebServer.HyperFastCgi.AppHosts.Raw
+namespace HyperFastCgi.AppHosts.Raw
 {
 	[Serializable]
 	[XmlRoot("apphost")]

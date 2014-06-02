@@ -1,15 +1,16 @@
 ﻿using System;
-using Mono.WebServer.HyperFastCgi.Interfaces;
-using Mono.WebServer.HyperFastCgi.FastCgiProtocol;
+using HyperFastCgi.Interfaces;
+using HyperFastCgi.FastCgiProtocol;
 using System.Collections.Generic;
-using Mono.WebServer.HyperFastCgi.Listener;
-using Mono.WebServer.HyperFastCgi.AppHosts.AspNet;
+using HyperFastCgi.Listeners;
 using System.Threading;
-using Mono.WebServer.HyperFastCgi.Logging;
+using HyperFastCgi.Logging;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
-namespace Mono.WebServer.HyperFastCgi.Transport
+namespace HyperFastCgi.Transports
 {
-	public class FastCgiListenerTransport : MarshalByRefObject, IListenerTransport
+	public class CombinedListenerTransport : MarshalByRefObject, IListenerTransport
 	{
 		private Dictionary<ulong,TransportRequest> requests = new Dictionary<ulong, TransportRequest> ();
 		private static object requestsLock = new object ();
@@ -18,10 +19,6 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 
 		public IWebListener Listener {
 			get { return listener; }
-		}
-
-		public FastCgiListenerTransport ()
-		{
 		}
 
 		public void Configure (IWebListener listener, object config)
@@ -89,7 +86,7 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 				if (recordBody != null) {
 					FcgiUtils.ParseParameters (recordBody, AddHeader, request);
 				} else {
-					request.Transport.HeadersSent (request.Hash, request.RequestNumber);
+					AppHostTransportHeadersSent (request.Host, request.Hash, request.RequestNumber);
 				}
 
 				//send last Params request
@@ -105,13 +102,15 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 						header [1], (ushort)((header [2] << 8) + header [3]));
 				}
 				bool final = record.BodyLength == 0;
-				request.Transport.AddBodyPart (request.Hash, request.RequestNumber, recordBody, final);
+				AppHostTransportAddBodyPart (request.Host, request.Hash, request.RequestNumber, recordBody, final);
 				if (final) {
 					stopReceive = true;
-					request.Transport.Process (request.Hash, request.RequestNumber);
+					AppHostTransportProcess (request.Host, request.Hash, request.RequestNumber);
 				}
 				break;
 			case RecordType.Data:
+				//TODO: ThreadPool.QueueUserWorkItem (we must not delay IO thread)
+				//TODO: get routed host, send request to host as is
 				break;
 			case RecordType.GetValues:
 				if (request != null) {
@@ -125,18 +124,18 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 					//FIXME: send it to the HostTransport as is
 					//TODO: send error to Connector
 					//TODO: send EndRequest to Connector
-//					SendError (request.RequestId, Strings.Connection_AbortRecordReceived);
-//					EndRequest (request.RequestId, -1, ProtocolStatus.RequestComplete);
+					//					SendError (request.RequestId, Strings.Connection_AbortRecordReceived);
+					//					EndRequest (request.RequestId, -1, ProtocolStatus.RequestComplete);
 				}
 
 				break;
 
 			default:
 				//TODO: CgiConnector.SendRecord
-//				SendRecord (new Record (Record.ProtocolVersion,
-//					RecordType.UnknownType,
-//					request.RequestId,
-//					new UnknownTypeBody (record.Type).GetData ()));
+				//				SendRecord (new Record (Record.ProtocolVersion,
+				//					RecordType.UnknownType,
+				//					request.RequestId,
+				//					new UnknownTypeBody (record.Type).GetData ()));
 				break;
 			}
 
@@ -148,23 +147,23 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 			TransportRequest req = userData as TransportRequest;
 
 			//if we did not find a route yet
-			if (req.Transport == null) {
+			if (req.Host == IntPtr.Zero) {
 				//TODO: change this stub
-//				if (isHeader && name == "Host") {
-					//TODO: check for null after route if yes return false
-					req.Transport = Listener.Server.GetRoute (value).AppHostTransport;
-					//TODO: check that transport is routed
-					req.Transport.CreateRequest (req.Hash, req.RequestNumber);
-					//TODO: send all saved headers.
-//					req.Transport.AddHeader (req.Hash, req.RequestNumber, name, value);
-//				}
+				//				if (isHeader && name == "Host") {
+				//TODO: check for null after route if yes return false
+				req.Host = GetRoute (value);
+				//TODO: check that transport is routed
+				AppHostTransportCreateRequest (req.Host, req.Hash, req.RequestNumber);
+				//TODO: send all saved headers.
+				//					req.Transport.AddHeader (req.Hash, req.RequestNumber, name, value);
+				//				}
 			} 
-//			else {
-				if (isHeader)
-					req.Transport.AddHeader (req.Hash, req.RequestNumber, name, value);
-				else
-					req.Transport.AddServerVariable (req.Hash, req.RequestNumber, name, value);
-//			}
+			//			else {
+			if (isHeader)
+				AppHostTransportAddHeader (req.Host, req.Hash, req.RequestNumber, name, value);
+			else
+				AppHostTransportAddServerVariable (req.Host, req.Hash, req.RequestNumber, name, value);
+			//			}
 		}
 
 		public void SendOutput (ulong hash, int requestNumber, byte[] data, int length)
@@ -306,6 +305,52 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 		}
 		#endregion
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern IntPtr GetRoute (string vpath);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void AppHostTransportCreateRequest (IntPtr host, ulong requestId, int requestNumber);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void AppHostTransportAddServerVariable (IntPtr host, ulong requestId, int requestNumber, string name, string value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void AppHostTransportAddHeader (IntPtr host, ulong requestId, int requestNumber, string name, string value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void AppHostTransportHeadersSent (IntPtr host, ulong requestId, int requestNumber);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void AppHostTransportAddBodyPart (IntPtr host, ulong requestId, int requestNumber, byte[] body, bool final);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void AppHostTransportProcess (IntPtr host, ulong requestId, int requestNumber);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern static void RegisterTransport (object thisObj, Type transportType);
+
+		[DllImport("libhfc-native", EntryPoint="domain_bridge_register_icall")]
+		public extern static void RegisterIcall ();
+
+		delegate void HideFromJit(object thisObj, Type t);    
+		private static HideFromJit d=RegisterTransport;
+
+		static CombinedListenerTransport ()
+		{
+			CombinedListenerTransport.RegisterIcall ();
+		}
+
+		public CombinedListenerTransport()
+		{
+			//we have to create instance of the transport,
+			//otherwise jit can't find its methods 
+			new CombinedAppHostTransport ();
+			d (this, typeof(CombinedAppHostTransport));
+		}
+
+
 	}
 }
+
+
 

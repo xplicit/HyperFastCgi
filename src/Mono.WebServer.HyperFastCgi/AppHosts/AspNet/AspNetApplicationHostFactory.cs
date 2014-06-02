@@ -1,7 +1,7 @@
 ﻿using System;
-using Mono.WebServer.HyperFastCgi.Interfaces;
+using HyperFastCgi.Interfaces;
 
-namespace Mono.WebServer.HyperFastCgi.AppHosts.AspNet
+namespace HyperFastCgi.AppHosts.AspNet
 {
 	public class AspNetApplicationHostFactory : IApplicationHostFactory
 	{

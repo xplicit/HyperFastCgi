@@ -28,7 +28,7 @@
 
 using System;
 
-namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol
+namespace HyperFastCgi.FastCgiProtocol
 {
 	public enum ProtocolStatus : byte
 	{

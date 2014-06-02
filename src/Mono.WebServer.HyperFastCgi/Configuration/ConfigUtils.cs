@@ -4,10 +4,10 @@ using System.Xml;
 using System.IO;
 using System.Xml.Serialization;
 using System.Reflection;
-using Mono.WebServer.HyperFastCgi.Configuration;
-using Mono.WebServer.HyperFastCgi.Logging;
+using HyperFastCgi.Configuration;
+using HyperFastCgi.Logging;
 
-namespace Mono.WebServer.HyperFastCgi.Configuration
+namespace HyperFastCgi.Configuration
 {
 	public class ConfigUtils
 	{

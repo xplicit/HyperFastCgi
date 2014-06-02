@@ -30,7 +30,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 
-namespace Mono.WebServer.HyperFastCgi.Sockets
+namespace HyperFastCgi.Sockets
 {
 	public class TcpSocket : GeneralSocket
 	{

@@ -28,7 +28,7 @@
 
 using System;
 
-namespace Mono.WebServer.HyperFastCgi.Sockets
+namespace HyperFastCgi.Sockets
 {
 	//FIXME: remove enum and use typeof() instead of this enum
 	[Serializable]

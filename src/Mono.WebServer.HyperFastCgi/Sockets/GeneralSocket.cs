@@ -29,7 +29,7 @@
 using System;
 using System.Net.Sockets;
 
-namespace Mono.WebServer.HyperFastCgi.Sockets
+namespace HyperFastCgi.Sockets
 {
 	public abstract class GeneralSocket : Socket
 	{

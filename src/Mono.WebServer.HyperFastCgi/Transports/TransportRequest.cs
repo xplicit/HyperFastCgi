@@ -1,8 +1,8 @@
 ﻿using System;
-using Mono.WebServer.HyperFastCgi.Interfaces;
+using HyperFastCgi.Interfaces;
 using System.Threading;
 
-namespace Mono.WebServer.HyperFastCgi.Transport
+namespace HyperFastCgi.Transports
 {
 	public class TransportRequest
 	{

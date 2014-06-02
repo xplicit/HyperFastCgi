@@ -183,10 +183,10 @@ register_transport (MonoReflectionType *transport_type)
 
 void bridge_register_icall ()
 {
-   mono_add_internal_call ("Mono.WebServer.HyperFastCgi.Transport.NativeTransport::RegisterHost",register_host);
-   mono_add_internal_call ("Mono.WebServer.HyperFastCgi.Transport.NativeTransport::RegisterTransport",register_transport);
-   mono_add_internal_call ("Mono.WebServer.HyperFastCgi.Transport.NativeTransport::SendOutput",bridge_send_output);
-   mono_add_internal_call ("Mono.WebServer.HyperFastCgi.Transport.NativeTransport::EndRequest",bridge_end_request);
+   mono_add_internal_call ("HyperFastCgi.Transports.NativeTransport::RegisterHost",register_host);
+   mono_add_internal_call ("HyperFastCgi.Transports.NativeTransport::RegisterTransport",register_transport);
+   mono_add_internal_call ("HyperFastCgi.Transports.NativeTransport::SendOutput",bridge_send_output);
+   mono_add_internal_call ("HyperFastCgi.Transports.NativeTransport::EndRequest",bridge_end_request);
 
 }
 

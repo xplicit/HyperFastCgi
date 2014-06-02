@@ -1,4 +1,4 @@
-namespace Mono.WebServer.HyperFastCgi
+namespace HyperFastCgi
 {
 	internal static class Strings
 	{

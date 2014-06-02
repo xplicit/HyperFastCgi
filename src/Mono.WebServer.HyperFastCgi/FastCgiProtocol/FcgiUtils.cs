@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol
+namespace HyperFastCgi.FastCgiProtocol
 {
 	public class FcgiUtils
 	{

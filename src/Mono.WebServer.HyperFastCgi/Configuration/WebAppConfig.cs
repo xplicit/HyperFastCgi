@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Xml.Serialization;
 
-namespace Mono.WebServer.HyperFastCgi.Configuration
+namespace HyperFastCgi.Configuration
 {
 	[XmlRoot("web-application")]
 	public class WebAppConfig

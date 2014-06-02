@@ -1,7 +1,7 @@
 ﻿using System;
-using Mono.WebServer.HyperFastCgi.Interfaces;
+using HyperFastCgi.Interfaces;
 
-namespace Mono.WebServer.HyperFastCgi.AppHosts
+namespace HyperFastCgi.AppHosts
 {
 	public abstract class AppHostBase : MarshalByRefObject, IApplicationHost
 	{

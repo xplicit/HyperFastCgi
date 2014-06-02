@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net.Sockets;
 
-namespace Mono.WebServer.HyperFastCgi.Interfaces
+namespace HyperFastCgi.Interfaces
 {
 	public interface IWebListener
 	{

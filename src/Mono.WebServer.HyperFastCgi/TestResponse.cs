@@ -28,7 +28,7 @@
 
 using System;
 
-namespace Mono.WebServer.HyperFastCgi
+namespace HyperFastCgi
 {
 	public class TestResponse
 	{

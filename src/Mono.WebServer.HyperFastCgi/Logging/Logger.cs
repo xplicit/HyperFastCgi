@@ -31,7 +31,7 @@ using System.IO;
 using System.Text;
 using System.Globalization;
 
-namespace Mono.WebServer.HyperFastCgi.Logging
+namespace HyperFastCgi.Logging
 {
 	public class Logger
 	{

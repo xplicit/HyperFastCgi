@@ -73,7 +73,7 @@ FILES =  \
 	AppHosts/Raw/HelloWorldRequest.cs \
 	AppHosts/Raw/RawHost.cs \
 	AppHosts/Raw/RawHostConfig.cs \
-	ApplicationServer/SimpleApplicationServer.cs \
+	ApplicationServers/SimpleApplicationServer.cs \
 	Configuration/AppHostConfig.cs \
 	Configuration/AppServerConfig.cs \
 	Configuration/ConfigAttribute.cs \
@@ -97,12 +97,17 @@ FILES =  \
 	Interfaces/IWebListener.cs \
 	Interfaces/IWebRequest.cs \
 	Interfaces/IWebResponse.cs \
-	Listener/FastCgiNetworkConnector.cs \
-	Listener/ManagedFastCgiListener.cs \
-	Listener/NativeListener.cs \
+	Listeners/FastCgiNetworkConnector.cs \
+	Listeners/ManagedFastCgiListener.cs \
+	Listeners/NativeListener.cs \
 	Logging/Logger.cs \
 	Logging/LogLevel.cs \
 	Main.cs \
+	Mono.WebServer/Events/DomainReloadEventArgs.cs \
+	Mono.WebServer/Events/MapPathEventArgs.cs \
+	Mono.WebServer/Events/MapPathEventHandler.cs \
+	Mono.WebServer/HttpErrors.cs \
+	Mono.WebServer/VPathToHost.cs \
 	Properties/AssemblyInfo.cs \
 	Sockets/GeneralSocket.cs \
 	Sockets/GeneralSocketType.cs \
@@ -110,17 +115,12 @@ FILES =  \
 	Sockets/UnixSocket.cs \
 	Strings.cs \
 	TestResponse.cs \
-	Transport/CombinedAppHostTransport.cs \
-	Transport/CombinedListenerTransport.cs \
-	Transport/FastCgiListenerTransport.cs \
-	Transport/ManagedAppHostTransport.cs \
-	Transport/NativeTransport.cs \
-	Transport/TransportRequest.cs \
-	WebServer/Events/DomainReloadEventArgs.cs \
-	WebServer/Events/MapPathEventArgs.cs \
-	WebServer/Events/MapPathEventHandler.cs \
-	WebServer/HttpErrors.cs \
-	WebServer/VPathToHost.cs 
+	Transports/CombinedAppHostTransport.cs \
+	Transports/CombinedListenerTransport.cs \
+	Transports/FastCgiListenerTransport.cs \
+	Transports/ManagedAppHostTransport.cs \
+	Transports/NativeTransport.cs \
+	Transports/TransportRequest.cs 
 
 DATA_FILES = 
 

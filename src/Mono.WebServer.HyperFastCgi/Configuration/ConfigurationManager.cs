@@ -35,7 +35,7 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Text;
 
-namespace Mono.WebServer.HyperFastCgi
+namespace HyperFastCgi.Configuration
 {
 	public class ConfigurationManager
 	{

@@ -47,8 +47,9 @@ using System.Text;
 using System.Threading;
 using System.Web;
 using System.Web.Hosting;
+using Mono.WebServer;
 
-namespace Mono.WebServer.HyperFastCgi.AppHosts.AspNet
+namespace HyperFastCgi.AppHosts.AspNet
 {
 	public delegate void EndOfRequestHandler (MonoWorkerRequest request);
 
@@ -58,7 +59,7 @@ namespace Mono.WebServer.HyperFastCgi.AppHosts.AspNet
 		static readonly char[] mapPathTrimStartChars = { '/' };
 		static bool needToReplacePathSeparator;
 		static char pathSeparatorChar;
-		Mono.WebServer.HyperFastCgi.Interfaces.IApplicationHost appHostBase;
+		HyperFastCgi.Interfaces.IApplicationHost appHostBase;
 		Encoding encoding;
 		Encoding headerEncoding;
 		byte[] queryStringBytes;
@@ -148,7 +149,7 @@ namespace Mono.WebServer.HyperFastCgi.AppHosts.AspNet
 			}
 		}
 
-		public MonoWorkerRequest (Mono.WebServer.HyperFastCgi.Interfaces.IApplicationHost appHost)
+		public MonoWorkerRequest (HyperFastCgi.Interfaces.IApplicationHost appHost)
 			: base (String.Empty, String.Empty, null)
 		{
 			if (appHost == null)

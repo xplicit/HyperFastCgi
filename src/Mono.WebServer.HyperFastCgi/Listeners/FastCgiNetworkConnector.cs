@@ -33,12 +33,12 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Text;
 using System.Net;
-using Mono.WebServer.HyperFastCgi.FastCgiProtocol;
-using Mono.WebServer.HyperFastCgi.Logging;
-using Mono.WebServer.HyperFastCgi.Transport;
-using Mono.WebServer.HyperFastCgi.Interfaces;
+using HyperFastCgi.FastCgiProtocol;
+using HyperFastCgi.Logging;
+using HyperFastCgi.Transports;
+using HyperFastCgi.Interfaces;
 
-namespace Mono.WebServer.HyperFastCgi.Listener
+namespace HyperFastCgi.Listeners
 {
 	public enum ReadState
 	{

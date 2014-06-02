@@ -1,10 +1,10 @@
 ﻿using System;
-using Mono.WebServer.HyperFastCgi.Interfaces;
+using HyperFastCgi.Interfaces;
 using System.Collections.Generic;
 using System.Text;
 using System.Globalization;
 
-namespace Mono.WebServer.HyperFastCgi.AppHosts.Raw
+namespace HyperFastCgi.AppHosts.Raw
 {
 	public class BaseRawRequest : IWebRequest, IWebResponse
 	{

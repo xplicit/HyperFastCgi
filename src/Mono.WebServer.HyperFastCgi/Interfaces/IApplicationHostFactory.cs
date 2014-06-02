@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Mono.WebServer.HyperFastCgi.Interfaces
+namespace HyperFastCgi.Interfaces
 {
 	public interface IApplicationHostFactory
 	{

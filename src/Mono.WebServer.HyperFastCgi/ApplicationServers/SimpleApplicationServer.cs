@@ -1,8 +1,8 @@
 ﻿using System;
-using Mono.WebServer.HyperFastCgi.Interfaces;
-using Mono.WebServer.HyperFastCgi.AppHosts.AspNet;
+using HyperFastCgi.Interfaces;
+using HyperFastCgi.AppHosts.AspNet;
 
-namespace Mono.WebServer.HyperFastCgi.ApplicationServers
+namespace HyperFastCgi.ApplicationServers
 {
 	public class SimpleApplicationServer : MarshalByRefObject, IApplicationServer
 	{

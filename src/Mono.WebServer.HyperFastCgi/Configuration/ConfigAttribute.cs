@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Mono.WebServer.HyperFastCgi.Configuration
+namespace HyperFastCgi.Configuration
 {
 	public class ConfigAttribute : Attribute
 	{

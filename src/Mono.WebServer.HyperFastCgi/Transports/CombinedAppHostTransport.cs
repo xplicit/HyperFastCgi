@@ -1,18 +1,17 @@
 ﻿using System;
-using Mono.WebServer.HyperFastCgi.Interfaces;
+using HyperFastCgi.Interfaces;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
-using Mono.WebServer.HyperFastCgi.AppHosts.AspNet;
 using System.Threading;
 using System.Text;
 #if !NET_2_0
 using System.Threading.Tasks;
 #endif 
 
-namespace Mono.WebServer.HyperFastCgi.Transport
+namespace HyperFastCgi.Transports
 {
-	public class ManagedAppHostTransport : MarshalByRefObject, IApplicationHostTransport
+	public class CombinedAppHostTransport : MarshalByRefObject, IApplicationHostTransport
 	{
 		Dictionary<ulong, IWebRequest> requests = new Dictionary<ulong, IWebRequest> ();
 		object requestsLock = new object ();
@@ -27,6 +26,7 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 		public void Configure (IApplicationHost host, object config)
 		{
 			this.appHost = host;
+			RegisterHost (host.VPath, host.Path);
 		}
 
 		public void CreateRequest (ulong requestId, int requestNumber)
@@ -37,7 +37,7 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 				requests.Add (requestId, req);
 			}
 
-//			Console.WriteLine ("CreateRequest hash={0}, reqN={1}", requestId, requestNumber);
+			//			Console.WriteLine ("CreateRequest hash={0}, reqN={1}", requestId, requestNumber);
 		}
 
 		public void AddServerVariable (ulong requestId, int requestNumber, string name, string value)
@@ -110,16 +110,17 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 		}
 		#endregion
 
-		public void SendOutput (ulong requestId, int requestNumber, byte[] data, int len)
-		{
-			appHost.ListenerTransport.SendOutput (requestId, requestNumber, data, len);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void RegisterHost (string virtualPath, string path);
 
-		public void EndRequest (ulong requestId, int requestNumber, int appStatus)
-		{
-			appHost.ListenerTransport.EndRequest (requestId, requestNumber, appStatus);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void SendOutput (ulong requestId, int requestNumber, byte[] data, int len);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void EndRequest (ulong requestId, int requestNumber, int appStatus);
+
 	}
 }
+
 
 

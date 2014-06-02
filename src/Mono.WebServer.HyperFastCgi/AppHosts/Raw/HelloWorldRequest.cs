@@ -1,8 +1,8 @@
 ﻿using System;
-using Mono.WebServer.HyperFastCgi.Interfaces;
+using HyperFastCgi.Interfaces;
 using System.Text;
 
-namespace Mono.WebServer.HyperFastCgi.AppHosts.Raw
+namespace HyperFastCgi.AppHosts.Raw
 {
 	public class HelloWorldRequest : BaseRawRequest
 	{

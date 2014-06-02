@@ -36,13 +36,13 @@ using System.Text;
 using System.Net;
 using System.Globalization;
 using System.IO;
-using Mono.WebServer.HyperFastCgi.FastCgiProtocol;
-using Mono.WebServer.HyperFastCgi.Interfaces;
-using Mono.WebServer.HyperFastCgi.Transport;
+using HyperFastCgi.FastCgiProtocol;
+using HyperFastCgi.Interfaces;
+using HyperFastCgi.Transports;
 using System.Web;
-using Mono.WebServer.HyperFastCgi.Logging;
+using HyperFastCgi.Logging;
 
-namespace Mono.WebServer.HyperFastCgi.AppHosts.AspNet
+namespace HyperFastCgi.AppHosts.AspNet
 {
 	public class AspNetNativeWebRequest : MonoWorkerRequest, IWebRequest, IWebResponse
 	{

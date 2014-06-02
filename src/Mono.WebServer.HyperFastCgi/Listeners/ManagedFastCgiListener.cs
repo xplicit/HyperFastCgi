@@ -1,14 +1,14 @@
 ﻿using System;
-using Mono.WebServer.HyperFastCgi.Interfaces;
-using Mono.WebServer.HyperFastCgi.Sockets;
+using HyperFastCgi.Interfaces;
+using HyperFastCgi.Sockets;
 using System.Net.Sockets;
 using System.Net;
-using Mono.WebServer.HyperFastCgi.Logging;
+using HyperFastCgi.Logging;
 using System.Collections.Generic;
-using Mono.WebServer.HyperFastCgi.Transport;
-using Mono.WebServer.HyperFastCgi.Configuration;
+using HyperFastCgi.Transports;
+using HyperFastCgi.Configuration;
 
-namespace Mono.WebServer.HyperFastCgi.Listener
+namespace HyperFastCgi.Listeners
 {
 	[Config(typeof(ListenerConfig))]
 	public class ManagedFastCgiListener : IWebListener

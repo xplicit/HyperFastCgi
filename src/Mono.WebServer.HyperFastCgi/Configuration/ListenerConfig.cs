@@ -2,7 +2,7 @@
 using System.Xml.Serialization;
 using System.Net.Sockets;
 
-namespace Mono.WebServer.HyperFastCgi.Configuration
+namespace HyperFastCgi.Configuration
 {
 	[XmlRoot("listener")]
 	public class ListenerConfig

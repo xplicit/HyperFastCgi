@@ -1,10 +1,10 @@
 ﻿using System;
-using Mono.WebServer.HyperFastCgi.Interfaces;
-using Mono.WebServer.HyperFastCgi.Transport;
-using Mono.WebServer.HyperFastCgi.Logging;
-using Mono.WebServer.HyperFastCgi.Configuration;
+using HyperFastCgi.Interfaces;
+using HyperFastCgi.Transports;
+using HyperFastCgi.Logging;
+using HyperFastCgi.Configuration;
 
-namespace Mono.WebServer.HyperFastCgi.AppHosts.AspNet
+namespace HyperFastCgi.AppHosts.AspNet
 {
 	[Config(typeof(AspNetHostConfig))]
 	public class AspNetApplicationHost : AppHostBase

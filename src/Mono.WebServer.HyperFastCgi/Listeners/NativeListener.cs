@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Mono.WebServer.HyperFastCgi.Interfaces;
-using Mono.WebServer.HyperFastCgi.Configuration;
-using Mono.WebServer.HyperFastCgi.Transport;
+using HyperFastCgi.Interfaces;
+using HyperFastCgi.Configuration;
+using HyperFastCgi.Transports;
 
-namespace Mono.WebServer.HyperFastCgi.Listener
+namespace HyperFastCgi.Listeners
 {
 	[Config(typeof(ListenerConfig))]
 	public class NativeListener : IWebListener
