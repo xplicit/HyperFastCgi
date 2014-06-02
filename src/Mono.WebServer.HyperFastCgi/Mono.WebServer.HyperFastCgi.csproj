@@ -25,7 +25,7 @@
         <Variable name="MONO_PATH" value="." />
       </EnvironmentVariables>
     </EnvironmentVariables>
-    <Commandlineparameters>/config=../../../../samples/hello-world.config  /applications=ssbench3:81:/:/var/www/nginx-mono /socket=tcp:127.0.0.1:9000 /loglevels=All /printlog /addtrailingslash=true</Commandlineparameters>
+    <Commandlineparameters>/config=../../../../samples/combined.config  /applications=ssbench3:81:/:/var/www/nginx-mono /socket=tcp:127.0.0.1:9000 /loglevels=All /printlog /addtrailingslash=true</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -55,29 +55,14 @@
     <Compile Include="Logging\Logger.cs" />
     <Compile Include="Logging\LogLevel.cs" />
     <Compile Include="Sockets\GeneralSocketType.cs" />
-    <Compile Include="WebServer\HttpErrors.cs" />
-    <Compile Include="WebServer\VPathToHost.cs" />
-    <Compile Include="WebServer\Events\DomainReloadEventArgs.cs" />
     <Compile Include="Interfaces\IApplicationHost.cs" />
     <Compile Include="Interfaces\IWebRequest.cs" />
     <Compile Include="Interfaces\IApplicationHostFactory.cs" />
     <Compile Include="Interfaces\IWebListener.cs" />
-    <Compile Include="Listener\ManagedFastCgiListener.cs" />
-    <Compile Include="Listener\FastCgiNetworkConnector.cs" />
     <Compile Include="Interfaces\IWebResponse.cs" />
     <Compile Include="Interfaces\IListenerTransport.cs" />
-    <Compile Include="Transport\TransportRequest.cs" />
-    <Compile Include="Transport\FastCgiListenerTransport.cs" />
     <Compile Include="Interfaces\IApplicationServer.cs" />
-    <Compile Include="ApplicationServer\SimpleApplicationServer.cs" />
-    <Compile Include="Transport\NativeTransport.cs" />
-    <Compile Include="Listener\NativeListener.cs" />
     <Compile Include="FastCgiProtocol\FcgiUtils.cs" />
-    <Compile Include="Transport\ManagedAppHostTransport.cs" />
-    <Compile Include="Transport\CombinedAppHostTransport.cs" />
-    <Compile Include="Transport\CombinedListenerTransport.cs" />
-    <Compile Include="WebServer\Events\MapPathEventHandler.cs" />
-    <Compile Include="WebServer\Events\MapPathEventArgs.cs" />
     <Compile Include="Configuration\ConfigurationManager.cs" />
     <Compile Include="Configuration\WebAppConfig.cs" />
     <Compile Include="Configuration\ConfigUtils.cs" />
@@ -99,6 +84,21 @@
     <Compile Include="AppHosts\Raw\RawHostConfig.cs" />
     <Compile Include="AppHosts\Raw\BaseRawRequest.cs" />
     <Compile Include="AppHosts\Raw\HelloWorldRequest.cs" />
+    <Compile Include="ApplicationServers\SimpleApplicationServer.cs" />
+    <Compile Include="Listeners\ManagedFastCgiListener.cs" />
+    <Compile Include="Listeners\FastCgiNetworkConnector.cs" />
+    <Compile Include="Listeners\NativeListener.cs" />
+    <Compile Include="Transports\TransportRequest.cs" />
+    <Compile Include="Transports\FastCgiListenerTransport.cs" />
+    <Compile Include="Transports\NativeTransport.cs" />
+    <Compile Include="Transports\ManagedAppHostTransport.cs" />
+    <Compile Include="Transports\CombinedAppHostTransport.cs" />
+    <Compile Include="Transports\CombinedListenerTransport.cs" />
+    <Compile Include="Mono.WebServer\HttpErrors.cs" />
+    <Compile Include="Mono.WebServer\VPathToHost.cs" />
+    <Compile Include="Mono.WebServer\Events\DomainReloadEventArgs.cs" />
+    <Compile Include="Mono.WebServer\Events\MapPathEventHandler.cs" />
+    <Compile Include="Mono.WebServer\Events\MapPathEventArgs.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -110,14 +110,14 @@
     <Folder Include="FastCgiProtocol\" />
     <Folder Include="Sockets\" />
     <Folder Include="Logging\" />
-    <Folder Include="WebServer\" />
-    <Folder Include="WebServer\Events\" />
     <Folder Include="Interfaces\" />
-    <Folder Include="Transport\" />
-    <Folder Include="Listener\" />
-    <Folder Include="ApplicationServer\" />
     <Folder Include="Configuration\" />
     <Folder Include="AppHosts\Raw\" />
+    <Folder Include="ApplicationServers\" />
+    <Folder Include="Listeners\" />
+    <Folder Include="Transports\" />
+    <Folder Include="Mono.WebServer\" />
+    <Folder Include="Mono.WebServer\Events\" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
