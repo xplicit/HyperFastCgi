@@ -7,6 +7,8 @@ Key features:
 * Does not leak memory
 * Serves requests much faster. [See performance comparison](http://forcedtoadmin.blogspot.ru/2013/11/servicestack-performance-in-mono-p2.html#stat)
 
+Latest stable version https://github.com/xplicit/HyperFastCgi/tree/v0.3_stable
+
 ## Installation
 
 Download the source and perform commands:
