@@ -285,7 +285,7 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 			if (debugEnabled) {
 				Logger.Write (LogLevel.Debug, "cn={0} read header={1} reqId={2}", cn, header [1], (ushort)((header [2] << 8) + header [3]));
 			}
-			Transport.Process (Tag, 0,  header, body);
+			stopReceive = Transport.Process (Tag, 0,  header, body);
 		}
 
 		private void StartSendPackets ()

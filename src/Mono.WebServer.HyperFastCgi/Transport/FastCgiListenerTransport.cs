@@ -62,6 +62,11 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 				req.fd = (uint)listenerTag;
 				req.KeepAlive = (brb.Flags & BeginRequestFlags.KeepAlive) == BeginRequestFlags.KeepAlive;
 				AddRequest (req);
+
+				FastCgiNetworkConnector connector = FastCgiNetworkConnector.GetConnector (req.fd);
+				if (connector != null) {
+					connector.KeepAlive = req.KeepAlive;
+				}
 				return stopReceive;
 			}
 
@@ -107,8 +112,6 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 				}
 				break;
 			case RecordType.Data:
-				//TODO: ThreadPool.QueueUserWorkItem (we must not delay IO thread)
-				//TODO: get routed host, send request to host as is
 				break;
 			case RecordType.GetValues:
 				if (request != null) {

@@ -123,9 +123,6 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 		[DllImport("libhfc-native", EntryPoint="bridge_register_icall")]
 		public extern static void RegisterIcall ();
 
-		byte[] header=Encoding.ASCII.GetBytes(TestResponse.Header);
-		byte[] content=Encoding.ASCII.GetBytes(TestResponse.Response);
-
 		delegate void HideFromJit(Type t);    
 		private static HideFromJit d=RegisterTransport;
 

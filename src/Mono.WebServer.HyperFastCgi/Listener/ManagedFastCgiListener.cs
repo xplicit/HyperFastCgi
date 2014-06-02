@@ -13,7 +13,6 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 	[Config(typeof(ListenerConfig))]
 	public class ManagedFastCgiListener : IWebListener
 	{
-		bool keepAlive;
 		bool useThreadPool;
 		GeneralSocket listener;
 		AsyncCallback accept;
@@ -42,7 +41,6 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 		{
 			this.server = server;
 
-			ListenerConfig config = (ListenerConfig)conf;
 			transport = (IListenerTransport)Activator.CreateInstance (listenerTransport);
 			transport.Configure (this, listenerTransportConfig);
 
@@ -51,7 +49,6 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 
 		public int Listen (AddressFamily family, string host, int port)
 		{
-			this.keepAlive = true; //keepAlive;
 			this.useThreadPool = true; //useThreadPool;
 
 			try {
@@ -110,7 +107,6 @@ namespace Mono.WebServer.HyperFastCgi.Listener
 
 				// Additional code to read data goes here.
 				FastCgiNetworkConnector connector = new FastCgiNetworkConnector (client, this);
-				connector.KeepAlive = keepAlive;
 				connector.UseThreadPool = useThreadPool;
 				connector.Disconnected += OnDisconnect;
 

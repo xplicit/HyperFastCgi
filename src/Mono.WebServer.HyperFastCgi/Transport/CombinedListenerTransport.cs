@@ -60,6 +60,11 @@ namespace Mono.WebServer.HyperFastCgi.Transport
 				req.fd = (uint)listenerTag;
 				req.KeepAlive = (brb.Flags & BeginRequestFlags.KeepAlive) == BeginRequestFlags.KeepAlive;
 				AddRequest (req);
+
+				FastCgiNetworkConnector connector = FastCgiNetworkConnector.GetConnector (req.fd);
+				if (connector != null) {
+					connector.KeepAlive = req.KeepAlive;
+				}
 				return stopReceive;
 			}
 

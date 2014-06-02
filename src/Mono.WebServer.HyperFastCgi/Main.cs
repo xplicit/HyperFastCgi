@@ -96,7 +96,6 @@ namespace Mono.WebServer.HyperFastCgi
 		private static AddressFamily sockType;
 		private static string address; 
 		private static ushort port=0;
-		private static bool keepAlive; 
 		private static bool useThreadPool;
 
 		public static int Main (string[] args)
@@ -315,7 +314,6 @@ namespace Mono.WebServer.HyperFastCgi
 
 			Logger.Write (LogLevel.Debug, "Root directory: {0}", root_dir);
 
-			keepAlive = (bool)configmanager ["keepalive"];
 			useThreadPool = (bool)configmanager ["usethreadpool"];
 
 			string[] minThreads = ((string)configmanager ["minthreads"]).Split(',');
