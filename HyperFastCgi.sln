@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperFastCgi", "src\Mono.WebServer.HyperFastCgi\HyperFastCgi.csproj", "{8ED4E686-5CA8-4A80-AA10-D10D994630FB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperFastCgi", "src\HyperFastCgi\HyperFastCgi.csproj", "{8ED4E686-5CA8-4A80-AA10-D10D994630FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,7 +15,7 @@ Global
 		{8ED4E686-5CA8-4A80-AA10-D10D994630FB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = src\Mono.WebServer.HyperFastCgi\HyperFastCgi.csproj
+		StartupItem = src\HyperFastCgi\HyperFastCgi.csproj
 		Policies = $0
 		$0.TextStylePolicy = $1
 		$1.TabsToSpaces = False
