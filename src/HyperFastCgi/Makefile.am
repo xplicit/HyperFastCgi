@@ -7,21 +7,21 @@ EXTRA_DIST =
 if ENABLE_DEBUG_X86
 ASSEMBLY_COMPILER_COMMAND = dmcs
 ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize- -debug "-define:DEBUG; -keyfile:$(top_srcdir)/src/mono.snk"
-ASSEMBLY = bin/Debug/Mono.WebServer.HyperFastCgi.exe
+ASSEMBLY = bin/Debug/HyperFastCgi.exe
 ASSEMBLY_MDB = $(ASSEMBLY).mdb
 COMPILE_TARGET = exe
 PROJECT_REFERENCES = 
 BUILD_DIR = bin/Debug
 
-MONO_WEBSERVER_HYPERFASTCGI_EXE_MDB_SOURCE=bin/Debug/Mono.WebServer.HyperFastCgi.exe.mdb
-MONO_WEBSERVER_HYPERFASTCGI_EXE_MDB=$(BUILD_DIR)/Mono.WebServer.HyperFastCgi.exe.mdb
+MONO_WEBSERVER_HYPERFASTCGI_EXE_MDB_SOURCE=bin/Debug/HyperFastCgi.exe.mdb
+MONO_WEBSERVER_HYPERFASTCGI_EXE_MDB=$(BUILD_DIR)/HyperFastCgi.exe.mdb
 
 endif
 
 if ENABLE_RELEASE_X86
 ASSEMBLY_COMPILER_COMMAND = dmcs
 ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize+ -keyfile:$(top_srcdir)/src/mono.snk
-ASSEMBLY = bin/Release/Mono.WebServer.HyperFastCgi.exe
+ASSEMBLY = bin/Release/HyperFastCgi.exe
 ASSEMBLY_MDB = 
 COMPILE_TARGET = exe
 PROJECT_REFERENCES = 
@@ -131,7 +131,7 @@ EXTRAS = \
 	Sockets \
 	Config \
 	Logging \
-	mono.webserver.hyperfastcgi.in 
+	hyperfastcgi.in 
 
 REFERENCES =  \
 	Mono.Posix \
@@ -214,7 +214,7 @@ if NET_4_0
 endif
 
 uninstall-local:
-	-for i in Mono.WebServer.HyperFastCgi ; do \
+	-for i in HyperFastCgi ; do \
 		$(GACUTIL) $(GACUTIL_FLAGS) -u $$(basename $$i .exe) ; \
 	done
 

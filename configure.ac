@@ -107,13 +107,13 @@ build/m4/Makefile
 build/m4/shave/shave
 build/m4/shave/shave-libtool
 src/Makefile
-src/Mono.WebServer.HyperFastCgi/Makefile
-src/Mono.WebServer.HyperFastCgi/scripts/Makefile
+src/HyperFastCgi/Makefile
+src/HyperFastCgi/scripts/Makefile
 src/libnative/Makefile
 ])
 
-AM_COND_IF([NET_4_0],[AC_CONFIG_FILES([src/Mono.WebServer.HyperFastCgi/scripts/mono-server-hyperfastcgi4])])
-AM_COND_IF([NET_2_0],[AC_CONFIG_FILES([src/Mono.WebServer.HyperFastCgi/scripts/mono-server-hyperfastcgi2])])
+AM_COND_IF([NET_4_0],[AC_CONFIG_FILES([src/HyperFastCgi/scripts/hyperfastcgi4])])
+AM_COND_IF([NET_2_0],[AC_CONFIG_FILES([src/HyperFastCgi/scripts/hyperfastcgi2])])
 
 
 #SHAVE_INIT([build/m4/shave], [enable])

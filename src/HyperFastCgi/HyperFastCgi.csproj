@@ -7,8 +7,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{8ED4E686-5CA8-4A80-AA10-D10D994630FB}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Mono.WebServer.HyperFastCgi</RootNamespace>
-    <AssemblyName>Mono.WebServer.HyperFastCgi</AssemblyName>
+    <RootNamespace>HyperFastCgi</RootNamespace>
+    <AssemblyName>HyperFastCgi</AssemblyName>
     <ReleaseVersion>0.4</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

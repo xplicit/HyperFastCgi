@@ -8,11 +8,9 @@ $($1): $2
 	$(if $3,chmod +x '$$@')
 endef
 
-#mono-server-hyperfastcgi4: 
+$(eval $(call emit-deploy-wrapper,MONO_WEBSERVER_HYPERFASTCGI4,hyperfastcgi4,x))
 
-$(eval $(call emit-deploy-wrapper,MONO_WEBSERVER_HYPERFASTCGI4,mono-server-hyperfastcgi4,x))
-
-$(eval $(call emit-deploy-wrapper,MONO_WEBSERVER_HYPERFASTCGI2,mono-server-hyperfastcgi2,x))
+$(eval $(call emit-deploy-wrapper,MONO_WEBSERVER_HYPERFASTCGI2,hyperfastcgi2,x))
 
 binaries = 
 
@@ -29,7 +27,7 @@ BINARIES = $(MONO_WEBSERVER_HYPERFASTCGI2) $(MONO_WEBSERVER_HYPERFASTCGI4)
 
 CLEANFILES = $(BINARIES) 
 
-bin_SCRIPTS = mono-server-hyperfastcgi2 mono-server-hyperfastcgi4
+bin_SCRIPTS = hyperfastcgi2 hyperfastcgi4
 
 all: $(BINARIES)
 	echo -e 'bin' $(BINARIES)
