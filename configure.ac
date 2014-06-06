@@ -103,6 +103,7 @@ dnl package checks, common for all configs
 
 AC_CONFIG_FILES([Makefile
 build/Makefile
+build/m4/Makefile
 build/m4/shave/shave
 build/m4/shave/shave-libtool
 src/Makefile
