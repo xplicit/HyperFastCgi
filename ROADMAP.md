@@ -27,10 +27,10 @@
 * [ ] Implement Shutdown
 
 ### Managed Listener
-* [ ] Remove warnings, check using of stopReceive flag and others
+* [X] Remove warnings, check using of stopReceive flag and others
 
 ### Refactoring
-* [ ] Rename namespaces
+* [X] Rename namespaces
 * [ ] Add 'Core' namespace, move all common things here
 
 ### Documentation
@@ -60,3 +60,7 @@
 
 ### Managed transports
 * [ ] Add more logging
+
+## version 0.6
+
+* [ ] AspNet vNext Host implementation
