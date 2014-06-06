@@ -102,14 +102,8 @@ dnl package checks, common for all configs
 
 
 AC_CONFIG_FILES([Makefile
-build/Makefile
-build/m4/Makefile
 build/m4/shave/shave
 build/m4/shave/shave-libtool
-src/Makefile
-src/HyperFastCgi/Makefile
-src/HyperFastCgi/scripts/Makefile
-src/libnative/Makefile
 ])
 
 AM_COND_IF([NET_4_0],[AC_CONFIG_FILES([src/HyperFastCgi/scripts/hyperfastcgi4])])

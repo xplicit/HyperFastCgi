@@ -1,6 +1,7 @@
+EXTRA_DIST = autogen.sh README.md ROADMAP.md LICENSE
 
-#EXTRA_DIST =  expansions.m4
-SUBDIRS=src
+#EXTRA_DIST = expansions.m4
+SUBDIRS=src samples build
 
 #Warning: This is an automatically generated file, do not edit!
 

@@ -1,6 +1,6 @@
 SUBDIRS = scripts
 
-EXTRA_DIST =  
+EXTRA_DIST = $(FILES) $(RESOURCES)
 
 # Warning: This is an automatically generated file, do not edit!
 
