@@ -99,6 +99,7 @@
     <Compile Include="Mono.WebServer\Events\DomainReloadEventArgs.cs" />
     <Compile Include="Mono.WebServer\Events\MapPathEventHandler.cs" />
     <Compile Include="Mono.WebServer\Events\MapPathEventArgs.cs" />
+    <Compile Include="Interfaces\Events\HostUnloadEventArgs.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -118,6 +119,7 @@
     <Folder Include="Transports\" />
     <Folder Include="Mono.WebServer\" />
     <Folder Include="Mono.WebServer\Events\" />
+    <Folder Include="Interfaces\Events\" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>

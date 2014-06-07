@@ -1,5 +1,6 @@
 ﻿using System;
 using HyperFastCgi.Interfaces;
+using HyperFastCgi.Interfaces.Events;
 
 namespace HyperFastCgi.AppHosts
 {
@@ -34,6 +35,8 @@ namespace HyperFastCgi.AppHosts
 			get { return AppDomain.CurrentDomain; }
 		}
 
+		public event EventHandler<HostUnloadEventArgs> HostUnload;
+
 		public virtual IApplicationServer Server {
 			get {return appServer;}
 		}
@@ -61,6 +64,31 @@ namespace HyperFastCgi.AppHosts
 			this.listenerTransport = listenerTransport;
 			appHostTransport = (IApplicationHostTransport) Activator.CreateInstance (appHostTransportType);
 			appHostTransport.Configure (this, transportConfig);
+		}
+
+		public virtual void Shutdown()
+		{
+			AppDomain.CurrentDomain.DomainUnload -= OnDomainUnload;
+
+			EventHandler<HostUnloadEventArgs> handler = HostUnload;
+
+			if (handler != null) {
+				handler (this, new HostUnloadEventArgs (){ IsShutdown = true });
+			}
+		}
+
+		public AppHostBase()
+		{
+			AppDomain.CurrentDomain.DomainUnload += new EventHandler (OnDomainUnload);
+		}
+
+		public virtual void OnDomainUnload (object sender, EventArgs e)
+		{
+			EventHandler<HostUnloadEventArgs> handler = HostUnload;
+
+			if (handler != null) {
+				handler (this, new HostUnloadEventArgs (){ IsShutdown = false });
+			}
 		}
 		#endregion
 

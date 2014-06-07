@@ -89,6 +89,7 @@ FILES =  \
 	FastCgiProtocol/FcgiUtils.cs \
 	FastCgiProtocol/Record.cs \
 	FastCgiProtocol/UnknownTypeBody.cs \
+	Interfaces/Events/HostUnloadEventArgs.cs \
 	Interfaces/IApplicationHost.cs \
 	Interfaces/IApplicationHostFactory.cs \
 	Interfaces/IApplicationHostTransport.cs \

@@ -1,4 +1,5 @@
 ﻿using System;
+using HyperFastCgi.Interfaces.Events;
 
 namespace HyperFastCgi.Interfaces
 {
@@ -7,6 +8,14 @@ namespace HyperFastCgi.Interfaces
 		string Path { get; }
 
 		string VPath { get; }
+
+		IApplicationHostTransport AppHostTransport { get; }
+
+		IListenerTransport ListenerTransport { get; } 
+
+		IApplicationServer Server { get; }
+
+		event EventHandler<HostUnloadEventArgs> HostUnload;
 
 		/// <summary>
 		/// Init the host with transport.
@@ -45,11 +54,11 @@ namespace HyperFastCgi.Interfaces
 
 		void ProcessRequest (IWebRequest request);
 
-		IApplicationHostTransport AppHostTransport { get; }
+		/// <summary>
+		/// Shutdown the application.
+		/// </summary>
+		void Shutdown();
 
-		IListenerTransport ListenerTransport { get; } 
-
-		IApplicationServer Server { get; }
 	}
 }
 
