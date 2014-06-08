@@ -4,12 +4,6 @@
 #include <mono/metadata/object.h>
 
 typedef struct {
-    MonoObject *host;
-    MonoString *virtual_path;
-    MonoString *path;
-} HostInfo;
-
-typedef struct {
     char *name;
     void *func;
 } MethodCalls;

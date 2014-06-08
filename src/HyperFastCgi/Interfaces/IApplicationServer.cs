@@ -10,7 +10,7 @@ namespace HyperFastCgi.Interfaces
 
 		IApplicationHost CreateApplicationHost(
 			Type appHostType, object appHostConfig, 
-			string vhost, int vport, string vpath, string path, 
+			object webAppConfig,
 			IListenerTransport listenerTransport, Type transport, object transportConfig);
 	}
 }

@@ -30,25 +30,6 @@ Host_HeadersSent host_headers_sent;
 Host_AddBodyPart host_add_body_part;
 Host_Process host_process;
 
-HostInfo app;
-
-void
-register_host (MonoObject* host, MonoString *virtual_path, MonoString *path)
-{
-//    MONO_OBJECT_SETREF(&app,host,host);
-    //app.host = host;
-    //mono_gc_wbarrier_generic_store(&app.host,host);
-    app.host = mono_gchandle_get_target(mono_gchandle_new(host,TRUE));
-    app.virtual_path = virtual_path;
-    app.path = path;
-}
-
-HostInfo *
-find_host_by_path (gchar* vpath)
-{
-    return &app;
-}
-
 void
 create_request (HostInfo *host, guint64 requestId, int request_num)
 {
@@ -64,7 +45,7 @@ create_request (HostInfo *host, guint64 requestId, int request_num)
 }
 
 void
-add_server_variable (HostInfo *host, guint64 requestId, int request_num, guint8 *name, int name_len, guint8 *value, int value_len)
+add_server_variable (HostInfo *host, guint64 requestId, int request_num, gchar *name, int name_len, gchar *value, int value_len)
 {
     MonoException* ex = NULL;
     MonoDomain* domain=mono_object_get_domain(host->host);
@@ -72,8 +53,8 @@ add_server_variable (HostInfo *host, guint64 requestId, int request_num, guint8 
     mono_domain_set(domain,FALSE);
 
     host_add_server_variable(host->host, requestId, request_num,
-                            mono_string_new_len(domain, (const char *)name, name_len),
-                            mono_string_new_len(domain, (const char *)value, value_len),
+                            mono_string_new_len(domain, name, name_len),
+                            mono_string_new_len(domain, value, value_len),
                             &ex);
     //TODO: handle exception
     mono_domain_set(current,FALSE);
@@ -82,7 +63,7 @@ add_server_variable (HostInfo *host, guint64 requestId, int request_num, guint8 
 }
 
 void
-add_header (HostInfo *host, guint64 requestId, int request_num, guint8 *name, int name_len, guint8 *value, int value_len)
+add_header (HostInfo *host, guint64 requestId, int request_num, gchar *name, int name_len, gchar *value, int value_len)
 {
     MonoException* ex;
     MonoDomain* domain=mono_object_get_domain(host->host);
@@ -90,8 +71,8 @@ add_header (HostInfo *host, guint64 requestId, int request_num, guint8 *name, in
     mono_domain_set(domain,FALSE);
 
     host_add_header(host->host, requestId, request_num,
-                            mono_string_new_len(domain, (const char *)name, name_len),
-                            mono_string_new_len(domain, (const char *)value, value_len),
+                            mono_string_new_len(domain, name, name_len),
+                            mono_string_new_len(domain, value, value_len),
                             &ex);
     //TODO: handle exception
     mono_domain_set(current,FALSE);
@@ -184,6 +165,7 @@ register_transport (MonoReflectionType *transport_type)
 void bridge_register_icall ()
 {
    mono_add_internal_call ("HyperFastCgi.Transports.NativeTransport::RegisterHost",register_host);
+   mono_add_internal_call ("HyperFastCgi.Transports.NativeTransport::UnregisterHost",unregister_host);
    mono_add_internal_call ("HyperFastCgi.Transports.NativeTransport::RegisterTransport",register_transport);
    mono_add_internal_call ("HyperFastCgi.Transports.NativeTransport::SendOutput",bridge_send_output);
    mono_add_internal_call ("HyperFastCgi.Transports.NativeTransport::EndRequest",bridge_end_request);

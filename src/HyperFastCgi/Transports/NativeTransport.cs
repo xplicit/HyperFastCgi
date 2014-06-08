@@ -25,7 +25,12 @@ namespace HyperFastCgi.Transports
 		public void Configure (IApplicationHost host, object config)
 		{
 			this.appHost = host;
-			RegisterHost (host.VPath, host.Path);
+			host.HostUnload += (sender, e) => UnregisterHost (
+				((IApplicationHost)sender).VHost,
+				((IApplicationHost)sender).VPort,
+				((IApplicationHost)sender).VPath
+			);
+			RegisterHost (host.VHost, host.VPort, host.VPath, host.Path);
 		}
 
 		public void CreateRequest (ulong requestId, int requestNumber)
@@ -108,7 +113,10 @@ namespace HyperFastCgi.Transports
 
 		//[DllImport("libnative")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void RegisterHost (string virtualPath, string path);
+		public extern void RegisterHost (string host, int port, string virtualPath, string path);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void UnregisterHost (string host, int port, string virtualPath);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern static void RegisterTransport (Type transportType);

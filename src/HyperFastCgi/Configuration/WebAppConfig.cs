@@ -3,6 +3,7 @@ using System.Xml.Serialization;
 
 namespace HyperFastCgi.Configuration
 {
+	[Serializable]
 	[XmlRoot("web-application")]
 	public class WebAppConfig
 	{

@@ -287,6 +287,10 @@ namespace HyperFastCgi
 				return 1;
 			}
 
+			if (config != null) {
+				webapps.AddRange (ConfigUtils.GetApplicationsFromConfigFile (config));
+			}
+
 			if (applications != null) {
 				webapps.AddRange (ConfigUtils.GetApplicationsFromCommandLine (applications));
 			}
@@ -299,8 +303,7 @@ namespace HyperFastCgi
 				webapps.AddRange (ConfigUtils.GetApplicationsFromConfigDirectory (app_config_dir));
 			}
 
-			if (applications == null && app_config_dir == null &&
-			    app_config_file == null && !auto_map) {
+			if (webapps.Count==0 && !auto_map) {
 				Logger.Write (LogLevel.Error,
 					"There are no applications defined, and path mapping is disabled.");
 				Logger.Write (LogLevel.Error,
@@ -368,6 +371,9 @@ namespace HyperFastCgi
 				return 1;
 			}
 
+			Console.WriteLine ("Read key");
+			Console.ReadLine ();
+
 			IWebListener listener = (IWebListener)Activator.CreateInstance(listenerConfigs[0].Type);
 			listener.Configure (listenerConfigs[0].Config, srv, 
 				listenerConfigs[0].ListenerTransport != null? listenerConfigs[0].ListenerTransport.Type: null,
@@ -376,10 +382,10 @@ namespace HyperFastCgi
 				listenerConfigs[0].AppHostTransport != null? listenerConfigs[0].AppHostTransport.Config: null
 			);
 
-			foreach (WebAppConfig app in webapps) {
+			foreach (WebAppConfig appConfig in webapps) {
 				srv.CreateApplicationHost (
 					hostConfigs[0].Type, hostConfigs[0].Config,
-					app.VHost, app.VPort, app.VPath, app.RealPath, 
+					appConfig,
 					listener.Transport, listener.AppHostTransportType, 
 					listenerConfigs[0].AppHostTransport != null ? listenerConfigs[0].AppHostTransport.Config: null);
 			}

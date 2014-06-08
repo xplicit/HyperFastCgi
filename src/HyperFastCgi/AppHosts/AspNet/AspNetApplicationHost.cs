@@ -26,10 +26,10 @@ namespace HyperFastCgi.AppHosts.AspNet
 			throw new NotImplementedException ();
 		}
 
-		public override void Configure (IApplicationServer server, 
+		public override void Configure (object appHostConfig, object webAppConfig, 
+			IApplicationServer server, 
 			IListenerTransport listenerTransport, 
-			Type appHostTransportType, object transportConfig,
-			object appHostConfig)
+			Type appHostTransportType, object transportConfig)
 		{
 			AspNetHostConfig config = appHostConfig as AspNetHostConfig;
 
@@ -39,7 +39,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 				AddTrailingSlash = config.AddTrailingSlash;
 			}
 
-			base.Configure (server, listenerTransport, appHostTransportType, transportConfig, appHostConfig);
+			base.Configure (appHostConfig, webAppConfig, server, listenerTransport, appHostTransportType, transportConfig);
 		}
 		#endregion
 

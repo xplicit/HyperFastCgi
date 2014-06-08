@@ -9,6 +9,10 @@ namespace HyperFastCgi.Interfaces
 
 		string VPath { get; }
 
+		string VHost { get; }
+
+		int VPort { get; }
+
 		IApplicationHostTransport AppHostTransport { get; }
 
 		IListenerTransport ListenerTransport { get; } 
@@ -26,10 +30,10 @@ namespace HyperFastCgi.Interfaces
 		/// <param name="appHostConfig">Application host config.</param>
 		/// <remarks>This method is called by Application Server from other AppDomain.
 		/// </remarks>
-		void Configure (IApplicationServer appServer, 
+		void Configure (object appHostConfig, object webAppConfig,
+			IApplicationServer appServer, 
 			IListenerTransport listenerTransport, 
-			Type transportType, object transportConfig,
-			object appHostConfig);
+			Type appHostTransportType, object appHostTransportConfig);
 
 		/// <summary>
 		/// Creates the request.

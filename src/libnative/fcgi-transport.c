@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <glib.h>
 #include <pthread.h>
 #include <string.h>
@@ -18,7 +19,21 @@ typedef struct {
     unsigned char* body;
     gboolean stdout_sent;
     gboolean keep_alive;
+    HostInfo *host_info;
+    gchar *hostname;
+    int port;
+    gchar *vpath;
+    GStringChunk *chunks;
+    GArray *key_value_pairs;
 } Request;
+
+typedef struct {
+    gchar *name;
+    int nlen;
+    gchar *value;
+    int vlen;
+    gboolean is_header;
+} KeyValuePair;
 
 static GHashTable* requests;
 static pthread_mutex_t requests_lock;
@@ -49,9 +64,8 @@ static const char* Response="<p>Hello, world!</p>";
 static void process_internal (Request *req, FCGI_Header *header, guint8 *body, int len)
 {
 //    INFO_OUT("%s","process internal");
-    HostInfo* host = find_host_by_path("123");
     //process(host, req->hash, req->request_num);
-    add_body_part(host, req->hash, req->request_num, body, len, len == 0);
+    add_body_part(req->host_info, req->hash, req->request_num, body, len, len == 0);
 
 //    send_output(req->hash, req->request_num, (guint8 *)Header, strlen(Header));
 //    send_output(req->hash, req->request_num, (guint8 *)Response, strlen(Response));
@@ -75,6 +89,10 @@ process_record(int fd, FCGI_Header* header, guint8* body)
 
             req = g_new (Request, 1);
             req->hash = id;
+
+            g_hash_table_insert (requests, &req->hash, req);
+            pthread_mutex_unlock (&requests_lock);
+
             req->fd = fd;
             req->requestId = fcgi_get_request_id(header);
             req->header = header;
@@ -82,12 +100,21 @@ process_record(int fd, FCGI_Header* header, guint8* body)
             req->request_num = ++request_num;
             req->keep_alive = begin_body->flags & FCGI_KEEP_CONN;
             req->stdout_sent = FALSE;
-            g_hash_table_insert (requests, &req->hash, req);
+            req->hostname = NULL;
+            req->port = -1;
+            req->vpath = NULL;
 
-            pthread_mutex_unlock (&requests_lock);
+            //TODO: host_info must be set in parse_params
+            req->host_info = find_host_by_path("test", -1,"123");
 
-            HostInfo* host = find_host_by_path("123");
-            create_request (host, req->hash, req->request_num);
+            //if host is not single, preallocate space for server variables
+            if (!req->host_info) {
+                req->chunks = g_string_chunk_new(4096);
+                req->key_value_pairs = g_array_sized_new(FALSE, FALSE, sizeof(KeyValuePair), 128);
+            } else {
+                //host is single, so we can create request now
+                create_request (req->host_info, req->hash, req->request_num);
+            }
 
             return;
         }
@@ -224,10 +251,7 @@ parse_params(Request *req, FCGI_Header *header, guint8 *data)
     int data_len = fcgi_get_content_len(header);
     int offset = 0;
     int nlen, vlen;
-    guint8 *name, *value;
-
-    //TODO: find appropriate server keys, and only then find host
-    HostInfo* host = find_host_by_path("123");
+    gchar *name, *value;
 
     while (offset < data_len) {
         nlen = data[offset++];
@@ -253,9 +277,9 @@ parse_params(Request *req, FCGI_Header *header, guint8 *data)
 
 //        if (offset + nlen + vlen > dataLength)
 //                throw new ArgumentOutOfRangeException ("offset");
-        name = data + offset;
+        name = (gchar *)(data + offset);
         offset += nlen;
-        value = data + offset;
+        value = (gchar *)(data + offset);
         offset += vlen;
 
         //params can be server vars or http headers.
@@ -279,14 +303,89 @@ parse_params(Request *req, FCGI_Header *header, guint8 *data)
                 i++;
             }
             //call add header function
-            if (host)
-                add_header(host, req->hash, req->request_num, name, nlen, value, vlen);
-            //TODO: save to temp array
+            if (req->host_info)
+                add_header(req->host_info, req->hash, req->request_num, name, nlen, value, vlen);
+            else {
+                //save header to temporary place. This code should not be run
+                //if server variables go first
+                KeyValuePair pair;
+                pair.name = g_string_chunk_insert_len(req->chunks, name, nlen);
+                pair.nlen = nlen;
+                pair.value = g_string_chunk_insert_len(req->chunks, value, vlen);
+                pair.vlen = vlen;
+                pair.is_header = TRUE;
+                g_array_append_val(req->key_value_pairs, pair);
+            }
         }
         else { /* server variable */
             //TODO: call function to add server param
-            if (host)
-                add_server_variable(host, req->hash, req->request_num, name, nlen, value, vlen);
+            if (req->host_info)
+                add_server_variable(req->host_info, req->hash, req->request_num, name, nlen, value, vlen);
+            else {
+                //add server variable to the temporary place
+                KeyValuePair pair;
+                pair.name = g_string_chunk_insert_len(req->chunks, name, nlen);
+                pair.nlen = nlen;
+                pair.value = g_string_chunk_insert_len(req->chunks, value, vlen);
+                pair.vlen = vlen;
+                pair.is_header = FALSE;
+                g_array_append_val(req->key_value_pairs, pair);
+
+                //we need to get host, port and vpath from server variables
+                //when we'll get them all, we can find a route to appropriate host
+                if (!req->hostname && nlen == 11 && (memcmp(name,"SERVER_NAME",11) == 0)) {
+                        req->hostname = g_strndup(value,vlen);
+//                        INFO_OUT("VHost=%s\n", req->hostname);
+                }
+
+                if (req->port == -1 && nlen == 11 && (memcmp(name,"SERVER_PORT",11) == 0)) {
+                        gchar *tmp = g_strndup(value,vlen);
+                        req->port = atoi(tmp);
+                        g_free(tmp);
+//                        INFO_OUT("VPort=%i\n", req->port);
+                }
+
+                if (!req->vpath && nlen == 11 && (memcmp(name,"SCRIPT_NAME",11) == 0)) {
+                    req->vpath = g_strndup(value, vlen);
+//                    INFO_OUT("VPath=%s\n", req->vpath);
+                }
+//                INFO_OUT("name=%s value=%s\n",pair.name, pair.value);
+
+                //check, that we've got all server variables we're needed
+                if (req->hostname && req->port != -1 && req->vpath) {
+                    //now we can find host by path
+//                    INFO_OUT("host=%s port=%i vpath=%s\n", req->hostname, req->port, req->vpath);
+                    req->host_info = find_host_by_path(req->hostname, req->port, req->vpath);
+
+                    //if *.webapp configuration is OK, we'll found a host and
+                    //can send all server variables and headers, we've saved to
+                    //temporary place before
+                    if (req->host_info) {
+                        //create request on the bridge
+                        create_request (req->host_info, req->hash, req->request_num);
+
+                        //send all variables to host
+                        int i;
+                        for (i=0; i<req->key_value_pairs->len; i++) {
+                            KeyValuePair pair = g_array_index(req->key_value_pairs,KeyValuePair, i);
+                            if (pair.is_header) {
+                                add_header(req->host_info, req->hash, req->request_num, pair.name, pair.nlen, pair.value, pair.vlen);
+                            } else {
+                                add_server_variable(req->host_info, req->hash, req->request_num, pair.name, pair.nlen, pair.value, pair.vlen);
+                            }
+                        }
+                        //free temporary resources
+                        g_array_free(req->key_value_pairs, TRUE);
+                        g_string_chunk_free(req->chunks);
+                    } else {
+                        //something wrong with configuration... we can't find the host
+                        ERROR_OUT("Can't find path! HOST='%s' port=%i path='%s'",req->hostname, req->port, req->vpath);
+                        //TODO: abort request (send EndRequest with 404, or other error?)
+                    }
+
+                }
+
+            }
         }
     }
 
@@ -294,10 +393,3 @@ parse_params(Request *req, FCGI_Header *header, guint8 *data)
     //this means, that server passed all the data.
     return data_len == 0;
 }
-
-
-
-
-
-
-

@@ -1,6 +1,9 @@
 ﻿using System;
 using HyperFastCgi.Interfaces;
 using HyperFastCgi.AppHosts.AspNet;
+using HyperFastCgi.Interfaces.Events;
+using HyperFastCgi.Configuration;
+using HyperFastCgi.Logging;
 
 namespace HyperFastCgi.ApplicationServers
 {
@@ -18,13 +21,21 @@ namespace HyperFastCgi.ApplicationServers
 			return singleHost;
 		}
 
-		public IApplicationHost CreateApplicationHost(Type appHostType, object appHostConfig,
-			string vhost, int vport, string vpath, string path, 
+		public IApplicationHost CreateApplicationHost(Type appHostType, object appHostConfig, 
+			object webAppConfig, 
 			IListenerTransport listenerTransport, Type transportType, object transportConfig)
 		{
+			WebAppConfig appConfig = webAppConfig as WebAppConfig;
+
+			if (appConfig == null) {
+				Logger.Write (LogLevel.Error, "Web application is not specified");
+				return null;
+			}
+
 			AspNetApplicationHostFactory factory = new AspNetApplicationHostFactory ();
-			IApplicationHost host = factory.CreateApplicationHost (appHostType, vhost, vport, vpath, path);
-			host.Configure (this, listenerTransport, transportType, transportConfig, appHostConfig);
+			IApplicationHost host = factory.CreateApplicationHost (appHostType, appConfig.VHost, appConfig.VPort, appConfig.VPath, appConfig.RealPath);
+			host.HostUnload += (object sender, HostUnloadEventArgs e) => Console.WriteLine ("Host unload");
+			host.Configure (appHostConfig, webAppConfig, this, listenerTransport, transportType, transportConfig);
 
 			singleHost = host;
 

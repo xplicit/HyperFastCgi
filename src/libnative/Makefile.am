@@ -18,4 +18,6 @@ sources = \
 	mono-bridge.c		\
 	mono-bridge-def.h	\
 	mono-bridge-def.c	\
+	host-list.h		\
+	host-list.c		\
 	domain-bridge.c

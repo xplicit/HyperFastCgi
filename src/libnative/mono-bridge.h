@@ -3,25 +3,19 @@
 
 #include <glib.h>
 #include <mono/metadata/object.h>
-#include "mono-bridge-def.h"
+#include "host-list.h"
 
 void
 register_transport (MonoReflectionType *transport_type);
 
 void
-register_host (MonoObject* host, MonoString *virtual_path, MonoString *path);
-
-HostInfo *
-find_host_by_path (gchar* vpath);
-
-void
 create_request (HostInfo *host, guint64 requestId, int request_num);
 
 void
-add_server_variable (HostInfo *host, guint64 requestId, int request_num, guint8 *name, int name_len, guint8 *value, int value_len);
+add_server_variable (HostInfo *host, guint64 requestId, int request_num, gchar *name, int name_len, gchar *value, int value_len);
 
 void
-add_header (HostInfo *host, guint64 requestId, int request_num, guint8 *name, int name_len, guint8 *value, int value_len);
+add_header (HostInfo *host, guint64 requestId, int request_num, gchar *name, int name_len, gchar *value, int value_len);
 
 void
 headers_sent (HostInfo *host, guint64 requestId, int request_num);

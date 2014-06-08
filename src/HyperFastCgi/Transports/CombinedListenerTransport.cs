@@ -151,7 +151,7 @@ namespace HyperFastCgi.Transports
 				//TODO: change this stub
 				//				if (isHeader && name == "Host") {
 				//TODO: check for null after route if yes return false
-				req.Host = GetRoute (value);
+				req.Host = GetRoute (value, -1, value);
 				//TODO: check that transport is routed
 				AppHostTransportCreateRequest (req.Host, req.Hash, req.RequestNumber);
 				//TODO: send all saved headers.
@@ -306,7 +306,7 @@ namespace HyperFastCgi.Transports
 		#endregion
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern IntPtr GetRoute (string vpath);
+		public extern IntPtr GetRoute (string vhost, int vport, string vpath);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void AppHostTransportCreateRequest (IntPtr host, ulong requestId, int requestNumber);

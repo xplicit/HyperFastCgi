@@ -3,6 +3,7 @@
 #include <mono/metadata/object.h>
 #include <mono/metadata/appdomain.h>
 #include "libev.h"
+#include "host-list.h"
 #include "mono-bridge-def.h"
 
 CreateRequestType domain_bridge_create_request_func;
@@ -32,27 +33,6 @@ static MethodCalls listener_transport_methods[] = {
 };
 
 MonoObject *listener_transport;
-
-HostInfo app;
-
-void
-domain_bridge_register_host (MonoObject* host, MonoString *virtual_path, MonoString *path)
-{
-//    MONO_OBJECT_SETREF(&app,host,host);
-    //app.host = host;
-    //mono_gc_wbarrier_generic_store(&app.host,host);
-    app.host = mono_gchandle_get_target(mono_gchandle_new(host,TRUE));
-    app.virtual_path = virtual_path;
-    app.path = path;
-    INFO_OUT("registering host %s %s %p\n", mono_string_to_utf8(virtual_path), mono_string_to_utf8(path), app.host);
-
-}
-
-HostInfo *
-domain_bridge_find_host_by_path (MonoObject *transport, MonoString* vpath)
-{
-    return &app;
-}
 
 void
 domain_bridge_register_transport(MonoObject *thisObj, MonoReflectionType *apphost_transport_type)
@@ -211,7 +191,7 @@ domain_bridge_end_request(MonoObject *transport, guint64 requestId, int request_
 
 void domain_bridge_register_icall ()
 {
-    mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::GetRoute",domain_bridge_find_host_by_path);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::GetRoute",find_host_by_path);
 
     mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::RegisterTransport",domain_bridge_register_transport);
     mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::AppHostTransportCreateRequest",domain_bridge_create_request);
@@ -221,7 +201,8 @@ void domain_bridge_register_icall ()
     mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::AppHostTransportAddBodyPart",domain_bridge_add_body_part);
     mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::AppHostTransportProcess",domain_bridge_process);
 
-    mono_add_internal_call ("HyperFastCgi.Transports.CombinedAppHostTransport::RegisterHost",domain_bridge_register_host);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedAppHostTransport::RegisterHost",register_host);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedAppHostTransport::UnregisterHost",unregister_host);
     mono_add_internal_call ("HyperFastCgi.Transports.CombinedAppHostTransport::SendOutput",domain_bridge_send_output);
     mono_add_internal_call ("HyperFastCgi.Transports.CombinedAppHostTransport::EndRequest",domain_bridge_end_request);
 

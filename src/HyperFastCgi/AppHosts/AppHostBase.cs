@@ -1,25 +1,27 @@
 ﻿using System;
 using HyperFastCgi.Interfaces;
 using HyperFastCgi.Interfaces.Events;
+using HyperFastCgi.Configuration;
 
 namespace HyperFastCgi.AppHosts
 {
 	public abstract class AppHostBase : MarshalByRefObject, IApplicationHost
 	{
 		#region IApplicationHost implementation
-		string path;
+		string vhost;
+		int vport;
 		string vpath;
+		string path;
 		IListenerTransport listenerTransport;
 		IApplicationHostTransport appHostTransport;
 		IApplicationServer appServer;
 
-		public virtual string Path {
-			get {
-				if (path == null)
-					path = AppDomain.CurrentDomain.GetData (".appPath").ToString ();
+		public virtual int VPort {
+			get { return vport; }
+		}
 
-				return path;
-			}
+		public virtual string VHost {
+			get { return vhost; }
 		}
 
 		public virtual string VPath {
@@ -28,6 +30,15 @@ namespace HyperFastCgi.AppHosts
 					vpath = AppDomain.CurrentDomain.GetData (".appVPath").ToString ();
 
 				return vpath;
+			}
+		}
+
+		public virtual string Path {
+			get {
+				if (path == null)
+					path = AppDomain.CurrentDomain.GetData (".appPath").ToString ();
+
+				return path;
 			}
 		}
 
@@ -55,11 +66,19 @@ namespace HyperFastCgi.AppHosts
 
 		public abstract void ProcessRequest (IWebRequest request);
 
-		public virtual void Configure (IApplicationServer server, 
+		public virtual void Configure (object appHostConfig, object webAppConfig, 
+			IApplicationServer server, 
 			IListenerTransport listenerTransport, 
-			Type appHostTransportType, object transportConfig,
-			object appHostConfig)
+			Type appHostTransportType, object transportConfig)
 		{
+			WebAppConfig appConfig = webAppConfig as WebAppConfig;
+			if (appConfig != null) {
+				vport = appConfig.VPort;
+				vhost = appConfig.VHost;
+				vpath = appConfig.VPath;
+				path = appConfig.RealPath;
+			}
+
 			appServer = server;
 			this.listenerTransport = listenerTransport;
 			appHostTransport = (IApplicationHostTransport) Activator.CreateInstance (appHostTransportType);

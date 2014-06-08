@@ -7,8 +7,8 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="../Mono.WebServer.HyperFastCgi/bin/Debug/libhfc-native" prefix_auto="1" extension_auto="1" />
-				<Option object_output="../Mono.WebServer.HyperFastCgi/obj/Debug/" />
+				<Option output="../HyperFastCgi/bin/Debug/libhfc-native" prefix_auto="1" extension_auto="1" />
+				<Option object_output="../HyperFastCgi/obj/Debug/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
@@ -28,8 +28,8 @@
 				</Linker>
 			</Target>
 			<Target title="Release">
-				<Option output="../Mono.WebServer.HyperFastCgi/bin/Release/liblibnative" prefix_auto="1" extension_auto="1" />
-				<Option object_output="../Mono.WebServer.HyperFastCgi/obj/Release/" />
+				<Option output="../HyperFastCgi/bin/Release/liblibnative" prefix_auto="1" extension_auto="1" />
+				<Option object_output="../HyperFastCgi/obj/Release/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
@@ -59,6 +59,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="fcgi.h" />
+		<Unit filename="host-list.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="host-list.h" />
 		<Unit filename="libev.c">
 			<Option compilerVar="CC" />
 		</Unit>

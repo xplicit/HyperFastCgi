@@ -32,8 +32,10 @@ namespace HyperFastCgi.AppHosts.Raw
 
 		#endregion
 
-		public override void Configure (IApplicationServer server, IListenerTransport listenerTransport, 
-			Type appHostTransportType, object transportConfig, object appHostConfig)
+		public override void Configure (object appHostConfig, object webAppConfig,
+			IApplicationServer server, 
+			IListenerTransport listenerTransport, 
+			Type appHostTransportType, object transportConfig)
 		{
 			RawHostConfig config = appHostConfig as RawHostConfig;
 
@@ -42,7 +44,7 @@ namespace HyperFastCgi.AppHosts.Raw
 				CreateRequestInstance = CreateDynamicMethod (requestType);
 			}
 
-			base.Configure (server, listenerTransport, appHostTransportType, transportConfig, appHostConfig);
+			base.Configure (appHostConfig, webAppConfig, server, listenerTransport, appHostTransportType, transportConfig);
 		} 
 
 
