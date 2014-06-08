@@ -371,9 +371,6 @@ namespace HyperFastCgi
 				return 1;
 			}
 
-			Console.WriteLine ("Read key");
-			Console.ReadLine ();
-
 			IWebListener listener = (IWebListener)Activator.CreateInstance(listenerConfigs[0].Type);
 			listener.Configure (listenerConfigs[0].Config, srv, 
 				listenerConfigs[0].ListenerTransport != null? listenerConfigs[0].ListenerTransport.Type: null,
