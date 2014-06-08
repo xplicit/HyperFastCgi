@@ -1,6 +1,7 @@
 #include <glib.h>
 #include <string.h>
 #include <mono/metadata/object.h>
+#include "libev.h"
 #include "host-list.h"
 
 //TODO: add pthread rw-lock mutex to apps array
@@ -29,7 +30,7 @@ register_host (MonoObject* host, MonoString *virtual_host, int virtual_port, Mon
 
     g_array_append_val(apps,app);
 
-    //INFO_OUT("registering host %s %s %p\n", mono_string_to_utf8(virtual_path), mono_string_to_utf8(path), app.host);
+    INFO_OUT("%s:%i:%s:%s\n", app.vhost, app.vport, app.vpath, app.path);
 }
 
 void

@@ -26,7 +26,7 @@ namespace HyperFastCgi.Transports
 		public void Configure (IApplicationHost host, object config)
 		{
 			this.appHost = host;
-			RegisterHost (host.VPath, host.Path);
+			RegisterHost (host.VHost, host.VPort, host.VPath, host.Path);
 		}
 
 		public void CreateRequest (ulong requestId, int requestNumber)
@@ -111,7 +111,7 @@ namespace HyperFastCgi.Transports
 		#endregion
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void RegisterHost (string virtualPath, string path);
+		public extern void RegisterHost (string vhost, int vport, string virtualPath, string path);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SendOutput (ulong requestId, int requestNumber, byte[] data, int len);

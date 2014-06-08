@@ -60,6 +60,12 @@ namespace HyperFastCgi.Transports
 				req.KeepAlive = (brb.Flags & BeginRequestFlags.KeepAlive) == BeginRequestFlags.KeepAlive;
 				AddRequest (req);
 
+				//try to find single app route
+				req.Host = GetRoute (null, -1, null);
+				if (req.Host != IntPtr.Zero) {
+					AppHostTransportCreateRequest (req.Host, req.Hash, req.RequestNumber);
+				}
+
 				FastCgiNetworkConnector connector = FastCgiNetworkConnector.GetConnector (req.fd);
 				if (connector != null) {
 					connector.KeepAlive = req.KeepAlive;
@@ -71,11 +77,6 @@ namespace HyperFastCgi.Transports
 			case RecordType.BeginRequest:
 				break;
 			case RecordType.Params:
-				//TODO: find application in the route
-				//TODO: save route to the request
-				//FIXME: can be two cases: route not found (no HOST param), need to wait next params  
-				//or route not found (there is no matching HOST). Send error back in the case
-
 				if (request.Header != null) {
 					if (debugEnabled) {
 						Logger.Write (LogLevel.Debug, "lt={0} LT::ProcessRecord header={1} reqId={2}", listenerTag,
@@ -86,10 +87,10 @@ namespace HyperFastCgi.Transports
 				if (recordBody != null) {
 					FcgiUtils.ParseParameters (recordBody, AddHeader, request);
 				} else {
+					//FIXME: request.Host can be null
 					AppHostTransportHeadersSent (request.Host, request.Hash, request.RequestNumber);
 				}
 
-				//send last Params request
 				if (debugEnabled) {
 					Logger.Write (LogLevel.Debug, "lt={0} LT::ProcessRecord header={1} reqId={2}", listenerTag,
 						header [1], (ushort)((header [2] << 8) + header [3]));
@@ -109,8 +110,6 @@ namespace HyperFastCgi.Transports
 				}
 				break;
 			case RecordType.Data:
-				//TODO: ThreadPool.QueueUserWorkItem (we must not delay IO thread)
-				//TODO: get routed host, send request to host as is
 				break;
 			case RecordType.GetValues:
 				if (request != null) {
@@ -148,22 +147,45 @@ namespace HyperFastCgi.Transports
 
 			//if we did not find a route yet
 			if (req.Host == IntPtr.Zero) {
-				//TODO: change this stub
-				//				if (isHeader && name == "Host") {
-				//TODO: check for null after route if yes return false
-				req.Host = GetRoute (value, -1, value);
-				//TODO: check that transport is routed
-				AppHostTransportCreateRequest (req.Host, req.Hash, req.RequestNumber);
-				//TODO: send all saved headers.
-				//					req.Transport.AddHeader (req.Hash, req.RequestNumber, name, value);
-				//				}
-			} 
-			//			else {
-			if (isHeader)
-				AppHostTransportAddHeader (req.Host, req.Hash, req.RequestNumber, name, value);
-			else
-				AppHostTransportAddServerVariable (req.Host, req.Hash, req.RequestNumber, name, value);
-			//			}
+				req.tempKeys.Add (new KeyValuePair () {
+					Key = name,
+					Value = value,
+					IsHeader = isHeader
+				});
+
+				if (req.VHost == null && name == "SERVER_NAME") {
+					req.VHost = value;
+				}
+				if (req.VPort == -1 && name == "SERVER_PORT") {
+					int.TryParse (value, out req.VPort);
+				}
+				if (req.VPath == null && name == "SCRIPT_NAME") {
+					req.VPath = value;
+				}
+
+				if (req.VHost != null && req.VPort != -1 && req.VPath != null) {
+					req.Host = GetRoute (req.VHost, req.VPort, req.VPath);
+
+					if (req.Host != IntPtr.Zero) {
+						AppHostTransportCreateRequest (req.Host, req.Hash, req.RequestNumber);
+
+						foreach (KeyValuePair pair in req.tempKeys) {
+							if (pair.IsHeader)
+								AppHostTransportAddHeader (req.Host, req.Hash, req.RequestNumber, pair.Key, pair.Value);
+							else
+								AppHostTransportAddServerVariable (req.Host, req.Hash, req.RequestNumber, pair.Key, pair.Value);
+						}
+					} else {
+						Logger.Write (LogLevel.Error, "Can't find app {0}:{1} {2}", req.VHost, req.VPort, req.VPath);
+						//TODO: send EndRequest with error message
+					}
+				}
+			} else {
+				if (isHeader)
+					AppHostTransportAddHeader (req.Host, req.Hash, req.RequestNumber, name, value);
+				else
+					AppHostTransportAddServerVariable (req.Host, req.Hash, req.RequestNumber, name, value);
+			}
 		}
 
 		public void SendOutput (ulong hash, int requestNumber, byte[] data, int length)

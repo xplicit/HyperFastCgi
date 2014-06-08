@@ -1,6 +1,7 @@
 ﻿using System;
 using HyperFastCgi.Interfaces;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace HyperFastCgi.Transports
 {
@@ -17,6 +18,10 @@ namespace HyperFastCgi.Transports
 		public bool StdOutSent;
 		public bool KeepAlive;
 
+		public List<KeyValuePair> tempKeys = new List<KeyValuePair> (128);
+		public string VHost;
+		public int VPort = -1;
+		public string VPath;
 
 		//use 'host' for unmanaged transport
 		public IntPtr Host;

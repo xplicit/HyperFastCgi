@@ -187,11 +187,25 @@ domain_bridge_end_request(MonoObject *transport, guint64 requestId, int request_
     mono_domain_set(current,FALSE);
 }
 
+HostInfo*
+domain_bridge_get_route(MonoObject *transport, MonoString *virtual_host, int virtual_port, MonoString *virtual_path)
+{
+    HostInfo* app;
+    gchar *vhost = mono_string_to_utf8(virtual_host);
+    gchar *vpath = mono_string_to_utf8(virtual_path);
+
+    app = find_host_by_path(vhost, virtual_port, vpath);
+
+    g_free(vhost);
+    g_free(vpath);
+
+    return app;
+}
 
 
 void domain_bridge_register_icall ()
 {
-    mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::GetRoute",find_host_by_path);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::GetRoute",domain_bridge_get_route);
 
     mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::RegisterTransport",domain_bridge_register_transport);
     mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::AppHostTransportCreateRequest",domain_bridge_create_request);

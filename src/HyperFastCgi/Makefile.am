@@ -119,6 +119,7 @@ FILES =  \
 	Transports/CombinedAppHostTransport.cs \
 	Transports/CombinedListenerTransport.cs \
 	Transports/FastCgiListenerTransport.cs \
+	Transports/KeyValuePair.cs \
 	Transports/ManagedAppHostTransport.cs \
 	Transports/NativeTransport.cs \
 	Transports/TransportRequest.cs 
