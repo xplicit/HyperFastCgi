@@ -5,7 +5,7 @@ namespace HyperFastCgi.FastCgiProtocol
 {
 	public class FcgiUtils
 	{
-		public delegate void AddHeaderDelegate(string name, string value, bool isHeader, object userData);
+		public delegate bool AddHeaderDelegate(string name, string value, bool isHeader, object userData);
 
 		public FcgiUtils ()
 		{
@@ -49,12 +49,11 @@ namespace HyperFastCgi.FastCgiProtocol
 				offset += vlen;
 
 				string header = ReformatHttpHeader (name);
+				bool isHeader = !String.IsNullOrEmpty (header);
 
-				if (!String.IsNullOrEmpty (header)) {
-					func (header, value, true, userData);
-				} else {
-					func (name, value, false, userData);
-				}
+				//return value 'false' means stop further processing
+				if (!func (isHeader? header : name, value, isHeader, userData))
+					return;
 			}
 		}
 

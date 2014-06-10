@@ -23,8 +23,9 @@ namespace HyperFastCgi.Transports
 		public int VPort = -1;
 		public string VPath;
 
-		//use 'host' for unmanaged transport
+		//use 'Host' for unmanaged transport
 		public IntPtr Host;
+		//use 'Transport' for managed transport
 		public IApplicationHostTransport Transport;
 
 		public TransportRequest(ushort requestId, byte[] header, byte[] body)

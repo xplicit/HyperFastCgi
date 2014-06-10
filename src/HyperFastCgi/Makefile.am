@@ -73,6 +73,7 @@ FILES =  \
 	AppHosts/Raw/HelloWorldRequest.cs \
 	AppHosts/Raw/RawHost.cs \
 	AppHosts/Raw/RawHostConfig.cs \
+	ApplicationServers/HostInfo.cs \
 	ApplicationServers/SimpleApplicationServer.cs \
 	Configuration/AppHostConfig.cs \
 	Configuration/AppServerConfig.cs \
@@ -116,11 +117,12 @@ FILES =  \
 	Sockets/UnixSocket.cs \
 	Strings.cs \
 	TestResponse.cs \
+	Transports/BaseManagedListenerTransport.cs \
 	Transports/CombinedAppHostTransport.cs \
-	Transports/CombinedListenerTransport.cs \
-	Transports/FastCgiListenerTransport.cs \
+	Transports/CombinedFastCgiListenerTransport.cs \
 	Transports/KeyValuePair.cs \
 	Transports/ManagedAppHostTransport.cs \
+	Transports/ManagedFastCgiListenerTransport.cs \
 	Transports/NativeTransport.cs \
 	Transports/TransportRequest.cs 
 

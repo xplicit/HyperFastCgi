@@ -10,6 +10,9 @@ GArray *apps = NULL;
 static gboolean
 match_host (HostInfo *host, gchar *vhost, int vport, gchar *vpath);
 
+static void
+dump_hosts();
+
 void
 register_host (MonoObject* host, MonoString *virtual_host, int virtual_port, MonoString *virtual_path, MonoString *path)
 {
@@ -31,6 +34,7 @@ register_host (MonoObject* host, MonoString *virtual_host, int virtual_port, Mon
     g_array_append_val(apps,app);
 
     INFO_OUT("%s:%i:%s:%s\n", app.vhost, app.vport, app.vpath, app.path);
+//    dump_hosts();
 }
 
 void
@@ -46,6 +50,7 @@ unregister_host (MonoObject* host, MonoString *virtual_host, int virtual_port, M
         if (strcmp(app.vhost, vhost) == 0
             && strcmp(app.vpath, vpath) == 0
             && app.vport == virtual_port) {
+                INFO_OUT("%s:%i:%s:%s\n", app.vhost, app.vport, app.vpath, app.path);
                 g_array_remove_index(apps, i);
                 g_free(app.vhost);
                 g_free(app.vpath);
@@ -55,6 +60,8 @@ unregister_host (MonoObject* host, MonoString *virtual_host, int virtual_port, M
     }
     g_free (vhost);
     g_free (vpath);
+
+//    dump_hosts();
 }
 
 HostInfo *
@@ -93,5 +100,19 @@ match_host (HostInfo *host, gchar *vhost, int vport, gchar *vpath)
     if (host->vpath[vlen-1]=='/') vlen--;
 
     return strncmp(host->vpath, vpath, vlen) == 0;
+}
+
+static void
+dump_hosts()
+{
+    HostInfo *app;
+    int i;
+
+    INFO_OUT("Applications:\n")
+    for(i=0; i < apps->len; i++) {
+        app = &g_array_index(apps, HostInfo, i);
+        INFO_OUT("%s:%i:%s:%s %p\n", app->vhost, app->vport, app->vpath, app->path, app->host);
+    }
+
 }
 

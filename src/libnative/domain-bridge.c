@@ -54,11 +54,15 @@ domain_bridge_create_request (MonoObject *transport, HostInfo *host, guint64 req
     MonoDomain* domain=mono_object_get_domain(host->host);
     MonoDomain* current=mono_domain_get();
     mono_domain_set(domain,FALSE);
+//    if (mono_gchandle_get_target(host->host_gc_handle) != host->host) {
+//        ERROR_OUT("target=%p host=%p", mono_gchandle_get_target(host->host_gc_handle), host->host);
+//    }
+
     domain_bridge_create_request_func(host->host,requestId, request_num, &ex);
     //TODO: handle exception
     mono_domain_set(current,FALSE);
     if (ex)
-        ERROR_OUT("exception! %s","add_server_variable");
+        ERROR_OUT("exception! %s","create_request");
 }
 
 void
@@ -205,15 +209,15 @@ domain_bridge_get_route(MonoObject *transport, MonoString *virtual_host, int vir
 
 void domain_bridge_register_icall ()
 {
-    mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::GetRoute",domain_bridge_get_route);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedFastCgiListenerTransport::GetRoute",domain_bridge_get_route);
 
-    mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::RegisterTransport",domain_bridge_register_transport);
-    mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::AppHostTransportCreateRequest",domain_bridge_create_request);
-    mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::AppHostTransportAddHeader",domain_bridge_add_header);
-    mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::AppHostTransportAddServerVariable",domain_bridge_add_server_variable);
-    mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::AppHostTransportHeadersSent",domain_bridge_headers_sent);
-    mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::AppHostTransportAddBodyPart",domain_bridge_add_body_part);
-    mono_add_internal_call ("HyperFastCgi.Transports.CombinedListenerTransport::AppHostTransportProcess",domain_bridge_process);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedFastCgiListenerTransport::RegisterTransport",domain_bridge_register_transport);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedFastCgiListenerTransport::AppHostTransportCreateRequest",domain_bridge_create_request);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedFastCgiListenerTransport::AppHostTransportAddHeader",domain_bridge_add_header);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedFastCgiListenerTransport::AppHostTransportAddServerVariable",domain_bridge_add_server_variable);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedFastCgiListenerTransport::AppHostTransportHeadersSent",domain_bridge_headers_sent);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedFastCgiListenerTransport::AppHostTransportAddBodyPart",domain_bridge_add_body_part);
+    mono_add_internal_call ("HyperFastCgi.Transports.CombinedFastCgiListenerTransport::AppHostTransportProcess",domain_bridge_process);
 
     mono_add_internal_call ("HyperFastCgi.Transports.CombinedAppHostTransport::RegisterHost",register_host);
     mono_add_internal_call ("HyperFastCgi.Transports.CombinedAppHostTransport::UnregisterHost",unregister_host);

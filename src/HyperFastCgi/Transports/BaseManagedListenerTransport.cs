@@ -1,41 +1,48 @@
 ﻿using System;
 using HyperFastCgi.Interfaces;
-using HyperFastCgi.FastCgiProtocol;
-using System.Collections.Generic;
 using HyperFastCgi.Listeners;
-using System.Threading;
+using HyperFastCgi.FastCgiProtocol;
 using HyperFastCgi.Logging;
+using System.Collections.Generic;
 
 namespace HyperFastCgi.Transports
 {
-	public class FastCgiListenerTransport : MarshalByRefObject, IListenerTransport
+	public abstract class BaseManagedListenerTransport : MarshalByRefObject, IListenerTransport
 	{
+		#region abstract methods
+		public abstract void CreateRequest(TransportRequest req);
+
+		public abstract void AddHeader(TransportRequest req, string name, string value);
+
+		public abstract void AddServerVariable(TransportRequest req, string name, string value);
+
+		public abstract void HeadersSent(TransportRequest req);
+
+		public abstract void AddBodyPart(TransportRequest req, byte[] body, bool final);
+
+		public abstract void Process(TransportRequest req);
+
+		public abstract bool IsHostFound(TransportRequest req);
+
+		public abstract void GetRoute(TransportRequest req, string vhost, int vport, string vpath);
+		#endregion
+
 		private Dictionary<ulong,TransportRequest> requests = new Dictionary<ulong, TransportRequest> ();
 		private static object requestsLock = new object ();
-		private IWebListener listener;
 		bool debugEnabled = false;
+		private IWebListener listener;
 
 		public IWebListener Listener {
-			get { return listener; }
-		}
+			get { return listener;}
+		} 
 
-		public FastCgiListenerTransport ()
-		{
-		}
-
-		public void Configure (IWebListener listener, object config)
+		#region IListenerTransport implementation
+		public virtual void Configure (IWebListener listener, object config)
 		{
 			this.listener = listener;
 		}
 
-		/// <summary>
-		/// Processes the record.
-		/// </summary>
-		/// <returns><c>true</c>, if record was sent, <c>false</c> otherwise.</returns>
-		/// <param name="header">Header.</param>
-		/// <param name="recordBody">Record body.</param>
-		/// <remarks>Routes the record to proper ApplicationHost<remarks>
-		public bool Process (ulong listenerTag, int num, byte[] header,byte[] recordBody)
+		public virtual bool Process (ulong listenerTag, int requestNumber, byte[] header, byte[] recordBody)
 		{
 			bool stopReceive = false;
 
@@ -62,6 +69,12 @@ namespace HyperFastCgi.Transports
 				req.KeepAlive = (brb.Flags & BeginRequestFlags.KeepAlive) == BeginRequestFlags.KeepAlive;
 				AddRequest (req);
 
+				//try to find single app route
+				GetRoute (req, null, -1, null);
+				if (IsHostFound(req)) {
+					CreateRequest (req);
+				}
+
 				FastCgiNetworkConnector connector = FastCgiNetworkConnector.GetConnector (req.fd);
 				if (connector != null) {
 					connector.KeepAlive = req.KeepAlive;
@@ -69,104 +82,73 @@ namespace HyperFastCgi.Transports
 				return stopReceive;
 			}
 
-			switch (record.Type) {
-			case RecordType.BeginRequest:
-				break;
-			case RecordType.Params:
-				//TODO: find application in the route
-				//TODO: save route to the request
-				//FIXME: can be two cases: route not found (no HOST param), need to wait next params  
-				//or route not found (there is no matching HOST). Send error back in the case
+			if (request != null) {
+				switch (record.Type) {
+				case RecordType.BeginRequest:
+					break;
+				case RecordType.Params:
+					if (request.Header != null) {
+						if (debugEnabled) {
+							Logger.Write (LogLevel.Debug, "lt={0} LT::ProcessRecord header={1} reqId={2}", listenerTag,
+								request.Header [1], (ushort)((request.Header [2] << 8) + request.Header [3]));
+						}
+					}
 
-				if (request.Header != null) {
+					if (recordBody != null) {
+						FcgiUtils.ParseParameters (recordBody, AddHeader, request);
+					} else {
+						//FIXME: request.Host can be null
+						HeadersSent (request);
+					}
+
 					if (debugEnabled) {
 						Logger.Write (LogLevel.Debug, "lt={0} LT::ProcessRecord header={1} reqId={2}", listenerTag,
-							request.Header [1], (ushort)((request.Header [2] << 8) + request.Header [3]));
+							header [1], (ushort)((header [2] << 8) + header [3]));
 					}
-				}
-
-				if (recordBody != null) {
-					FcgiUtils.ParseParameters (recordBody, AddHeader, request);
-				} else {
-					request.Transport.HeadersSent (request.Hash, request.RequestNumber);
-				}
-
-				//send last Params request
-				if (debugEnabled) {
-					Logger.Write (LogLevel.Debug, "lt={0} LT::ProcessRecord header={1} reqId={2}", listenerTag,
-						header [1], (ushort)((header [2] << 8) + header [3]));
-				}
-				break;
-			case RecordType.StandardInput:
-				//Ready to process
-				if (debugEnabled) {
-					Logger.Write (LogLevel.Debug, "lt={0} LT::ProcessRecord header={1} reqId={2}", listenerTag,
-						header [1], (ushort)((header [2] << 8) + header [3]));
-				}
-				bool final = record.BodyLength == 0;
-				request.Transport.AddBodyPart (request.Hash, request.RequestNumber, recordBody, final);
-				if (final) {
-					stopReceive = true;
-					request.Transport.Process (request.Hash, request.RequestNumber);
-				}
-				break;
-			case RecordType.Data:
-				break;
-			case RecordType.GetValues:
-				if (request != null) {
+					break;
+				case RecordType.StandardInput:
+						//Ready to process
+					if (debugEnabled) {
+						Logger.Write (LogLevel.Debug, "lt={0} LT::ProcessRecord header={1} reqId={2}", listenerTag,
+							header [1], (ushort)((header [2] << 8) + header [3]));
+					}
+					bool final = record.BodyLength == 0;
+					AddBodyPart (request, recordBody, final);
+					if (final) {
+						stopReceive = true;
+						Process (request);
+					}
+					break;
+				case RecordType.Data:
+					break;
+				case RecordType.GetValues:
 					//TODO: return server values
-				}
-				break;
+					break;
 				// Aborts a request when the server aborts.
 				//TODO: make Thread.Abort for request
-			case RecordType.AbortRequest:
-				if (request != null) {
+				case RecordType.AbortRequest:
 					//FIXME: send it to the HostTransport as is
 					//TODO: send error to Connector
 					//TODO: send EndRequest to Connector
-//					SendError (request.RequestId, Strings.Connection_AbortRecordReceived);
-//					EndRequest (request.RequestId, -1, ProtocolStatus.RequestComplete);
-				}
+					//					SendError (request.RequestId, Strings.Connection_AbortRecordReceived);
+					//					EndRequest (request.RequestId, -1, ProtocolStatus.RequestComplete);
+					break;
 
-				break;
-
-			default:
+				default:
 				//TODO: CgiConnector.SendRecord
-//				SendRecord (new Record (Record.ProtocolVersion,
-//					RecordType.UnknownType,
-//					request.RequestId,
-//					new UnknownTypeBody (record.Type).GetData ()));
-				break;
+				//				SendRecord (new Record (Record.ProtocolVersion,
+				//					RecordType.UnknownType,
+				//					request.RequestId,
+				//					new UnknownTypeBody (record.Type).GetData ()));
+					break;
+				}
 			}
 
 			return stopReceive;
+
 		}
 
-		private void AddHeader(string name, string value, bool isHeader, object userData)
-		{
-			TransportRequest req = userData as TransportRequest;
-
-			//if we did not find a route yet
-			if (req.Transport == null) {
-				//TODO: change this stub
-//				if (isHeader && name == "Host") {
-					//TODO: check for null after route if yes return false
-					req.Transport = Listener.Server.GetRoute (value).AppHostTransport;
-					//TODO: check that transport is routed
-					req.Transport.CreateRequest (req.Hash, req.RequestNumber);
-					//TODO: send all saved headers.
-//					req.Transport.AddHeader (req.Hash, req.RequestNumber, name, value);
-//				}
-			} 
-//			else {
-				if (isHeader)
-					req.Transport.AddHeader (req.Hash, req.RequestNumber, name, value);
-				else
-					req.Transport.AddServerVariable (req.Hash, req.RequestNumber, name, value);
-//			}
-		}
-
-		public void SendOutput (ulong hash, int requestNumber, byte[] data, int length)
+		public virtual void SendOutput (ulong hash, int requestNumber, byte[] data, int length)
 		{
 			if (debugEnabled) {
 				Logger.Write (LogLevel.Debug, "lt={0:X} SendOutput reqN={1}", hash, requestNumber);
@@ -177,7 +159,7 @@ namespace HyperFastCgi.Transports
 			} 
 		}
 
-		public void EndRequest (ulong hash, int requestNumber, int appStatus)
+		public virtual void EndRequest (ulong hash, int requestNumber, int appStatus)
 		{
 			if (debugEnabled) {
 				Logger.Write (LogLevel.Debug, "lt={0:X} EndRequest reqN={1}", hash, requestNumber);
@@ -196,8 +178,61 @@ namespace HyperFastCgi.Transports
 				Logger.Write (LogLevel.Error, "Wrong EndRequest"); 
 			}
 		}
+		#endregion
 
+		private bool AddHeader(string name, string value, bool isHeader, object userData)
+		{
+			TransportRequest req = userData as TransportRequest;
 
+			//if we did not find a route yet
+			if (!IsHostFound(req)) {
+				req.tempKeys.Add (new KeyValuePair () {
+					Key = name,
+					Value = value,
+					IsHeader = isHeader
+				});
+
+				if (req.VHost == null && name == "SERVER_NAME") {
+					req.VHost = value;
+				}
+				if (req.VPort == -1 && name == "SERVER_PORT") {
+					int.TryParse (value, out req.VPort);
+				}
+				if (req.VPath == null && name == "SCRIPT_NAME") {
+					req.VPath = value;
+				}
+
+				if (req.VHost != null && req.VPort != -1 && req.VPath != null) {
+					GetRoute (req, req.VHost, req.VPort, req.VPath);
+
+					if (IsHostFound(req)) {
+						CreateRequest (req);
+
+						foreach (KeyValuePair pair in req.tempKeys) {
+							if (pair.IsHeader)
+								AddHeader (req, pair.Key, pair.Value);
+							else
+								AddServerVariable (req, pair.Key, pair.Value);
+						}
+					} else {
+						Logger.Write (LogLevel.Error, "Can't find app {0}:{1} {2}", req.VHost, req.VPort, req.VPath);
+						//TODO: Send EndRequest with error message
+						//SendError (request.Hash, req.RequestNumber, Strings.Connection_AbortRecordReceived);
+						EndRequest (req.Hash, req.RequestNumber, -1);
+						return false;
+					}
+				}
+			} else {
+				if (isHeader)
+					AddHeader (req, name, value);
+				else
+					AddServerVariable (req, name, value);
+			}
+
+			return true;
+		}
+
+		#region SendData implementation
 		private void SendStreamData (uint listenerTag, RecordType type, ushort requestId, byte[] data,
 			int length)
 		{
@@ -225,7 +260,7 @@ namespace HyperFastCgi.Transports
 			}
 		}
 
-		public void SendRecord (uint listenerTag, RecordType type, ushort requestID,
+		private void SendRecord (uint listenerTag, RecordType type, ushort requestID,
 			byte[] bodyData, int bodyIndex, int bodyLength)
 		{
 			if (debugEnabled) {
@@ -255,7 +290,7 @@ namespace HyperFastCgi.Transports
 		/// <param name="header">Header.</param>
 		/// <param name="body">Body.</param>
 		/// <description>This function sends record to web listener in listener domain</description>
-		public bool SendRecord (uint listenerTag, byte[] header,byte[] body)
+		private bool SendRecord (uint listenerTag, byte[] header,byte[] body)
 		{
 			//get connector by it's tag
 			if (debugEnabled) {
@@ -277,6 +312,7 @@ namespace HyperFastCgi.Transports
 
 			return true;
 		}
+		#endregion
 
 		#region requests caching and handling
 		private TransportRequest GetRequest (ulong hash)

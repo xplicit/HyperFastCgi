@@ -4,26 +4,33 @@ using HyperFastCgi.AppHosts.AspNet;
 using HyperFastCgi.Interfaces.Events;
 using HyperFastCgi.Configuration;
 using HyperFastCgi.Logging;
+using System.Collections.Generic;
+using HyperFastCgi.Transports;
 
 namespace HyperFastCgi.ApplicationServers
 {
 	public class SimpleApplicationServer : MarshalByRefObject, IApplicationServer
 	{
-		private IApplicationHost singleHost;
 		private string physicalRoot;
+		private List<HostInfo> hosts = new List<HostInfo> ();
 
 		public string PhysicalRoot {
 			get { return physicalRoot; }
 		}
 
-		public IApplicationHost GetRoute(string path)
+		public IApplicationHost GetRoute(string vhost, int vport, string vpath)
 		{
-			return singleHost;
+			lock (hosts) {
+				if (hosts.Count > 0)
+					return hosts [0].Host;
+				else
+					return null;
+			}
 		}
 
 		public IApplicationHost CreateApplicationHost(Type appHostType, object appHostConfig, 
 			object webAppConfig, 
-			IListenerTransport listenerTransport, Type transportType, object transportConfig)
+			IListenerTransport listenerTransport, Type appHostTransportType, object appHostTransportConfig)
 		{
 			WebAppConfig appConfig = webAppConfig as WebAppConfig;
 
@@ -32,14 +39,70 @@ namespace HyperFastCgi.ApplicationServers
 				return null;
 			}
 
-			AspNetApplicationHostFactory factory = new AspNetApplicationHostFactory ();
-			IApplicationHost host = factory.CreateApplicationHost (appHostType, appConfig.VHost, appConfig.VPort, appConfig.VPath, appConfig.RealPath);
-			host.HostUnload += (object sender, HostUnloadEventArgs e) => Console.WriteLine ("Host unload");
-			host.Configure (appHostConfig, webAppConfig, this, listenerTransport, transportType, transportConfig);
+			return CreateAppHost (appHostType, appHostConfig, appConfig, listenerTransport, appHostTransportType, appHostTransportConfig);
+		}
 
-			singleHost = host;
+		private IApplicationHost CreateAppHost(Type appHostType, object appHostConfig, 
+			WebAppConfig appConfig, 
+			IListenerTransport listenerTransport, Type appHostTransportType, object appHostTransportConfig)
+		{
+			try
+			{
+				AspNetApplicationHostFactory factory = new AspNetApplicationHostFactory ();
+				IApplicationHost host = factory.CreateApplicationHost (appHostType, appConfig.VHost, appConfig.VPort, appConfig.VPath, appConfig.RealPath);
+				host.Configure (appHostConfig, appConfig, this, listenerTransport, appHostTransportType, appHostTransportConfig);
+				//subscribe to Unload event only after run host.Configure
+				//because apphost transport must unregister himself first
+				host.HostUnload += OnHostUnload;
 
-			return host;
+				lock (hosts) {
+					hosts.Add (new HostInfo () {
+						Host = host,
+						AppHostType = appHostType,
+						AppHostConfig = appHostConfig,
+						AppConfig = appConfig,
+						ListenerTransport = listenerTransport,
+						AppHostTransportType = appHostTransportType,
+						AppHostTransportConfig = appHostTransportConfig
+					});
+				}
+				return host;
+			} catch (Exception ex) {
+				Logger.Write (LogLevel.Error, "Can't create host {0}", ex);
+				return null;
+			}
+
+		}
+
+		private void OnHostUnload(object sender, HostUnloadEventArgs e)
+		{
+			HostInfo host = null;
+
+			foreach (HostInfo info in hosts) {
+				if (info.Host == sender) {
+					host = info;
+					break;
+				}
+			}
+
+			if (host == null) {
+				IApplicationHost appHost = sender as IApplicationHost;
+				Logger.Write (LogLevel.Error, "Can't unload host {0}:{1}:{2}:{3}", appHost.VHost, appHost.VPort, appHost.VPath, appHost.Path);
+				return;
+			}
+
+			Logger.Write (LogLevel.Debug, "Domain={0} Unload host in domain {1}", AppDomain.CurrentDomain.FriendlyName, ((IApplicationHost)sender).Domain.FriendlyName);
+
+			lock (hosts) {
+				hosts.Remove (host);
+			}
+
+			if (!e.IsShutdown) {
+//				CombinedFastCgiListenerTransport.RegisterTransport (host.ListenerTransport, typeof(CombinedAppHostTransport));
+
+				CreateAppHost (host.AppHostType, host.AppHostConfig, host.AppConfig,
+					host.ListenerTransport, host.AppHostTransportType, host.AppHostTransportConfig);
+			}
 		}
 
 		public SimpleApplicationServer(string physicalRoot)

@@ -26,6 +26,11 @@ namespace HyperFastCgi.Transports
 		public void Configure (IApplicationHost host, object config)
 		{
 			this.appHost = host;
+			host.HostUnload += (sender, e) => UnregisterHost (
+				((IApplicationHost)sender).VHost,
+				((IApplicationHost)sender).VPort,
+				((IApplicationHost)sender).VPath
+			);
 			RegisterHost (host.VHost, host.VPort, host.VPath, host.Path);
 		}
 
@@ -112,6 +117,9 @@ namespace HyperFastCgi.Transports
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void RegisterHost (string vhost, int vport, string virtualPath, string path);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void UnregisterHost (string vhost, int vport, string virtualPath);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SendOutput (ulong requestId, int requestNumber, byte[] data, int len);

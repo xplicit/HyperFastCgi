@@ -25,7 +25,7 @@
         <Variable name="MONO_PATH" value="." />
       </EnvironmentVariables>
     </EnvironmentVariables>
-    <Commandlineparameters>/config=../../../../samples/combined-two-apps.config  /socket=tcp:127.0.0.1:9000 /loglevels=All /printlog /addtrailingslash=true</Commandlineparameters>
+    <Commandlineparameters>/config=../../../../samples/combined.config  /applications=ssbench3:81:/:/var/www/ssbench3 /socket=tcp:127.0.0.1:9000 /loglevels=All /printlog /addtrailingslash=true</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -89,11 +89,9 @@
     <Compile Include="Listeners\FastCgiNetworkConnector.cs" />
     <Compile Include="Listeners\NativeListener.cs" />
     <Compile Include="Transports\TransportRequest.cs" />
-    <Compile Include="Transports\FastCgiListenerTransport.cs" />
     <Compile Include="Transports\NativeTransport.cs" />
     <Compile Include="Transports\ManagedAppHostTransport.cs" />
     <Compile Include="Transports\CombinedAppHostTransport.cs" />
-    <Compile Include="Transports\CombinedListenerTransport.cs" />
     <Compile Include="Mono.WebServer\HttpErrors.cs" />
     <Compile Include="Mono.WebServer\VPathToHost.cs" />
     <Compile Include="Mono.WebServer\Events\DomainReloadEventArgs.cs" />
@@ -101,6 +99,10 @@
     <Compile Include="Mono.WebServer\Events\MapPathEventArgs.cs" />
     <Compile Include="Interfaces\Events\HostUnloadEventArgs.cs" />
     <Compile Include="Transports\KeyValuePair.cs" />
+    <Compile Include="ApplicationServers\HostInfo.cs" />
+    <Compile Include="Transports\BaseManagedListenerTransport.cs" />
+    <Compile Include="Transports\ManagedFastCgiListenerTransport.cs" />
+    <Compile Include="Transports\CombinedFastCgiListenerTransport.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

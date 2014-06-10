@@ -42,7 +42,7 @@ namespace HyperFastCgi.AppHosts
 			}
 		}
 
-		public AppDomain Domain {
+		public virtual AppDomain Domain {
 			get { return AppDomain.CurrentDomain; }
 		}
 
@@ -99,6 +99,7 @@ namespace HyperFastCgi.AppHosts
 		public AppHostBase()
 		{
 			AppDomain.CurrentDomain.DomainUnload += new EventHandler (OnDomainUnload);
+//			AppDomain.CurrentDomain.DomainUnload += (sender, e) => Console.WriteLine("Domain unload");
 		}
 
 		public virtual void OnDomainUnload (object sender, EventArgs e)

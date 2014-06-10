@@ -16,6 +16,7 @@ namespace HyperFastCgi.Transports
 		Dictionary<ulong, IWebRequest> requests = new Dictionary<ulong, IWebRequest> ();
 		object requestsLock = new object ();
 		IApplicationHost appHost;
+		bool isUnload;
 
 		public IApplicationHost AppHost {
 			get { return appHost;}
@@ -26,17 +27,23 @@ namespace HyperFastCgi.Transports
 		public void Configure (IApplicationHost host, object config)
 		{
 			this.appHost = host;
+			host.HostUnload += OnHostUnload;
+		}
+
+		void OnHostUnload (object sender, HyperFastCgi.Interfaces.Events.HostUnloadEventArgs e)
+		{
+			isUnload = true;
 		}
 
 		public void CreateRequest (ulong requestId, int requestNumber)
 		{
+//			Console.WriteLine ("CreateRequest hash={0}, reqN={1}", requestId, requestNumber);
+
 			IWebRequest req=AppHost.CreateRequest (requestId, requestNumber, null);
 
 			lock (requestsLock) {
 				requests.Add (requestId, req);
 			}
-
-//			Console.WriteLine ("CreateRequest hash={0}, reqN={1}", requestId, requestNumber);
 		}
 
 		public void AddServerVariable (ulong requestId, int requestNumber, string name, string value)
@@ -79,6 +86,7 @@ namespace HyperFastCgi.Transports
 
 		public void AddBodyPart (ulong requestId, int requestNumber, byte[] body, bool final)
 		{
+//			Console.WriteLine ("AddBodyPart hash={0}, reqN={1}, final={2}", requestId, requestNumber, final);
 			IWebRequest request;
 			lock (requestsLock)
 			{
@@ -111,12 +119,16 @@ namespace HyperFastCgi.Transports
 
 		public void SendOutput (ulong requestId, int requestNumber, byte[] data, int len)
 		{
-			appHost.ListenerTransport.SendOutput (requestId, requestNumber, data, len);
+			if (!isUnload) {
+				appHost.ListenerTransport.SendOutput (requestId, requestNumber, data, len);
+			}
 		}
 
 		public void EndRequest (ulong requestId, int requestNumber, int appStatus)
 		{
-			appHost.ListenerTransport.EndRequest (requestId, requestNumber, appStatus);
+			if (!isUnload) {
+				appHost.ListenerTransport.EndRequest (requestId, requestNumber, appStatus);
+			}
 		}
 	}
 }
