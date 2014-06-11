@@ -78,13 +78,12 @@ namespace HyperFastCgi.Transports
 		public extern void AppHostTransportProcess (IntPtr host, ulong requestId, int requestNumber);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern static void RegisterTransport (object thisObj, Type transportType);
+		public extern void RegisterTransport ();
 
 		[DllImport("libhfc-native", EntryPoint="domain_bridge_register_icall")]
 		public extern static void RegisterIcall ();
 
-		delegate void HideFromJit(object thisObj, Type t);    
-		private static HideFromJit d=RegisterTransport;
+		delegate void HideFromJit();    
 
 		static CombinedFastCgiListenerTransport ()
 		{
@@ -93,10 +92,8 @@ namespace HyperFastCgi.Transports
 
 		public CombinedFastCgiListenerTransport()
 		{
-			//we have to create instance of the transport,
-			//otherwise jit can't find its methods 
-			new CombinedAppHostTransport ();
-			d (this, typeof(CombinedAppHostTransport));
+			HideFromJit d=RegisterTransport;
+			d ();
 		}
 
 	}

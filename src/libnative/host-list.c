@@ -6,6 +6,7 @@
 
 //TODO: add pthread rw-lock mutex to apps array
 GArray *apps = NULL;
+HostInfo lastApp;
 
 static gboolean
 match_host (HostInfo *host, gchar *vhost, int vport, gchar *vpath);
@@ -30,10 +31,11 @@ register_host (MonoObject* host, MonoString *virtual_host, int virtual_port, Mon
     app.vport = virtual_port;
     app.vpath = mono_string_to_utf8(virtual_path);
     app.path = mono_string_to_utf8(path);
+    lastApp = app;
 
     g_array_append_val(apps,app);
 
-    INFO_OUT("%s:%i:%s:%s\n", app.vhost, app.vport, app.vpath, app.path);
+    INFO_OUT("%s:%i:%s:%s host=%p pinned_host=%p domain=%p\n", app.vhost, app.vport, app.vpath, app.path, host, app.host, mono_object_get_domain(host));
 //    dump_hosts();
 }
 
@@ -69,6 +71,7 @@ find_host_by_path (gchar* vhost, int vport, gchar* vpath)
 {
     int i;
 
+    return &lastApp;
     if (!apps)
         return NULL;
 

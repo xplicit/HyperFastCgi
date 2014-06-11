@@ -5,6 +5,9 @@ using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Text;
+using HyperFastCgi.Logging;
+
+
 #if !NET_2_0
 using System.Threading.Tasks;
 #endif 
@@ -25,17 +28,33 @@ namespace HyperFastCgi.Transports
 
 		public void Configure (IApplicationHost host, object config)
 		{
-			this.appHost = host;
-			host.HostUnload += (sender, e) => UnregisterHost (
-				((IApplicationHost)sender).VHost,
-				((IApplicationHost)sender).VPort,
-				((IApplicationHost)sender).VPath
-			);
-			RegisterHost (host.VHost, host.VPort, host.VPath, host.Path);
+			try {
+				this.appHost = host;
+				//remove apphost transport from list of hosts in unmanaged code
+				//when the domain unloads
+				host.HostUnload += (sender, e) => UnregisterHost (
+					((IApplicationHost)sender).VHost,
+					((IApplicationHost)sender).VPort,
+					((IApplicationHost)sender).VPath
+				);
+				//add apphost transport to list of hosts in unmanaged code
+				RegisterHost (host.VHost, host.VPort, host.VPath, host.Path);
+
+				//We have to call RegisterAppHostTransport each time
+				//otherwise when domain unloaded it frees jit-tables
+				//for classes were loaded in this domain. This means
+				//that calling unmanaged thunks pointed to old jitted methods
+				//in native-to-managed wrapper produces SEGFAULT. 
+				//Reregistering thunks via RegisterAppHostTransport helps to avoid the issue.
+				RegisterAppHostTransport(this.GetType());
+			} catch (Exception ex){
+				Logger.Write (LogLevel.Error, "Error in configuring CombinedAppHostTransport {0}", ex);
+			}
 		}
 
 		public void CreateRequest (ulong requestId, int requestNumber)
 		{
+			Console.WriteLine ("reqN={0}", requestNumber);
 			IWebRequest req=AppHost.CreateRequest (requestId, requestNumber, null);
 
 			lock (requestsLock) {
@@ -114,6 +133,9 @@ namespace HyperFastCgi.Transports
 			}
 		}
 		#endregion
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void RegisterAppHostTransport (Type transportType);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void RegisterHost (string vhost, int vport, string virtualPath, string path);

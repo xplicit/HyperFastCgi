@@ -5,6 +5,9 @@ using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Text;
+using HyperFastCgi.Logging;
+
+
 #if !NET_2_0
 using System.Threading.Tasks;
 #endif 
@@ -135,6 +138,7 @@ namespace HyperFastCgi.Transports
 
 		static NativeTransport ()
 		{
+			Logger.Write (LogLevel.Debug, "Register native transport");
 			NativeTransport.RegisterIcall ();
 			d (typeof(NativeTransport));
 		}
