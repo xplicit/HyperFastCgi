@@ -17,14 +17,14 @@
 
 ### GetRoute
 * [ ] Implement GetRoute() for managed classes
-* [ ] Implement GetRoute() for native classes
+* [X] Implement GetRoute() for native classes
 
 ### Domain Reloading
-* [ ] Implement domain reloading in Server.
+* [X] Implement domain reloading in Server.
 
 ### Native Listener
 * [ ] Create and start from the new thread (don't block main thread)
-* [ ] Implement Shutdown
+* [X] Implement Shutdown
 
 ### Managed Listener
 * [X] Remove warnings, check using of stopReceive flag and others
