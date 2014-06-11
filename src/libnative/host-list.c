@@ -71,7 +71,6 @@ find_host_by_path (gchar* vhost, int vport, gchar* vpath)
 {
     int i;
 
-    return &lastApp;
     if (!apps)
         return NULL;
 
