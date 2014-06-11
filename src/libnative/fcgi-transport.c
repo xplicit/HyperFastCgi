@@ -60,6 +60,12 @@ transport_finalize()
 
 static const char* Header="HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: 20\r\n\r\n";
 static const char* Response="<p>Hello, world!</p>";
+static const char* error404 = "HTTP/1.0 404 Not Found\r\n" \
+			           "Connection: close\r\n\r\n" \
+			           "<html><head><title>404 Not Found</title></head>\r\n" \
+			           "<body><h1>Not Found</h1>The requested URL %s was not found on this " \
+			           "server.<p>\r\n</body></html>\r\n";
+
 
 static void process_internal (Request *req, FCGI_Header *header, guint8 *body, int len)
 {
@@ -105,7 +111,7 @@ process_record(int fd, FCGI_Header* header, guint8* body)
             req->vpath = NULL;
 
             //TODO: host_info must be set in parse_params
-            req->host_info = find_host_by_path("test", -1,"123");
+            req->host_info = find_host_by_path(NULL, -1, NULL);
 
             //if host is not single, preallocate space for server variables
             if (!req->host_info) {
@@ -121,30 +127,31 @@ process_record(int fd, FCGI_Header* header, guint8* body)
     }
     pthread_mutex_unlock (&requests_lock);
 
-    switch(header->type)
-    {
-        case FCGI_BEGIN_REQUEST:
-            //TODO: assert should not be reached
-            break;
-        case FCGI_ABORT_REQUEST:
-            //TODO: remove from hash, send abort to web server
-            break;
-        case FCGI_PARAMS:
-            //TODO: parse params
-            parse_params (req, header, body);
-            break;
-        case FCGI_STDIN:
-            //TODO: read until the end
-            process_internal (req, header, body, fcgi_get_content_len(header));
-            break;
-        case FCGI_DATA:
-            //TODO: nothing?
-            break;
-        case FCGI_GET_VALUES:
-            //currently there are no server-side settings (values)
-            break;
-        default:
-            break;
+    if (req) {
+        switch(header->type)
+        {
+            case FCGI_BEGIN_REQUEST:
+                //TODO: assert should not be reached
+                break;
+            case FCGI_ABORT_REQUEST:
+                //TODO: remove from hash, send abort to web server
+                break;
+            case FCGI_PARAMS:
+                parse_params (req, header, body);
+                break;
+            case FCGI_STDIN:
+                //TODO: read until the end
+                process_internal (req, header, body, fcgi_get_content_len(header));
+                break;
+            case FCGI_DATA:
+                //TODO: nothing?
+                break;
+            case FCGI_GET_VALUES:
+                //currently there are no server-side settings (values)
+                break;
+            default:
+                break;
+        }
     }
 }
 
@@ -379,8 +386,19 @@ parse_params(Request *req, FCGI_Header *header, guint8 *data)
                         g_string_chunk_free(req->chunks);
                     } else {
                         //something wrong with configuration... we can't find the host
-                        ERROR_OUT("Can't find path! HOST='%s' port=%i path='%s'",req->hostname, req->port, req->vpath);
-                        //TODO: abort request (send EndRequest with 404, or other error?)
+                        ERROR_OUT("Can't find app! HOST='%s' port=%i path='%s'\n",req->hostname, req->port, req->vpath);
+                        //send 404 not found
+                        gchar *err = g_strdup_printf(error404, req->vpath);
+                        send_output(req->hash, req->request_num, (guint8 *)err, strlen(err));
+                        g_free(err);
+                        //free temporary resources
+                        g_free(req->hostname);
+                        g_free(req->vpath);
+                        g_array_free(req->key_value_pairs, TRUE);
+                        g_string_chunk_free(req->chunks);
+                        //end request
+                        end_request(req->hash, req->request_num, 0, FCGI_REQUEST_COMPLETE);
+                        return FALSE;
                     }
 
                 }

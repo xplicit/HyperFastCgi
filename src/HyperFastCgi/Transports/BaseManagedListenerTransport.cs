@@ -4,6 +4,7 @@ using HyperFastCgi.Listeners;
 using HyperFastCgi.FastCgiProtocol;
 using HyperFastCgi.Logging;
 using System.Collections.Generic;
+using Mono.WebServer;
 
 namespace HyperFastCgi.Transports
 {
@@ -218,7 +219,9 @@ namespace HyperFastCgi.Transports
 						Logger.Write (LogLevel.Error, "Can't find app {0}:{1} {2}", req.VHost, req.VPort, req.VPath);
 						//TODO: Send EndRequest with error message
 						//SendError (request.Hash, req.RequestNumber, Strings.Connection_AbortRecordReceived);
-						EndRequest (req.Hash, req.RequestNumber, -1);
+						byte[] notFound = HttpErrors.NotFound (req.VPath);
+						SendOutput (req.Hash, req.RequestNumber, notFound, notFound.Length); 
+						EndRequest (req.Hash, req.RequestNumber, 0);
 						return false;
 					}
 				}
