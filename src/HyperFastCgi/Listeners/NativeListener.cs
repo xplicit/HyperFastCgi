@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using HyperFastCgi.Interfaces;
 using HyperFastCgi.Configuration;
 using HyperFastCgi.Transports;
+using HyperFastCgi.Logging;
 
 namespace HyperFastCgi.Listeners
 {
@@ -10,6 +11,7 @@ namespace HyperFastCgi.Listeners
 	public class NativeListener : IWebListener
 	{
 		IApplicationServer server;
+		ListenerConfig config;
 
 		#region IWebListener implementation
 
@@ -19,11 +21,15 @@ namespace HyperFastCgi.Listeners
 		)
 		{
 			this.server = server;
+			this.config = config as ListenerConfig;
 		}
 
-		public int Listen (System.Net.Sockets.AddressFamily family, string host, int port)
+		public int Listen ()
 		{
-			return NativeListener.Listen ((ushort)family, host, (ushort)port);
+			Logger.Write (LogLevel.Debug,"Listening on port: {0}", config.Port);
+			Logger.Write (LogLevel.Debug,"Listening on address: {0}", config.Address);
+
+			return NativeListener.Listen ((ushort)config.Family, config.Address, (ushort)config.Port);
 		}
 
 		public void Shutdown ()

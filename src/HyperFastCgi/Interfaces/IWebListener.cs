@@ -16,8 +16,22 @@ namespace HyperFastCgi.Interfaces
 			Type appHostTransport, object appHostTransportConfig
 		);
 
-		int Listen (AddressFamily family, string host, int port);
+		/// <summary>
+		/// Starts listening incoming requests
+		/// </summary>
+		/// <returns>0 if success, error code otherwise <returns>
+		/// <remarks>
+		/// This method uses config options Family, Address and Port
+		/// to start listening. Config options are passed by listenerConfig
+		/// argument in the Configure method. 
+		/// 
+		/// Implementation of this method must not block the calling thread
+		/// </remarks>
+		int Listen ();
 
+		/// <summary>
+		/// Shutdowns listening.
+		/// </summary>
 		void Shutdown ();
 	}
 }

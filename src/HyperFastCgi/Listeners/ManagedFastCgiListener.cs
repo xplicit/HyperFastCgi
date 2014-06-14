@@ -21,6 +21,8 @@ namespace HyperFastCgi.Listeners
 		IListenerTransport transport;
 		Type appHostTransportType;
 
+		ListenerConfig config;
+
 		#region IWebListener implementation
 
 		public IApplicationServer Server {
@@ -40,6 +42,7 @@ namespace HyperFastCgi.Listeners
 			Type appHostTransport, object appHostTransportConfig)
 		{
 			this.server = server;
+			this.config = conf as ListenerConfig;
 
 			transport = (IListenerTransport)Activator.CreateInstance (listenerTransport);
 			transport.Configure (this, listenerTransportConfig);
@@ -47,12 +50,15 @@ namespace HyperFastCgi.Listeners
 			appHostTransportType = appHostTransport;
 		}
 
-		public int Listen (AddressFamily family, string host, int port)
+		public int Listen ()
 		{
 			this.useThreadPool = true; //useThreadPool;
 
 			try {
-				this.listener = CreateSocket (family, host, port);
+				Logger.Write (LogLevel.Debug,"Listening on port: {0}", config.Port);
+				Logger.Write (LogLevel.Debug,"Listening on address: {0}", config.Address);
+
+				this.listener = CreateSocket (config.Family, config.Address, config.Port);
 
 				listener.Listen (500);
 				listener.BeginAccept (accept, listener);

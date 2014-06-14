@@ -93,9 +93,6 @@ namespace HyperFastCgi
 
 		private static ConfigurationManager configmanager;
 
-		private static AddressFamily sockType;
-		private static string address; 
-		private static ushort port=0;
 		private static bool useThreadPool;
 
 		public static int Main (string[] args)
@@ -179,80 +176,6 @@ namespace HyperFastCgi
 			Logger.Write (LogLevel.Debug,
 				Assembly.GetExecutingAssembly ().GetName ().Name);
 
-			// Socket strings are in the format
-			// "type[:ARG1[:ARG2[:...]]]".
-			string socket_type = configmanager ["socket"] as string;
-			if (socket_type == null)
-				socket_type = "pipe";
-
-			string[] socket_parts = socket_type.Split (
-				                         new char [] { ':' }, 3);
-
-			switch (socket_parts [0].ToLower ()) {
-			// The FILE sockets is of the format
-			// "file[:PATH]".
-			case "unix":
-			case "file":
-				if (socket_parts.Length == 2)
-					configmanager ["filename"] =
-						socket_parts [1];
-
-				string path = (string)configmanager ["filename"];
-
-				sockType = AddressFamily.Unix;
-				address = path;
-
-				Logger.Write (LogLevel.Debug,
-					"Listening on file: {0}",	path);
-				break;
-
-			// The TCP socket is of the format
-			// "tcp[[:ADDRESS]:PORT]".
-			case "tcp":
-				if (socket_parts.Length > 1)
-					configmanager ["port"] = socket_parts [
-						socket_parts.Length - 1];
-
-				if (socket_parts.Length == 3)
-					configmanager ["address"] =
-						socket_parts [1];
-
-				//ushort port;
-				try {
-					port = (ushort)configmanager ["port"];
-				} catch (ApplicationException e) {
-					Logger.Write (LogLevel.Error, e.Message);
-					return 1;
-				}
-
-				string address_str =
-					(string)configmanager ["address"];
-
-				try {
-					IPAddress.Parse (address_str);
-				} catch {
-					Logger.Write (LogLevel.Error,
-						"Error in argument \"address\". \"{0}\" cannot be converted to an IP address.",
-						address_str);
-					return 1;
-				}
-
-				sockType = AddressFamily.InterNetwork;
-				address = address_str;
-
-				Logger.Write (LogLevel.Debug,
-					"Listening on port: {0}", port);
-				Logger.Write (LogLevel.Debug,
-					"Listening on address: {0}", address_str);
-				break;
-
-			default:
-				Logger.Write (LogLevel.Error,
-					"Error in argument \"socket\". \"{0}\" is not a supported type. Use \"pipe\", \"tcp\" or \"unix\".",
-					socket_parts [0]);
-				return 1;
-			}
-
 			string root_dir = configmanager ["root"] as string;
 			if (root_dir != null && root_dir.Length != 0) {
 				try {
@@ -266,10 +189,6 @@ namespace HyperFastCgi
 
 			root_dir = Environment.CurrentDirectory;
 			bool auto_map = false; //(bool) configmanager ["automappaths"];
-
-//			appserver = new ApplicationServer (typeof(ApplicationHost), root_dir);
-//			appserver.Verbose = (bool)configmanager ["verbose"];
-//			appserver.DomainReloadEvent +=DomainReloadEventHandler;
 
 			string applications = (string)
 			                      configmanager ["applications"];
@@ -386,7 +305,7 @@ namespace HyperFastCgi
 					listener.Transport, listener.AppHostTransportType, 
 					listenerConfigs[0].AppHostTransport != null ? listenerConfigs[0].AppHostTransport.Config: null);
 			}
-			listener.Listen (sockType, address, port);
+			listener.Listen ();
 
 			configmanager = null;
 
@@ -394,7 +313,6 @@ namespace HyperFastCgi
 				Console.WriteLine (
 					"Hit Return to stop the server.");
 				Console.ReadLine ();
-//				host.Shutdown ();
 			} else {
 				UnixSignal[] signals = new UnixSignal[] { 
 					new UnixSignal (Signum.SIGINT), 
@@ -413,13 +331,6 @@ namespace HyperFastCgi
 			}
 
 			return 0;
-		}
-
-		static void DomainReloadEventHandler(object sender,DomainReloadEventArgs args)
-		{
-//			ApplicationHost host = args.VApp.AppHost as ApplicationHost;
-//
-//			host.Start (sockType, address, port, keepAlive, useThreadPool);
 		}
 
 		static void SetThreads(int minWorkerThreads, int minIOThreads, int maxWorkerThreads, int maxIOThreads)
