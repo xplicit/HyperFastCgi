@@ -13,8 +13,6 @@ namespace HyperFastCgi.Transports
 		public uint fd;
 		public ushort RequestId;
 		public int RequestNumber;
-		public byte[] Header;
-		public byte[] Body;
 		public bool StdOutSent;
 		public bool KeepAlive;
 
@@ -28,12 +26,10 @@ namespace HyperFastCgi.Transports
 		//use 'Transport' for managed transport
 		public IApplicationHostTransport Transport;
 
-		public TransportRequest(ushort requestId, byte[] header, byte[] body)
+		public TransportRequest(ushort requestId)
 		{
 			this.RequestId = requestId;
 			this.RequestNumber = Interlocked.Increment (ref nreq);
-			this.Header = (byte [])header.Clone();
-			this.Body = (byte[] )body.Clone();
 		}
 	}
 }

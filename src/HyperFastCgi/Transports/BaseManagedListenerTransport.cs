@@ -8,6 +8,9 @@ using Mono.WebServer;
 
 namespace HyperFastCgi.Transports
 {
+	/// <summary>
+	/// Base class for transports which deals with managed listener.
+	/// </summary>
 	public abstract class BaseManagedListenerTransport : MarshalByRefObject, IListenerTransport
 	{
 		#region abstract methods
@@ -64,7 +67,7 @@ namespace HyperFastCgi.Transports
 
 			if (request == null && record.Type == RecordType.BeginRequest) {
 				BeginRequestBody brb = new BeginRequestBody (recordBody);
-				TransportRequest req = new TransportRequest (record.RequestId, header, recordBody);
+				TransportRequest req = new TransportRequest (record.RequestId);
 				req.Hash = ((ulong)record.RequestId << 32) ^ listenerTag;
 				req.fd = (uint)listenerTag;
 				req.KeepAlive = (brb.Flags & BeginRequestFlags.KeepAlive) == BeginRequestFlags.KeepAlive;
@@ -88,10 +91,10 @@ namespace HyperFastCgi.Transports
 				case RecordType.BeginRequest:
 					break;
 				case RecordType.Params:
-					if (request.Header != null) {
+					if (header != null) {
 						if (debugEnabled) {
 							Logger.Write (LogLevel.Debug, "lt={0} LT::ProcessRecord header={1} reqId={2}", listenerTag,
-								request.Header [1], (ushort)((request.Header [2] << 8) + request.Header [3]));
+								header [1], (ushort)((header [2] << 8) + header [3]));
 						}
 					}
 
