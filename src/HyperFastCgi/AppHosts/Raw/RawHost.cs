@@ -2,6 +2,7 @@
 using HyperFastCgi.Interfaces;
 using HyperFastCgi.Configuration;
 using System.Reflection.Emit;
+using HyperFastCgi.Logging;
 
 namespace HyperFastCgi.AppHosts.Raw
 {
@@ -40,7 +41,14 @@ namespace HyperFastCgi.AppHosts.Raw
 			RawHostConfig config = appHostConfig as RawHostConfig;
 
 			if (config != null) {
+				Logger.Level = config.Log.Level;
+				Logger.WriteToConsole = config.Log.WriteToConsole;
+
 				requestType = Type.GetType(config.RequestType);
+				if (requestType == null) {
+					Logger.Write(LogLevel.Error, "Couldn't find type '{0}'", config.RequestType);
+					throw new ArgumentException ("appHostConfig.Type");
+				}
 				CreateRequestInstance = CreateDynamicMethod (requestType);
 			}
 
