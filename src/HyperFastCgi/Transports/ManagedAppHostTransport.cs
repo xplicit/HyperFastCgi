@@ -5,9 +5,6 @@ using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Text;
-#if !NET_2_0
-using System.Threading.Tasks;
-#endif 
 
 namespace HyperFastCgi.Transports
 {

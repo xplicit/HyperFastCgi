@@ -2,6 +2,10 @@
 using HyperFastCgi.Interfaces;
 using System.Collections.Generic;
 using HyperFastCgi.Configuration;
+using System.Threading;
+#if !NET_2_0
+using System.Threading.Tasks;
+#endif 
 
 namespace HyperFastCgi.Transports
 {
@@ -105,20 +109,22 @@ namespace HyperFastCgi.Transports
 					lock (requestsLock) {
 						requests.Remove (requestId);
 					}
-					//					ThreadPool.QueueUserWorkItem ( _ => req.Process (req));
-					//ThreadPool.UnsafeQueueUserWorkItem (ProcessInternal,req);
-					//					Task.Factory.StartNew ( () => {
-					request.Process ((IWebResponse)request);
-					//					});
-					//					ThreadPool.QueueUserWorkItem (_ => {
-					//						for(int i=0;i<1000000;i++)
-					//						{
-					//							int j=i*i;
-					//						}
-					//						SendOutput (request.RequestId, request.RequestNumber, header, header.Length);
-					//						SendOutput (request.RequestId, request.RequestNumber, content, content.Length);
-					//						EndRequest (request.RequestId, request.RequestNumber, 0);
-					//					});
+					switch (mt) {
+					case MultiThreadingOption.SingleThread:
+						request.Process ((IWebResponse)request);
+						break;
+					case MultiThreadingOption.Task:
+						#if !NET_2_0
+						Task.Factory.StartNew (() => {
+							request.Process ((IWebResponse)request);
+						});
+						break;
+						#endif
+					case MultiThreadingOption.ThreadPool:
+					default:
+						ThreadPool.QueueUserWorkItem (_ => request.Process ((IWebResponse)request));
+						break;
+					}
 				} else {
 					request.AddBodyPart (body);
 				}
