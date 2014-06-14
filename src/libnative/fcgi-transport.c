@@ -340,20 +340,19 @@ parse_params(Request *req, FCGI_Header *header, guint8 *data)
 
                 //we need to get host, port and vpath from server variables
                 //when we'll get them all, we can find a route to appropriate host
+                //TODO: we can reference chunks instead of using strndup
                 if (!req->hostname && nlen == 11 && (memcmp(name,"SERVER_NAME",11) == 0)) {
-                        req->hostname = g_strndup(value,vlen);
+                        req->hostname = pair.value;
 //                        INFO_OUT("VHost=%s\n", req->hostname);
                 }
 
                 if (req->port == -1 && nlen == 11 && (memcmp(name,"SERVER_PORT",11) == 0)) {
-                        gchar *tmp = g_strndup(value,vlen);
-                        req->port = atoi(tmp);
-                        g_free(tmp);
+                        req->port = atoi(pair.value);
 //                        INFO_OUT("VPort=%i\n", req->port);
                 }
 
                 if (!req->vpath && nlen == 11 && (memcmp(name,"SCRIPT_NAME",11) == 0)) {
-                    req->vpath = g_strndup(value, vlen);
+                    req->vpath = pair.value;
 //                    INFO_OUT("VPath=%s\n", req->vpath);
                 }
 //                INFO_OUT("name=%s value=%s\n",pair.name, pair.value);
@@ -392,8 +391,6 @@ parse_params(Request *req, FCGI_Header *header, guint8 *data)
                         send_output(req->hash, req->request_num, (guint8 *)err, strlen(err));
                         g_free(err);
                         //free temporary resources
-                        g_free(req->hostname);
-                        g_free(req->vpath);
                         g_array_free(req->key_value_pairs, TRUE);
                         g_string_chunk_free(req->chunks);
                         //end request
