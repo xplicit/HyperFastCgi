@@ -10,6 +10,8 @@ namespace HyperFastCgi.Configuration
 		[XmlAttribute("type")]
 		public string Type { get; set; }
 
+		[XmlElement("multithreading")]
+		public MultiThreadingOption MultiThreading { get; set; }
 	}
 }
 
