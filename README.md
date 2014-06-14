@@ -19,7 +19,7 @@ Download the source and perform commands:
 
 ## Run
 
-    mono-server-hyperfastcgi4 /config=<configfile> [arguments]
+    hyperfastcgi4 /config=<configfile> [arguments]
 
 ### Arguments
 
