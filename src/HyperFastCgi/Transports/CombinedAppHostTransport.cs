@@ -14,29 +14,26 @@ using System.Threading.Tasks;
 
 namespace HyperFastCgi.Transports
 {
-	public class CombinedAppHostTransport : MarshalByRefObject, IApplicationHostTransport
+	public class CombinedAppHostTransport : BaseAppHostTransport
 	{
-		Dictionary<ulong, IWebRequest> requests = new Dictionary<ulong, IWebRequest> ();
-		object requestsLock = new object ();
-		IApplicationHost appHost;
-
-		public IApplicationHost AppHost {
-			get { return appHost;}
-		}
 
 		#region INativeTransport implementation
-
-		public void Configure (IApplicationHost host, object config)
+		protected override void OnHostUnload (IApplicationHost host, bool isShutdown)
 		{
+			//remove apphost transport from list of hosts in unmanaged code
+			//when the domain unloads
+			UnregisterHost (
+				host.VHost,
+				host.VPort,
+				host.VPath
+			);		
+		}
+
+		public override void Configure (IApplicationHost host, object config)
+		{
+			base.Configure (host, config);
+
 			try {
-				this.appHost = host;
-				//remove apphost transport from list of hosts in unmanaged code
-				//when the domain unloads
-				host.HostUnload += (sender, e) => UnregisterHost (
-					((IApplicationHost)sender).VHost,
-					((IApplicationHost)sender).VPort,
-					((IApplicationHost)sender).VPath
-				);
 				//add apphost transport to list of hosts in unmanaged code
 				RegisterHost (host.VHost, host.VPort, host.VPath, host.Path);
 
@@ -52,86 +49,6 @@ namespace HyperFastCgi.Transports
 			}
 		}
 
-		public void CreateRequest (ulong requestId, int requestNumber)
-		{
-			Console.WriteLine ("reqN={0}", requestNumber);
-			IWebRequest req=AppHost.CreateRequest (requestId, requestNumber, null);
-
-			lock (requestsLock) {
-				requests.Add (requestId, req);
-			}
-
-			//			Console.WriteLine ("CreateRequest hash={0}, reqN={1}", requestId, requestNumber);
-		}
-
-		public void AddServerVariable (ulong requestId, int requestNumber, string name, string value)
-		{
-			IWebRequest request;
-			lock (requestsLock)
-			{
-				requests.TryGetValue (requestId, out request);
-			}
-
-			try
-			{
-				if (request != null 
-					&& request.RequestNumber == requestNumber) {
-					request.AddServerVariable (name, value);
-				}
-			} catch (Exception ex) {
-				Console.WriteLine ("ex={0}", ex.ToString ());
-			}
-		}
-
-		public void AddHeader (ulong requestId, int requestNumber, string name, string value)
-		{
-			IWebRequest request;
-			lock (requestsLock)
-			{
-				requests.TryGetValue (requestId, out request);
-			}
-
-			if (request != null
-				&& request.RequestNumber == requestNumber) {
-				request.AddHeader (name, value);
-			}
-		}
-
-		public void HeadersSent (ulong requestId, int requestNumber)
-		{
-
-		}
-
-		public void AddBodyPart (ulong requestId, int requestNumber, byte[] body, bool final)
-		{
-			IWebRequest request;
-			lock (requestsLock)
-			{
-				requests.TryGetValue (requestId, out request);
-			}
-
-			if (request != null
-				&& request.RequestNumber == requestNumber) {
-
-				if (final) {
-					lock (requestsLock) {
-						requests.Remove (requestId);
-					}
-					request.Process ((IWebResponse)request);
-				} else {
-					request.AddBodyPart (body);
-				}
-			}
-
-		}
-
-		public void Process (ulong requestId, int requestNumber)
-		{
-			//			Console.WriteLine ("Remove ReqId={0}", requestId);
-			lock (requestsLock) {
-				requests.Remove (requestId);
-			}
-		}
 		#endregion
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -144,10 +61,10 @@ namespace HyperFastCgi.Transports
 		public extern void UnregisterHost (string vhost, int vport, string virtualPath);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SendOutput (ulong requestId, int requestNumber, byte[] data, int len);
+		public extern override void SendOutput (ulong requestId, int requestNumber, byte[] data, int len);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void EndRequest (ulong requestId, int requestNumber, int appStatus);
+		public extern override void EndRequest (ulong requestId, int requestNumber, int appStatus);
 
 	}
 }

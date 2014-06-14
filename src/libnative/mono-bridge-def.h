@@ -40,7 +40,7 @@ typedef struct BridgeClass {
     METHOD(Process);
 } BridgeClass;
 
-void
+MonoBoolean
 bridge_register_transport (MonoReflectionType *transport_type, MethodCalls *methods);
 
 

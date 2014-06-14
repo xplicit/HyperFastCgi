@@ -41,21 +41,6 @@ namespace HyperFastCgi.Transports
 		}
 		#endregion
 
-		#region override callbacks
-		//these overrides are required here only becase native code in bridge_register_transport 
-		//can't find methods in base class. When native code will be able to find method in base class
-		//these overrides may be safelly removed
-		public override void SendOutput (ulong hash, int requestNumber, byte[] data, int length)
-		{
-			base.SendOutput (hash, requestNumber, data, length);
-		}
-
-		public override void EndRequest (ulong hash, int requestNumber, int appStatus)
-		{
-			base.EndRequest (hash, requestNumber, appStatus);
-		}
-		#endregion
-
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern IntPtr GetRoute (string vhost, int vport, string vpath);
 

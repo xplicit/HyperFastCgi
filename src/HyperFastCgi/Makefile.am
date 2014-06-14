@@ -83,6 +83,7 @@ FILES =  \
 	Configuration/ConfigUtils.cs \
 	Configuration/ListenerConfig.cs \
 	Configuration/LogConfig.cs \
+	Configuration/MultiThreadingOption.cs \
 	Configuration/TransportConfig.cs \
 	Configuration/WebAppConfig.cs \
 	FastCgiProtocol/BeginRequestBody.cs \
@@ -117,6 +118,7 @@ FILES =  \
 	Sockets/UnixSocket.cs \
 	Strings.cs \
 	TestResponse.cs \
+	Transports/BaseAppHostTransport.cs \
 	Transports/BaseManagedListenerTransport.cs \
 	Transports/CombinedAppHostTransport.cs \
 	Transports/CombinedFastCgiListenerTransport.cs \
