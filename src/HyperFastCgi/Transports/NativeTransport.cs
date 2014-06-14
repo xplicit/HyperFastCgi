@@ -14,6 +14,9 @@ using System.Threading.Tasks;
 
 namespace HyperFastCgi.Transports
 {
+	/// <summary>
+	/// Native application host transport for FastCgi NativeListener
+	/// </summary>
 	public class NativeTransport : IApplicationHostTransport
 	{
 		Dictionary<ulong, IWebRequest> requests = new Dictionary<ulong, IWebRequest> ();
