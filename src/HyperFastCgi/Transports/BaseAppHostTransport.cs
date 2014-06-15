@@ -110,7 +110,7 @@ namespace HyperFastCgi.Transports
 						requests.Remove (requestId);
 					}
 					switch (mt) {
-					case MultiThreadingOption.SingleThread:
+					case MultiThreadingOption.Single:
 						request.Process ((IWebResponse)request);
 						break;
 					case MultiThreadingOption.Task:

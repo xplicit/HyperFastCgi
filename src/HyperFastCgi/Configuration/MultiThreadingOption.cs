@@ -6,7 +6,7 @@ namespace HyperFastCgi.Configuration
 	{
 		ThreadPool = 0,
 		Task = 1,
-		SingleThread =2
+		Single =2
 	}
 }
 
