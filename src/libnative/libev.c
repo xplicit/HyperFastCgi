@@ -406,44 +406,54 @@ static void cmd_connect(int listenfd, short evtype, void *arg)
 	}
 }
 
-// Used only by signal handler
 static struct event_base *server_loop;
+static struct event connect_event;
+static int listenfd;
 
-static void sighandler(int signal)
+void Shutdown()
 {
-	INFO_OUT("Received signal %d: %s.  Shutting down.\n", signal, strsignal(signal));
-
 	if(event_base_loopexit(server_loop, NULL)) {
 		ERROR_OUT("Error shutting down server\n");
+		return;
+	}
+
+	transport_finalize();
+
+	// Clean up and close open connections
+	while(socketlist->next != NULL) {
+		free_cmdsocket(socketlist->next);
+	}
+
+	// Clean up libevent
+	if(event_del(&connect_event)) {
+		ERROR_OUT("Error removing connection event from the event loop.\n");
+	}
+	event_base_free(server_loop);
+	if(close(listenfd)) {
+		ERRNO_OUT("Error closing listening socket");
+	}
+
+	INFO_OUT("Goodbye.\n");
+}
+
+void ProcessLoop()
+{
+    if(event_base_dispatch(server_loop)) {
+		ERROR_OUT("Error running event loop.\n");
+		return;
 	}
 }
 
-
-
-//int main(int argc, char *argv[])
 int Listen(unsigned short int address_family, const char *addr, guint16 listen_port)
 {
-    sa_family_t family = address_family_to_sa_family(address_family);
-    //const char *addr = "127.0.0.1";
-	//unsigned short listen_port = 9000;
-
-    struct event_base *evloop;
-	struct event connect_event;
-
 	struct sockaddr_storage listen_addr;
 	size_t listen_addr_len;
-	int listenfd;
+    sa_family_t family = address_family_to_sa_family(address_family);
 
-	// Set signal handlers
-	sigset_t sigset;
-	sigemptyset(&sigset);
-	struct sigaction siginfo = {
-		.sa_handler = sighandler,
-		.sa_mask = sigset,
-		.sa_flags = SA_RESTART,
-	};
-	sigaction(SIGINT, &siginfo, NULL);
-	sigaction(SIGTERM, &siginfo, NULL);
+    if (family == AF_UNSPEC) {
+        ERROR_OUT("Unknown address family: %hu\n", address_family);
+        return -1;
+    }
 
 	transport_init();
 
@@ -457,13 +467,12 @@ int Listen(unsigned short int address_family, const char *addr, guint16 listen_p
 	}
 	#endif
 
-	evloop = event_base_new();
-	if(CHECK_NULL(evloop)) {
+	server_loop = event_base_new();
+	if(CHECK_NULL(server_loop)) {
 		ERROR_OUT("Error initializing event loop.\n");
 		return -1;
 	}
-	server_loop = evloop;
-	INFO_OUT("libevent is using %s for events.\n", event_base_get_method(evloop));
+	INFO_OUT("libevent is using %s for events.\n", event_base_get_method(server_loop));
 
 	// Initialize socket address
 	init_socket_addr(family, &listen_addr, addr, listen_port);
@@ -472,7 +481,7 @@ int Listen(unsigned short int address_family, const char *addr, guint16 listen_p
 	// Begin listening for connections
 	listenfd = socket(family, SOCK_STREAM, 0);
 	if(listenfd == -1) {
-		ERRNO_OUT("Error creating listening socket");
+		ERRNO_OUT("Error creating listening socket, address_family=%hu",family);
 		return -1;
 	}
 	int tmp_reuse = 1;
@@ -496,37 +505,11 @@ int Listen(unsigned short int address_family, const char *addr, guint16 listen_p
 	}
 
 	// Add an event to wait for connections
-	event_set(&connect_event, listenfd, EV_READ | EV_PERSIST, cmd_connect, evloop);
-	event_base_set(evloop, &connect_event);
+	event_set(&connect_event, listenfd, EV_READ | EV_PERSIST, cmd_connect, server_loop);
+	event_base_set(server_loop, &connect_event);
 	if(event_add(&connect_event, NULL)) {
 		ERROR_OUT("Error scheduling connection event on the event loop.\n");
 	}
-
-
-	// Start the event loop
-	if(event_base_dispatch(evloop)) {
-		ERROR_OUT("Error running event loop.\n");
-	}
-
-	INFO_OUT("Server is shutting down.\n");
-	transport_finalize();
-
-
-	// Clean up and close open connections
-	while(socketlist->next != NULL) {
-		free_cmdsocket(socketlist->next);
-	}
-
-	// Clean up libevent
-	if(event_del(&connect_event)) {
-		ERROR_OUT("Error removing connection event from the event loop.\n");
-	}
-	event_base_free(evloop);
-	if(close(listenfd)) {
-		ERRNO_OUT("Error closing listening socket");
-	}
-
-	INFO_OUT("Goodbye.\n");
 
 	return 0;
 }

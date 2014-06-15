@@ -4,6 +4,7 @@ using HyperFastCgi.Interfaces;
 using HyperFastCgi.Configuration;
 using HyperFastCgi.Transports;
 using HyperFastCgi.Logging;
+using System.Threading;
 
 namespace HyperFastCgi.Listeners
 {
@@ -29,12 +30,18 @@ namespace HyperFastCgi.Listeners
 			Logger.Write (LogLevel.Debug,"Listening on port: {0}", config.Port);
 			Logger.Write (LogLevel.Debug,"Listening on address: {0}", config.Address);
 
-			return NativeListener.Listen ((ushort)config.Family, config.Address, (ushort)config.Port);
+			int retval = NativeListener.Listen ((ushort)config.Family, config.Address, (ushort)config.Port);
+			//retval == 0 when no error occured
+			if (retval == 0) {
+				ThreadPool.QueueUserWorkItem (_ => NativeListener.ProcessLoop ());
+			}
+
+			return retval;
 		}
 
 		public void Shutdown ()
 		{
-			throw new NotImplementedException ();
+			NativeListener.InternalShutdown ();
 		}
 
 		public IApplicationServer Server {
@@ -53,6 +60,12 @@ namespace HyperFastCgi.Listeners
 
 		[DllImport("libhfc-native", EntryPoint="Listen")]
 		private extern static int Listen(ushort family, string addr, ushort port);
+
+		[DllImport("libhfc-native", EntryPoint="Shutdown")]
+		private extern static void InternalShutdown();
+
+		[DllImport("libhfc-native", EntryPoint="ProcessLoop")]
+		private extern static void ProcessLoop();
 	}
 }
 

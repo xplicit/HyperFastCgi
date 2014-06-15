@@ -305,7 +305,10 @@ namespace HyperFastCgi
 					listener.Transport, listener.AppHostTransportType, 
 					listenerConfigs[0].AppHostTransport != null ? listenerConfigs[0].AppHostTransport.Config: null);
 			}
-			listener.Listen ();
+			if (listener.Listen () != 0) {
+				Logger.Write (LogLevel.Error, "Could not start server");
+				return 1;
+			}
 
 			configmanager = null;
 
@@ -329,6 +332,7 @@ namespace HyperFastCgi
 					}
 				}
 			}
+			listener.Shutdown ();
 
 			return 0;
 		}
