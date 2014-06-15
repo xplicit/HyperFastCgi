@@ -13,7 +13,7 @@
 * [X] Implement abstract AppHostBase class with common methods
 
 ### AppHostTransport
-* [ ] Implement threadpooling/tasks/singlethread support
+* [X] Implement threadpooling/tasks/singlethread support
 
 ### GetRoute
 * [ ] Implement GetRoute() for managed classes
@@ -23,7 +23,7 @@
 * [X] Implement domain reloading in Server.
 
 ### Native Listener
-* [ ] Create and start from the new thread (don't block main thread)
+* [X] Create and start from the new thread (don't block main thread)
 * [X] Implement Shutdown
 
 ### Managed Listener
