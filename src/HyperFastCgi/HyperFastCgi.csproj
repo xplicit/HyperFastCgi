@@ -105,6 +105,8 @@
     <Compile Include="Helpers\TestResponse.cs" />
     <Compile Include="Helpers\Strings.cs" />
     <Compile Include="HostFactories\SystemWebHostFactory.cs" />
+    <Compile Include="Configuration\ThreadPoolConfig.cs" />
+    <Compile Include="Helpers\ThreadHelper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

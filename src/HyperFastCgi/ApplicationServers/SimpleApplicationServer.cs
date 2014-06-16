@@ -6,6 +6,7 @@ using HyperFastCgi.Configuration;
 using HyperFastCgi.Helpers.Logging;
 using System.Collections.Generic;
 using HyperFastCgi.Transports;
+using HyperFastCgi.Helpers;
 
 namespace HyperFastCgi.ApplicationServers
 {
@@ -13,9 +14,45 @@ namespace HyperFastCgi.ApplicationServers
 	{
 		private string physicalRoot;
 		private List<HostInfo> hosts = new List<HostInfo> ();
+		private AppServerConfig config;
+		IApplicationHostFactory hostFactory;
 
 		public string PhysicalRoot {
 			get { return physicalRoot; }
+		}
+
+		public void Configure (object serverConfig)
+		{
+			config = serverConfig as AppServerConfig;
+
+			physicalRoot = Environment.CurrentDirectory;
+
+			if (config != null) {
+				if (!String.IsNullOrEmpty (config.PhysycalRoot))
+					physicalRoot = config.PhysycalRoot; 
+
+				if (config.ThreadsConfig != null) {
+					ThreadHelper.SetThreads (
+						config.ThreadsConfig.MinWorkerThreads,
+						config.ThreadsConfig.MinIOThreads,
+						config.ThreadsConfig.MaxWorkerThreads,
+						config.ThreadsConfig.MaxIOThreads
+					);
+				}
+
+				if (!String.IsNullOrEmpty (config.HostFactoryType)) {
+					Type factoryType = Type.GetType (config.HostFactoryType);
+					if (factoryType == null) {
+						Logger.Write (LogLevel.Error, "Could not find factory type '{0}'", config.HostFactoryType);
+						return;
+					}
+					hostFactory = (IApplicationHostFactory)Activator.CreateInstance (factoryType);
+				} else {
+					hostFactory = new SystemWebHostFactory ();
+				}
+			}
+
+			Logger.Write (LogLevel.Debug, "Root directory: {0}", physicalRoot);
 		}
 
 		public IApplicationHost GetRoute(string vhost, int vport, string vpath)
@@ -48,8 +85,7 @@ namespace HyperFastCgi.ApplicationServers
 		{
 			try
 			{
-				SystemWebHostFactory factory = new SystemWebHostFactory ();
-				IApplicationHost host = factory.CreateApplicationHost (appHostType, appConfig.VHost, appConfig.VPort, appConfig.VPath, appConfig.RealPath);
+				IApplicationHost host = hostFactory.CreateApplicationHost (appHostType, appConfig.VHost, appConfig.VPort, appConfig.VPath, appConfig.RealPath);
 				host.Configure (appHostConfig, appConfig, this, listenerTransport, appHostTransportType, appHostTransportConfig);
 				//subscribe to Unload event only after run host.Configure
 				//because apphost transport must unregister himself first
@@ -103,11 +139,6 @@ namespace HyperFastCgi.ApplicationServers
 				CreateAppHost (host.AppHostType, host.AppHostConfig, host.AppConfig,
 					host.ListenerTransport, host.AppHostTransportType, host.AppHostTransportConfig);
 			}
-		}
-
-		public SimpleApplicationServer(string physicalRoot)
-		{
-			this.physicalRoot = physicalRoot;
 		}
 	}
 }

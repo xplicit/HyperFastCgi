@@ -187,46 +187,6 @@
 		</Description>
 	</Setting>
 
-	<Setting Name="minthreads" AppSetting="FastCgiMinThreads"
-		Environment="MONO_FCGI_MINTHREADS" Type="String" ConsoleVisible="True" WebVisible="True" Value="0,0">
-		<Description>
-			<para>Specifies the minimum number of threads in threadpool.</para>
-
-			<para>Samples:</para>
-
-			<example>
-				<code>20,8</code>
-				<desc>Minimal number of worker threads will be 20, minimal number of IO threads will be 8</desc>
-			</example>
-
-			<example>
-				<code>0,4</code>
-				<desc>Minimal number of worker threads will be system default, minimal number of IO threads will be 4</desc>
-			</example>
-
-		</Description>
-	</Setting>
-
-	<Setting Name="maxthreads" AppSetting="FastCgiMaxThreads"
-		Environment="MONO_FCGI_MAXTHREADS" Type="String" ConsoleVisible="True" WebVisible="True" Value="0,0">
-		<Description>
-			<para>Specifies the maximum number of threads in threadpool.</para>
-
-			<para>Samples:</para>
-
-			<example>
-				<code>100,16</code>
-				<desc>Maximum number of worker threads will be 100, maximum number of IO threads will be 16</desc>
-			</example>
-
-			<example>
-				<code>0,4</code>
-				<desc>Maximum number of worker threads will be system default, maximum number of IO threads will be 4</desc>
-			</example>
-
-		</Description>
-	</Setting>
-	
 	<Setting Name="addtrailingslash" AppSetting="FastCgiTrailingSlash" 
 		Environment="MONO_FCGI_ADDTRAILINGSLASH" Type="Bool" ConsoleVisible="True"  WebVisible="True" Value="False" >
 		<Description>

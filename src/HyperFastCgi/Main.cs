@@ -52,6 +52,7 @@ using System.Net.Sockets;
 using System.Collections.Generic;
 using HyperFastCgi.Configuration;
 using HyperFastCgi.Interfaces;
+using HyperFastCgi.Helpers;
 
 namespace HyperFastCgi
 {
@@ -174,18 +175,6 @@ namespace HyperFastCgi
 			Logger.Write (LogLevel.Debug,
 				Assembly.GetExecutingAssembly ().GetName ().Name);
 
-			string root_dir = configmanager ["root"] as string;
-			if (root_dir != null && root_dir.Length != 0) {
-				try {
-					Environment.CurrentDirectory = root_dir;
-				} catch (Exception e) {
-					Logger.Write (LogLevel.Error,
-						"Error: {0}", e.Message);
-					return 1;
-				}
-			}
-
-			root_dir = Environment.CurrentDirectory;
 			bool auto_map = false; //(bool) configmanager ["automappaths"];
 
 			string applications = (string)
@@ -232,23 +221,6 @@ namespace HyperFastCgi
 				return 1;
 			}
 
-			Logger.Write (LogLevel.Debug, "Root directory: {0}", root_dir);
-
-			string[] minThreads = ((string)configmanager ["minthreads"]).Split(',');
-			string[] maxThreads = ((string)configmanager ["maxthreads"]).Split(',');
-			int mintw=0, mintio=0, maxtw=0, maxtio=0;
-
-			Int32.TryParse (minThreads [0], out mintw);
-			if (minThreads.Length > 1)
-				Int32.TryParse (minThreads [1], out mintio);
-
-			Int32.TryParse (maxThreads [0], out maxtw);
-			if (maxThreads.Length > 1)
-				Int32.TryParse (maxThreads [1], out maxtio);
-
-			SetThreads (mintw, mintio, maxtw, maxtio);
-
-
 //			server.MaxConnections = (ushort)
 //			                        configmanager ["maxconns"];
 //			server.MaxRequests = (ushort)
@@ -265,18 +237,25 @@ namespace HyperFastCgi
 
 			bool stopable = (bool)configmanager ["stopable"];
 			Logger.WriteToConsole = (bool)configmanager ["printlog"];
-//			host.LogLevel = Logger.Level;
-//			host.LogToConsole = Logger.WriteToConsole;
-//			host.AddTrailingSlash = (bool)configmanager ["addtrailingslash"];
 
-			SimpleApplicationServer srv = new SimpleApplicationServer (root_dir);
+			List<ConfigInfo> serverConfigs = ConfigUtils.GetConfigsFromFile (config, "server", typeof(AppServerConfig));
+			if (serverConfigs.Count != 1) {
+				if (serverConfigs.Count == 0) {
+					Console.WriteLine ("Could not find <server> node in file '{0}'", config); 
+				} else {
+					Console.WriteLine ("Only one server is supported currently. Please remove redudant <server> node from file '{0}'", config);
+				}
+				return 1;
+			}
+			IApplicationServer srv = (IApplicationServer)Activator.CreateInstance (serverConfigs [0].Type);
+			srv.Configure (serverConfigs [0].Config);
 
 			List<ConfigInfo> listenerConfigs = ConfigUtils.GetConfigsFromFile (config, "listener", typeof(ListenerConfig));
 			if (listenerConfigs.Count != 1) {
 				if (listenerConfigs.Count == 0) {
-					Console.WriteLine ("Can't find <listener> node in file '{0}'", config); 
+					Console.WriteLine ("Could not find <listener> node in file '{0}'", config); 
 				} else {
-					Console.WriteLine ("Only one listener are supported currently. Please remove redudant <listener> node from file '{0}'", config);
+					Console.WriteLine ("Only one listener is supported currently. Please remove redudant <listener> node from file '{0}'", config);
 				}
 				return 1;
 			}
@@ -333,36 +312,5 @@ namespace HyperFastCgi
 			return 0;
 		}
 
-		static void SetThreads(int minWorkerThreads, int minIOThreads, int maxWorkerThreads, int maxIOThreads)
-		{
-			if (minWorkerThreads ==0 &&  minIOThreads ==0 && maxWorkerThreads ==0 && maxIOThreads == 0)
-				return;
-
-			if ((maxWorkerThreads != 0 && maxWorkerThreads < minWorkerThreads) || (maxIOThreads != 0 && maxIOThreads < minIOThreads))
-				throw new ArgumentException ("min threads must not be greater max threads");
-			int minwth, minioth, maxwth, maxioth;
-
-			ThreadPool.GetMinThreads (out minwth, out minioth);
-			ThreadPool.GetMaxThreads (out maxwth, out maxioth);
-
-			if (minWorkerThreads > minwth)
-				minwth = minWorkerThreads;
-			if (minIOThreads>minioth)
-				minioth = minIOThreads;
-			if (maxWorkerThreads != 0)
-				maxwth = maxWorkerThreads;
-			if (maxIOThreads != 0)
-				maxioth = maxIOThreads;
-			if (maxwth < minwth)
-				maxwth = minwth;
-			if (maxioth < minioth)
-				maxioth = minioth;
-
-			if (!ThreadPool.SetMaxThreads (maxwth, maxioth) ||
-			    !ThreadPool.SetMinThreads (minwth, minioth))
-				throw new Exception ("Could not set threads");
-
-			Logger.Write (LogLevel.Debug, "Threadpool minw={0},minio={1},maxw={2},maxio={3}", minwth, minioth, maxwth, maxioth);
-		}
 	}
 }

@@ -10,12 +10,6 @@ namespace HyperFastCgi.Configuration
 		[XmlAttribute("type")]
 		public string Type { get; set;}
 
-		[XmlElement("listener-transport")]
-		public string ListenerTransportType { get; set;}
-
-		[XmlElement("apphost-transport")]
-		public TransportConfig AppHostTransportType { get; set;}
-
 		[XmlElement("protocol")]
 		public AddressFamily Family { get; set;}
 

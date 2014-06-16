@@ -5,7 +5,8 @@
 ### Configuration
 * [X] Transports configurations (loglevel)
 * [X] AppHost configuration (loglevel, AddTrailingSlash for AspNetHost)
-* [ ] Server configuration (select AppHostFactory)
+* [X] Server configuration (select AppHostFactory)
+* [X] Server configuration (implement threadpooling config)
 
 ### AppHosts
 * [X] Implement general app factory for general application host

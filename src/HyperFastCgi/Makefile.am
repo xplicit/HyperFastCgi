@@ -83,6 +83,7 @@ FILES =  \
 	Configuration/ListenerConfig.cs \
 	Configuration/LogConfig.cs \
 	Configuration/MultiThreadingOption.cs \
+	Configuration/ThreadPoolConfig.cs \
 	Configuration/TransportConfig.cs \
 	Configuration/WebAppConfig.cs \
 	Helpers/FastCgiProtocol/BeginRequestBody.cs \
@@ -103,6 +104,7 @@ FILES =  \
 	Helpers/Sockets/UnixSocket.cs \
 	Helpers/Strings.cs \
 	Helpers/TestResponse.cs \
+	Helpers/ThreadHelper.cs \
 	HostFactories/SystemWebHostFactory.cs \
 	Interfaces/Events/HostUnloadEventArgs.cs \
 	Interfaces/IApplicationHost.cs \

@@ -27,10 +27,6 @@ Download the source and perform commands:
 
 Most of the arguments are the same as in mono-server-fastcgi. Some additional arguments were added
 
-* `/minthreads=[nw,nio]` Sets the minimum number of threads in threadpool.  nw - number of working threads. nio - number of IO threads
-
-* `/maxthreads=[nw,nio]` Sets the maximum number of threads in threadpool.  nw - number of working threads. nio - number of IO threads
-
 * `/addtrailingslash=[true|false]` Adds trailing slash if path to directory does not end with '/'. Default is 'false'. This option were added for compatibility with mono-fastcgi-server. For performance reasons it's recommended to use nginx 'rewrite' command instead, i. e.
     rewrite ^([^.]*[^/])$ $1/ permanent;
 

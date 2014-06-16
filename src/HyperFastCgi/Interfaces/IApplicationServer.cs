@@ -6,6 +6,8 @@ namespace HyperFastCgi.Interfaces
 	{
 		string PhysicalRoot { get;}
 
+		void Configure (object config);
+
 		IApplicationHost GetRoute(string vhost, int vport, string vpath);
 
 		IApplicationHost CreateApplicationHost(
