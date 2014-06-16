@@ -1,5 +1,5 @@
 //
-// TestResponse.cs: Simple HTTP responses.
+// GeneralSocket.cs: Provides base generalization for listening sockets.
 //
 // Author:
 //   Sergey Zhukov
@@ -27,31 +27,24 @@
 //
 
 using System;
+using System.Net.Sockets;
 
-namespace HyperFastCgi
+namespace HyperFastCgi.Helpers.Sockets
 {
-	public class TestResponse
+	public abstract class GeneralSocket : Socket
 	{
-		public TestResponse ()
+		public GeneralSocket (System.Net.Sockets.AddressFamily addressFamily,
+		                      System.Net.Sockets.SocketType socketType,
+		                      System.Net.Sockets.ProtocolType protocolType,
+		                      System.Net.EndPoint localEndPoint) : base (addressFamily, socketType, protocolType)
 		{
+			base.Bind (localEndPoint);
 		}
 
-		public static string Response1 =
-			@"HTTP/1.1 200 OK
-Date: Fri, 15 Nov 2013 00:29:02 GMT
-Content-Type: text/html; charset=utf-8
-X-AspNet-Version: 4.0.30319
-Cache-Control: private
-Set-Cookie: ASP.NET_SessionId=7226F67056A58F7572E98BDB; path=/
-Content-Length: 19
-
-<p>Hello, World</p>
-
-
-";
-		public static string Header = "Status: 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: 20\r\n\r\n";
-		public static string Response = "<p>Hello, world!</p>";
-		public static string Response2 = "Content-type: text/html\r\n\r\n<html>\n<p>Hello, World</p>\n</html>\n\n";
+		public new virtual Socket EndAccept (IAsyncResult ar)
+		{
+			return base.EndAccept (ar);
+		}
 	}
 }
 

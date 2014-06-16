@@ -2,7 +2,7 @@
 using HyperFastCgi.Interfaces;
 using HyperFastCgi.Configuration;
 using System.Reflection.Emit;
-using HyperFastCgi.Logging;
+using HyperFastCgi.Helpers.Logging;
 
 namespace HyperFastCgi.AppHosts.Raw
 {

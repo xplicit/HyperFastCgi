@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Text;
-using HyperFastCgi.Logging;
+using HyperFastCgi.Helpers.Logging;
 
 namespace HyperFastCgi.Transports
 {

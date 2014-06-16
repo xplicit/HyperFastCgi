@@ -1,7 +1,7 @@
 ﻿using System;
 using HyperFastCgi.Interfaces;
 using HyperFastCgi.Transports;
-using HyperFastCgi.Logging;
+using HyperFastCgi.Helpers.Logging;
 using HyperFastCgi.Configuration;
 
 namespace HyperFastCgi.AppHosts.AspNet

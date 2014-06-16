@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Xml.Serialization;
-using HyperFastCgi.Logging;
+using HyperFastCgi.Helpers.Logging;
 
 namespace HyperFastCgi.Configuration
 {

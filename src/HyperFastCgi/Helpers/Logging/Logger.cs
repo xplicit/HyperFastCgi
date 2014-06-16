@@ -31,7 +31,7 @@ using System.IO;
 using System.Text;
 using System.Globalization;
 
-namespace HyperFastCgi.Logging
+namespace HyperFastCgi.Helpers.Logging
 {
 	public class Logger
 	{

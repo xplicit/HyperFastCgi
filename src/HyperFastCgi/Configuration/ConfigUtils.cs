@@ -5,7 +5,7 @@ using System.IO;
 using System.Xml.Serialization;
 using System.Reflection;
 using HyperFastCgi.Configuration;
-using HyperFastCgi.Logging;
+using HyperFastCgi.Helpers.Logging;
 
 namespace HyperFastCgi.Configuration
 {

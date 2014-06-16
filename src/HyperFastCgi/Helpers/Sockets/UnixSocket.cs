@@ -31,7 +31,7 @@ using System.Globalization;
 using System.Net.Sockets;
 using Mono.Unix;
 
-namespace HyperFastCgi.Sockets
+namespace HyperFastCgi.Helpers.Sockets
 {
 	internal class UnixSocket : GeneralSocket, IDisposable
 	{

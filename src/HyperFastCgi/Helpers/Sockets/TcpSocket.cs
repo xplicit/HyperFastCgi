@@ -30,7 +30,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 
-namespace HyperFastCgi.Sockets
+namespace HyperFastCgi.Helpers.Sockets
 {
 	public class TcpSocket : GeneralSocket
 	{

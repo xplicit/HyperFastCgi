@@ -36,11 +36,11 @@ using System.Text;
 using System.Net;
 using System.Globalization;
 using System.IO;
-using HyperFastCgi.FastCgiProtocol;
+using HyperFastCgi.Helpers.FastCgiProtocol;
 using HyperFastCgi.Interfaces;
 using HyperFastCgi.Transports;
 using System.Web;
-using HyperFastCgi.Logging;
+using HyperFastCgi.Helpers.Logging;
 
 namespace HyperFastCgi.AppHosts.AspNet
 {

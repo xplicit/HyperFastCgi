@@ -1,4 +1,4 @@
-namespace HyperFastCgi
+namespace HyperFastCgi.Helpers
 {
 	internal static class Strings
 	{

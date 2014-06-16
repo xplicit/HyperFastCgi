@@ -28,7 +28,7 @@
 
 using System;
 
-namespace HyperFastCgi.Sockets
+namespace HyperFastCgi.Helpers.Sockets
 {
 	//FIXME: remove enum and use typeof() instead of this enum
 	[Serializable]

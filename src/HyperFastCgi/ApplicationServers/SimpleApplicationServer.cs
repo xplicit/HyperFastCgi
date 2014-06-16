@@ -3,7 +3,7 @@ using HyperFastCgi.Interfaces;
 using HyperFastCgi.AppHosts.AspNet;
 using HyperFastCgi.Interfaces.Events;
 using HyperFastCgi.Configuration;
-using HyperFastCgi.Logging;
+using HyperFastCgi.Helpers.Logging;
 using System.Collections.Generic;
 using HyperFastCgi.Transports;
 

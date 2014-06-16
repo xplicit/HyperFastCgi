@@ -33,8 +33,8 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Text;
 using System.Net;
-using HyperFastCgi.FastCgiProtocol;
-using HyperFastCgi.Logging;
+using HyperFastCgi.Helpers.FastCgiProtocol;
+using HyperFastCgi.Helpers.Logging;
 using HyperFastCgi.Transports;
 using HyperFastCgi.Interfaces;
 

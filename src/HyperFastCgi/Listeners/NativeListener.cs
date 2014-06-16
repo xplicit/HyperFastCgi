@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using HyperFastCgi.Interfaces;
 using HyperFastCgi.Configuration;
 using HyperFastCgi.Transports;
-using HyperFastCgi.Logging;
+using HyperFastCgi.Helpers.Logging;
 using System.Threading;
 
 namespace HyperFastCgi.Listeners

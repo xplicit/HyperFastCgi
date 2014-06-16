@@ -1,6 +1,7 @@
 ﻿using System;
-using HyperFastCgi.Interfaces;
 using System.Text;
+using HyperFastCgi.Interfaces;
+using HyperFastCgi.Helpers;
 
 namespace HyperFastCgi.AppHosts.Raw
 {

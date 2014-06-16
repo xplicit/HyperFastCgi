@@ -1,5 +1,5 @@
 //
-// LogLevel.cs: Logger levels.
+// Record.cs: Represents the FastCGI BeginRequestBody structure.
 //
 // Author:
 //   Brian Nickel (brian.nickel@gmail.com)
@@ -25,19 +25,73 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+
 using System;
 
-namespace HyperFastCgi.Logging
+namespace HyperFastCgi.Helpers.FastCgiProtocol
 {
-	[Flags]
-	public enum LogLevel
+	public enum Role : ushort
 	{
-		None = 0x00,
-		Error = 0x01,
-		Warning = 0x02,
-		Notice = 0x04,
-		Debug = 0x08,
-		Standard = Error | Warning | Notice,
-		All = Error | Warning | Notice | Debug
+		Responder = 1,
+		Authorizer = 2,
+		Filter = 3
+	}
+
+	[Flags]
+	public enum BeginRequestFlags : byte
+	{
+		None = 0,
+		KeepAlive = 1
+	}
+
+	public struct BeginRequestBody
+	{
+
+		#region Private Fields
+
+		private Role role;
+		private BeginRequestFlags flags;
+
+		#endregion
+
+		#region Constructors
+
+		public BeginRequestBody (Record record)
+		{
+			if (record.Type != RecordType.BeginRequest)
+				throw new ArgumentException (
+					Strings.BeginRequestBody_WrongType,
+					"record");
+
+			if (record.BodyLength != 8)
+				throw new ArgumentException (
+					Strings.BeginRequestBody_WrongSize, "record");
+
+			byte[] body = record.Body;
+			role = (Role)Record.ReadUInt16 (body, 0);
+			flags = (BeginRequestFlags)body [2];
+		}
+
+		public BeginRequestBody (byte[] body)
+		{
+			role = (Role)Record.ReadUInt16 (body, 0);
+			flags = (BeginRequestFlags)body [2];
+		}
+
+		#endregion
+
+		#region Public Properties
+
+		public Role Role {
+			get { return role; }
+		}
+
+		public BeginRequestFlags Flags {
+			get { return flags; }
+		}
+
+		#endregion
+
 	}
 }
+

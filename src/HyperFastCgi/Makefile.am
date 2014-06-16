@@ -86,11 +86,24 @@ FILES =  \
 	Configuration/MultiThreadingOption.cs \
 	Configuration/TransportConfig.cs \
 	Configuration/WebAppConfig.cs \
-	FastCgiProtocol/BeginRequestBody.cs \
-	FastCgiProtocol/EndRequestBody.cs \
-	FastCgiProtocol/FcgiUtils.cs \
-	FastCgiProtocol/Record.cs \
-	FastCgiProtocol/UnknownTypeBody.cs \
+	Helpers/FastCgiProtocol/BeginRequestBody.cs \
+	Helpers/FastCgiProtocol/EndRequestBody.cs \
+	Helpers/FastCgiProtocol/FcgiUtils.cs \
+	Helpers/FastCgiProtocol/Record.cs \
+	Helpers/FastCgiProtocol/UnknownTypeBody.cs \
+	Helpers/Logging/Logger.cs \
+	Helpers/Logging/LogLevel.cs \
+	Helpers/Mono.WebServer/Events/DomainReloadEventArgs.cs \
+	Helpers/Mono.WebServer/Events/MapPathEventArgs.cs \
+	Helpers/Mono.WebServer/Events/MapPathEventHandler.cs \
+	Helpers/Mono.WebServer/HttpErrors.cs \
+	Helpers/Mono.WebServer/VPathToHost.cs \
+	Helpers/Sockets/GeneralSocket.cs \
+	Helpers/Sockets/GeneralSocketType.cs \
+	Helpers/Sockets/TcpSocket.cs \
+	Helpers/Sockets/UnixSocket.cs \
+	Helpers/Strings.cs \
+	Helpers/TestResponse.cs \
 	Interfaces/Events/HostUnloadEventArgs.cs \
 	Interfaces/IApplicationHost.cs \
 	Interfaces/IApplicationHostFactory.cs \
@@ -103,21 +116,8 @@ FILES =  \
 	Listeners/FastCgiNetworkConnector.cs \
 	Listeners/ManagedFastCgiListener.cs \
 	Listeners/NativeListener.cs \
-	Logging/Logger.cs \
-	Logging/LogLevel.cs \
 	Main.cs \
-	Mono.WebServer/Events/DomainReloadEventArgs.cs \
-	Mono.WebServer/Events/MapPathEventArgs.cs \
-	Mono.WebServer/Events/MapPathEventHandler.cs \
-	Mono.WebServer/HttpErrors.cs \
-	Mono.WebServer/VPathToHost.cs \
 	Properties/AssemblyInfo.cs \
-	Sockets/GeneralSocket.cs \
-	Sockets/GeneralSocketType.cs \
-	Sockets/TcpSocket.cs \
-	Sockets/UnixSocket.cs \
-	Strings.cs \
-	TestResponse.cs \
 	Transports/BaseAppHostTransport.cs \
 	Transports/BaseManagedListenerTransport.cs \
 	Transports/CombinedAppHostTransport.cs \

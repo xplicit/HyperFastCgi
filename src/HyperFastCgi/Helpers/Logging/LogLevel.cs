@@ -1,10 +1,10 @@
 //
-// GeneralSocket.cs: Provides base generalization for listening sockets.
+// LogLevel.cs: Logger levels.
 //
 // Author:
-//   Sergey Zhukov
+//   Brian Nickel (brian.nickel@gmail.com)
 //
-// Copyright (C) 2013 Sergey Zhukov
+// Copyright (C) 2007 Brian Nickel
 // 
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -25,26 +25,19 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-
 using System;
-using System.Net.Sockets;
 
-namespace HyperFastCgi.Sockets
+namespace HyperFastCgi.Helpers.Logging
 {
-	public abstract class GeneralSocket : Socket
+	[Flags]
+	public enum LogLevel
 	{
-		public GeneralSocket (System.Net.Sockets.AddressFamily addressFamily,
-		                      System.Net.Sockets.SocketType socketType,
-		                      System.Net.Sockets.ProtocolType protocolType,
-		                      System.Net.EndPoint localEndPoint) : base (addressFamily, socketType, protocolType)
-		{
-			base.Bind (localEndPoint);
-		}
-
-		public new virtual Socket EndAccept (IAsyncResult ar)
-		{
-			return base.EndAccept (ar);
-		}
+		None = 0x00,
+		Error = 0x01,
+		Warning = 0x02,
+		Notice = 0x04,
+		Debug = 0x08,
+		Standard = Error | Warning | Notice,
+		All = Error | Warning | Notice | Debug
 	}
 }
-

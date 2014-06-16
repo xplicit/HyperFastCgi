@@ -32,7 +32,7 @@ using System;
 using System.Globalization;
 using System.Net.Sockets;
 
-namespace HyperFastCgi.FastCgiProtocol
+namespace HyperFastCgi.Helpers.FastCgiProtocol
 {
 	public enum RecordType : byte
 	{

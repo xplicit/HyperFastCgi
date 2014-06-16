@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace HyperFastCgi.FastCgiProtocol
+namespace HyperFastCgi.Helpers.FastCgiProtocol
 {
 	public class FcgiUtils
 	{

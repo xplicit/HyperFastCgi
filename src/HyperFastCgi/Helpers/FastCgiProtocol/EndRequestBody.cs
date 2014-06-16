@@ -28,7 +28,7 @@
 
 using System;
 
-namespace HyperFastCgi.FastCgiProtocol
+namespace HyperFastCgi.Helpers.FastCgiProtocol
 {
 	public enum ProtocolStatus : byte
 	{

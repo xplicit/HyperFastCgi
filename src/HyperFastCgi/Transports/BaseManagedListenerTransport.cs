@@ -1,8 +1,8 @@
 ﻿using System;
 using HyperFastCgi.Interfaces;
 using HyperFastCgi.Listeners;
-using HyperFastCgi.FastCgiProtocol;
-using HyperFastCgi.Logging;
+using HyperFastCgi.Helpers.FastCgiProtocol;
+using HyperFastCgi.Helpers.Logging;
 using System.Collections.Generic;
 using Mono.WebServer;
 

@@ -1,9 +1,9 @@
 ﻿using System;
 using HyperFastCgi.Interfaces;
-using HyperFastCgi.Sockets;
+using HyperFastCgi.Helpers.Sockets;
 using System.Net.Sockets;
 using System.Net;
-using HyperFastCgi.Logging;
+using HyperFastCgi.Helpers.Logging;
 using System.Collections.Generic;
 using HyperFastCgi.Transports;
 using HyperFastCgi.Configuration;

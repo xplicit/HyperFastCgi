@@ -1,10 +1,10 @@
 //
-// Record.cs: Represents the FastCGI BeginRequestBody structure.
+// TestResponse.cs: Simple HTTP responses.
 //
 // Author:
-//   Brian Nickel (brian.nickel@gmail.com)
+//   Sergey Zhukov
 //
-// Copyright (C) 2007 Brian Nickel
+// Copyright (C) 2013 Sergey Zhukov
 // 
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -28,36 +28,30 @@
 
 using System;
 
-namespace HyperFastCgi.FastCgiProtocol
+namespace HyperFastCgi.Helpers
 {
-	public struct UnknownTypeBody
+	public class TestResponse
 	{
-
-		#region Private Fields
-
-		private RecordType type;
-
-		#endregion
-
-		#region Constructors
-
-		public UnknownTypeBody (RecordType unknownType)
+		public TestResponse ()
 		{
-			type = unknownType;
 		}
 
-		#endregion
+		public static string Response1 =
+			@"HTTP/1.1 200 OK
+Date: Fri, 15 Nov 2013 00:29:02 GMT
+Content-Type: text/html; charset=utf-8
+X-AspNet-Version: 4.0.30319
+Cache-Control: private
+Set-Cookie: ASP.NET_SessionId=7226F67056A58F7572E98BDB; path=/
+Content-Length: 19
 
-		#region Public Methods
+<p>Hello, World</p>
 
-		public byte [] GetData ()
-		{
-			byte[] data = new byte [8];
-			data [0] = (byte)type;
-			return data;
-		}
 
-		#endregion
-
+";
+		public static string Header = "Status: 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: 20\r\n\r\n";
+		public static string Response = "<p>Hello, world!</p>";
+		public static string Response2 = "Content-type: text/html\r\n\r\n<html>\n<p>Hello, World</p>\n</html>\n\n";
 	}
 }
+

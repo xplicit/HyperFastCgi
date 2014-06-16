@@ -28,70 +28,36 @@
 
 using System;
 
-namespace HyperFastCgi.FastCgiProtocol
+namespace HyperFastCgi.Helpers.FastCgiProtocol
 {
-	public enum Role : ushort
-	{
-		Responder = 1,
-		Authorizer = 2,
-		Filter = 3
-	}
-
-	[Flags]
-	public enum BeginRequestFlags : byte
-	{
-		None = 0,
-		KeepAlive = 1
-	}
-
-	public struct BeginRequestBody
+	public struct UnknownTypeBody
 	{
 
 		#region Private Fields
 
-		private Role role;
-		private BeginRequestFlags flags;
+		private RecordType type;
 
 		#endregion
 
 		#region Constructors
 
-		public BeginRequestBody (Record record)
+		public UnknownTypeBody (RecordType unknownType)
 		{
-			if (record.Type != RecordType.BeginRequest)
-				throw new ArgumentException (
-					Strings.BeginRequestBody_WrongType,
-					"record");
-
-			if (record.BodyLength != 8)
-				throw new ArgumentException (
-					Strings.BeginRequestBody_WrongSize, "record");
-
-			byte[] body = record.Body;
-			role = (Role)Record.ReadUInt16 (body, 0);
-			flags = (BeginRequestFlags)body [2];
-		}
-
-		public BeginRequestBody (byte[] body)
-		{
-			role = (Role)Record.ReadUInt16 (body, 0);
-			flags = (BeginRequestFlags)body [2];
+			type = unknownType;
 		}
 
 		#endregion
 
-		#region Public Properties
+		#region Public Methods
 
-		public Role Role {
-			get { return role; }
-		}
-
-		public BeginRequestFlags Flags {
-			get { return flags; }
+		public byte [] GetData ()
+		{
+			byte[] data = new byte [8];
+			data [0] = (byte)type;
+			return data;
 		}
 
 		#endregion
 
 	}
 }
-
