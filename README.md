@@ -56,7 +56,7 @@ Each section except of `web-application` has the attribute `type` which represen
 
 All existing types are described in this manual.
 
-#### <server> element
+#### `<server>` element
 
 * `type` attribute. Currently can only be set to `HyperFastCgi.ApplicationServers.SimpleApplicationServer` or user-defined type.
 
@@ -70,29 +70,47 @@ All existing types are described in this manual.
 
 * `root-dir` element. Sets the root directory for the applications.
 
-#### <listener> element
+	<server type="HyperFastCgi.ApplicationServers.SimpleApplicationServer">
+		<!-- Host factory defines how host will be created. SystemWebHostFactory creates host in AppDomain in standard ASP.NET way --> 
+		<host-factory>HyperFastCgi.HostFactories.SystemWebHostFactory</host-factory>
+		<!-- <threads> creates threads at startup. Value "0" means default value --> 
+		<threads min-worker="40" max-worker="0" min-io="4" max-io="0" />
+		<!--- Sets the application host root directory -->
+		<!-- <root-dir>/path/to/your/dir</root-dir> -->
+	</server>
 
-<listener> describes behaviour of how HyperFastCgi will listen and proceed incoming requests. Currently there are two listeners, which process FastCgi requests, but one can write it's own to process HTTP requests, for example. 
+#### `<listener>` element
+
+`<listener>` describes behaviour of how HyperFastCgi will listen and proceed incoming requests. Currently there are two listeners, which process FastCgi requests, but one can write it's own to process HTTP requests, for example. 
 
 * `type` attribute. Fully-qualified CLR type name. There are two predefined types `HyperFastCgi.Listeners.NativeListener` and `HyperFastCgi.Listeners.ManagedFastCgiListener`.
-	NativeListener is a FastCgi libevent-based listener written in unmanaged code. It provides faster request processing time and allows you to use multithreading or single-threading request processing (like Node.Js)
-	ManagedFastCgiListener is a FastCgi listener written in asynchroneous sockets managed code. It works slower and can't process requests in Node.Js-like single-threading style, but if you don't want to deal with unmanaged code at all it can be a solution.
+	* NativeListener is a FastCgi libevent-based listener written in unmanaged code. It provides faster request processing time and allows you to use multithreading or single-threading request processing (like Node.Js)
+	* ManagedFastCgiListener is a FastCgi listener written in asynchroneous sockets managed code. It works slower and can't process requests in Node.Js-like single-threading style, but if you don't want to deal with unmanaged code at all it can be a solution.
 
 * `listener-transport` element. Transport which sends requests from listener to app host. See transports section for more details.
-	`type` attribute. Fully-quilified CLR type name. There are two predefined listeners transports, which can be used with managed listener (NativeListener has it's own in native code and does not require to define listener transport)     	         	 
-	    `HyperFastCgi.Transports.ManagedFastCgiListenerTransport` - listener transport was written in managed code. It uses cross-domain calls when working with `SystemWebHostFactory`. Cross-domain calls in mono are very slow, so use this transport only if you don't need good performance or want to deal with managed code only. 
-	    `HyperFastCgi.Transports.CombinedFastCgiListenerTransport` - this transport uses native calls to pass data fast to another domain. Speed of calls are similar to speed of calls to the methods located in one domain.
+	* `type` attribute. Fully-quilified CLR type name. There are two predefined listeners transports, which can be used with managed listener (NativeListener has it's own in native code and does not require to define listener transport)     	         	 
+	   * `HyperFastCgi.Transports.ManagedFastCgiListenerTransport` - listener transport was written in managed code. It uses cross-domain calls when working with `SystemWebHostFactory`. Cross-domain calls in mono are very slow, so use this transport only if you don't need good performance or want to deal with managed code only. 
+	   * `HyperFastCgi.Transports.CombinedFastCgiListenerTransport` - this transport uses native calls to pass data fast to another domain. Speed of calls are similar to speed of calls to the methods located in one domain.
 
 * `apphost-transport` element. Transport which recieves requests in the application host and sends response from it to listener. 
-	`type` attribute. Fully-quilified CLR type name. There are three predefined apphost transport.
-		`HyperFastCgi.Transports.ManagedAppHostTransport` must be used in pair with `HyperFastCgi.Transports.ManagedFastCgiListenerTransport` for managed listener.
-		`HyperFastCgi.Transports.CombinedAppHostTransport` must be used in pair with `HyperFastCgi.Transports.CombinedFastCgiListenerTransport` for managed listener.
-		`HyperFastCgi.Transports.NativeTransport` must be used with NativeListener only.
-	`multithreading` element. Defines how requests will be processed in multithreading. Can hold one of three values: `ThreadPool`, `Task` and `Single`. `ThreadPool` uses ThreadPool.QueueUserWorkItem method for processing requests, `Task` uses TPL, and `Single` processes requests directly. Default is `ThreadPool`
+	* `type` attribute. Fully-quilified CLR type name. There are three predefined apphost transport.
+		* `HyperFastCgi.Transports.ManagedAppHostTransport` must be used in pair with `HyperFastCgi.Transports.ManagedFastCgiListenerTransport` for managed listener.
+		* `HyperFastCgi.Transports.CombinedAppHostTransport` must be used in pair with `HyperFastCgi.Transports.CombinedFastCgiListenerTransport` for managed listener.
+		* `HyperFastCgi.Transports.NativeTransport` must be used with NativeListener only.
+	* `multithreading` element. Defines how requests will be processed in multithreading. Can hold one of three values: `ThreadPool`, `Task` and `Single`. `ThreadPool` uses ThreadPool.QueueUserWorkItem method for processing requests, `Task` uses TPL, and `Single` processes requests directly. Default is `ThreadPool`
 
 * `protocol` element. Defines which protocol will be used for opening sockets. Allowed values `InterNetwork` for IPv4, `InterNetwork6' for IPv6 and `Unix` for unix file sockets.
 * `address` element. Defines the address on which will listen to. For unix-sockets it's a path to file.
-* `port` element. Defines the port on which will listen to. Does not used for unix sockets. 
+* `port` element. Defines the port on which will listen to. Does not used for unix sockets.
+
+    <listener type="HyperFastCgi.Listeners.ManagedFastCgiListener">
+		<listener-transport type="HyperFastCgi.Transports.CombinedFastCgiListenerTransport"></listener-transport>
+	   	<apphost-transport type="HyperFastCgi.Transports.CombinedAppHostTransport"></apphost-transport>
+		<protocol>InterNetwork</protocol>
+	    <address>127.0.0.1</address>
+		<port>9000</port>
+    </listener>
+ 
 	     
 ### Nginx configuration
 
