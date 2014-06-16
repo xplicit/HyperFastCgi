@@ -93,8 +93,6 @@ namespace HyperFastCgi
 
 		private static ConfigurationManager configmanager;
 
-		private static bool useThreadPool;
-
 		public static int Main (string[] args)
 		{
 			// Load the configuration file stored in the
@@ -235,8 +233,6 @@ namespace HyperFastCgi
 			}
 
 			Logger.Write (LogLevel.Debug, "Root directory: {0}", root_dir);
-
-			useThreadPool = (bool)configmanager ["usethreadpool"];
 
 			string[] minThreads = ((string)configmanager ["minthreads"]).Split(',');
 			string[] maxThreads = ((string)configmanager ["maxthreads"]).Split(',');
