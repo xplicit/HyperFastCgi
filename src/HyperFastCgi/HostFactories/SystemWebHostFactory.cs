@@ -1,9 +1,9 @@
 ﻿using System;
 using HyperFastCgi.Interfaces;
 
-namespace HyperFastCgi.AppHosts.AspNet
+namespace HyperFastCgi.HostFactories
 {
-	public class AspNetApplicationHostFactory : IApplicationHostFactory
+	public class SystemWebHostFactory : IApplicationHostFactory
 	{
 		#region IApplicationHostFactory implementation
 		public IApplicationHost CreateApplicationHost (Type appHostType, string vhost, int vport, string vpath, string path)

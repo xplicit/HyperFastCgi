@@ -65,7 +65,6 @@ all: $(ASSEMBLY2) $(ASSEMBLY4) $(PROGRAMFILES) $(BINARIES)
 FILES =  \
 	AppHosts/AppHostBase.cs \
 	AppHosts/AspNet/AspNetApplicationHost.cs \
-	AppHosts/AspNet/AspNetApplicationHostFactory.cs \
 	AppHosts/AspNet/AspNetHostConfig.cs \
 	AppHosts/AspNet/AspNetNativeWebRequest.cs \
 	AppHosts/AspNet/MonoWorkerRequest.cs \
@@ -104,6 +103,7 @@ FILES =  \
 	Helpers/Sockets/UnixSocket.cs \
 	Helpers/Strings.cs \
 	Helpers/TestResponse.cs \
+	HostFactories/SystemWebHostFactory.cs \
 	Interfaces/Events/HostUnloadEventArgs.cs \
 	Interfaces/IApplicationHost.cs \
 	Interfaces/IApplicationHostFactory.cs \

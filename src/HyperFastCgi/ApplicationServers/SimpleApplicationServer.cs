@@ -1,6 +1,6 @@
 ﻿using System;
 using HyperFastCgi.Interfaces;
-using HyperFastCgi.AppHosts.AspNet;
+using HyperFastCgi.HostFactories;
 using HyperFastCgi.Interfaces.Events;
 using HyperFastCgi.Configuration;
 using HyperFastCgi.Helpers.Logging;
@@ -48,7 +48,7 @@ namespace HyperFastCgi.ApplicationServers
 		{
 			try
 			{
-				AspNetApplicationHostFactory factory = new AspNetApplicationHostFactory ();
+				SystemWebHostFactory factory = new SystemWebHostFactory ();
 				IApplicationHost host = factory.CreateApplicationHost (appHostType, appConfig.VHost, appConfig.VPort, appConfig.VPath, appConfig.RealPath);
 				host.Configure (appHostConfig, appConfig, this, listenerTransport, appHostTransportType, appHostTransportConfig);
 				//subscribe to Unload event only after run host.Configure

@@ -62,7 +62,6 @@
     <Compile Include="Configuration\LogConfig.cs" />
     <Compile Include="Interfaces\IApplicationHostTransport.cs" />
     <Compile Include="AppHosts\AspNet\AspNetApplicationHost.cs" />
-    <Compile Include="AppHosts\AspNet\AspNetApplicationHostFactory.cs" />
     <Compile Include="AppHosts\AspNet\AspNetHostConfig.cs" />
     <Compile Include="AppHosts\AspNet\AspNetNativeWebRequest.cs" />
     <Compile Include="AppHosts\AspNet\MonoWorkerRequest.cs" />
@@ -105,6 +104,7 @@
     <Compile Include="Helpers\Mono.WebServer\VPathToHost.cs" />
     <Compile Include="Helpers\TestResponse.cs" />
     <Compile Include="Helpers\Strings.cs" />
+    <Compile Include="HostFactories\SystemWebHostFactory.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -121,6 +121,7 @@
     <Folder Include="Transports\" />
     <Folder Include="Interfaces\Events\" />
     <Folder Include="Helpers\" />
+    <Folder Include="HostFactories\" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
