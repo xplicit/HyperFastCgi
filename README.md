@@ -6,6 +6,7 @@ HyperFastCgi hosts mono web applications with nginx. It's a primary replacement 
 Key features:
 * Does not leak memory
 * Serves requests much faster. [See performance comparison](http://forcedtoadmin.blogspot.ru/2013/11/servicestack-performance-in-mono-p2.html#stat)
+* Open architecture allows developers to write their own extensions or replacements of HyperFastCgi components
 
 Latest stable version https://github.com/xplicit/HyperFastCgi/tree/v0.3_stable
 
@@ -166,7 +167,7 @@ HyperFastCgi allows your to write fast web-request processing routines using C#.
 
 4. Get the `samples/hello-world.config` and replace `<request-type>` element value with the type name of your class. You should get something like this 
 
-    <request-type>YourNameSpace.HelloWorldRequest, YourAssemblyName</request-type> 
+        <request-type>YourNameSpace.HelloWorldRequest, YourAssemblyName</request-type> 
 
 5. You're possible have to place your assembly into the GAC or put it under `bin` folder of your web-application, otherwise web-server won't find it. If your web application is located under `/var/www/yourapp` you should place the assembly to `/var/www/yourapp/bin` 
 
