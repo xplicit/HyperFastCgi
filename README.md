@@ -70,14 +70,14 @@ All existing types are described in this manual.
 
 * `root-dir` element. Sets the root directory for the applications.
 
-	<server type="HyperFastCgi.ApplicationServers.SimpleApplicationServer">
-		<!-- Host factory defines how host will be created. SystemWebHostFactory creates host in AppDomain in standard ASP.NET way --> 
-		<host-factory>HyperFastCgi.HostFactories.SystemWebHostFactory</host-factory>
-		<!-- <threads> creates threads at startup. Value "0" means default value --> 
-		<threads min-worker="40" max-worker="0" min-io="4" max-io="0" />
-		<!--- Sets the application host root directory -->
-		<!-- <root-dir>/path/to/your/dir</root-dir> -->
-	</server>
+        <server type="HyperFastCgi.ApplicationServers.SimpleApplicationServer">
+            <!-- Host factory defines how host will be created. SystemWebHostFactory creates host in AppDomain in standard ASP.NET way -->
+            <host-factory>HyperFastCgi.HostFactories.SystemWebHostFactory</host-factory>
+            <!-- <threads> creates threads at startup. Value "0" means default value --> 
+            <threads min-worker="40" max-worker="0" min-io="4" max-io="0" />
+            <!--- Sets the application host root directory -->
+            <!-- <root-dir>/path/to/your/dir</root-dir> -->
+        </server>
 
 #### `<listener>` element
 
@@ -101,15 +101,15 @@ All existing types are described in this manual.
 
 * `protocol` element. Defines which protocol will be used for opening sockets. Allowed values `InterNetwork` for IPv4, `InterNetwork6' for IPv6 and `Unix` for unix file sockets.
 * `address` element. Defines the address on which will listen to. For unix-sockets it's a path to file.
-* `port` element. Defines the port on which will listen to. Does not used for unix sockets.
+* `port` element. Defines the port on which will listen to. Is not used for unix sockets.
 
-    <listener type="HyperFastCgi.Listeners.ManagedFastCgiListener">
-		<listener-transport type="HyperFastCgi.Transports.CombinedFastCgiListenerTransport"></listener-transport>
-	   	<apphost-transport type="HyperFastCgi.Transports.CombinedAppHostTransport"></apphost-transport>
-		<protocol>InterNetwork</protocol>
-	    <address>127.0.0.1</address>
-		<port>9000</port>
-    </listener>
+        <listener type="HyperFastCgi.Listeners.ManagedFastCgiListener">
+            <listener-transport type="HyperFastCgi.Transports.CombinedFastCgiListenerTransport" />
+            <apphost-transport type="HyperFastCgi.Transports.CombinedAppHostTransport" />
+            <protocol>InterNetwork</protocol>
+            <address>127.0.0.1</address>
+            <port>9000</port>
+        </listener>
  
 	     
 ### Nginx configuration
