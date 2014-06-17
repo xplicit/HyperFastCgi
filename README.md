@@ -110,11 +110,64 @@ All existing types are described in this manual.
             <address>127.0.0.1</address>
             <port>9000</port>
         </listener>
- 
+#### `<apphost>` element.
+
+`<apphost>` defines how requests in web application will be processed. HyperFastCgi has two apphosts: AspNet for running ASP.NET applications and Raw for directly working with HTTP request data.
+
+* `type` attribute. Fully-qualified CLR type name. There are two types: 
+	* `HyperFastCgi.AppHosts.AspNet.AspNetApplicationHost` hosts standard ASP.NET sites using System.Web. 
+	* `HyperFastCgi.AppHosts.Raw.RawHost` provides methods for working with raw request - headers and data. It much faster than ASP.NET host (~2.5x-3.5x) but requires low-level manipulating request data. How to write web-application which works with RawHost see in the "Writing RawHost Application" chapter
+* `log` element. 
+		* `level` attribute. Defines log level in AppHost. There are `Error`, `Debug`, `Standard`, `All` values.
+		* `write-to-console` attribute. Defines when logger must write debug info to console. Allowed values are `true` and `false`
+* `add-trailing-slash` element. Allowed values `true` or `false`. Defines when to add trailing slash to the requests of form 'http://server.com/directory'. If you use nginx `rewrite` rule, you're possible don't have to enable this setting.
+* `request-type` element. Used only by RawHost. User-defined fully-qualified CLR type name which will be used for processing requests. See "Writing RawHost Application" chapter. 
+
+    <apphost type="HyperFastCgi.AppHosts.AspNet.AspNetApplicationHost">
+        <log level="Debug" write-to-console="true" />
+        <add-trailing-slash>false</add-trailing-slash>
+    </apphost>
+
+#### `<web-applications>` element.
+
+`<web-applications>` represents collection of `<web-application>` elements each of them defines web application will be hosted by the server.
+
+`<web-application>` element.
+    * `name` element. Provides name of the web application. Is not used yet.
+    * `vhost` element. Host name of virtual host. For example: www.myserver.com
+    * `vport` element. Port of virtual host.
+    * `vpath` element. Virtual path to the host. Generally `/`
+    * `path` element. Physical path to the host files location. For example, `/var/www/myserver`
 	     
 ### Nginx configuration
 
 See the [wiki page for examples of how to configure Nginx](https://github.com/xplicit/HyperFastCgi/wiki/Nginx-configuration)
+
+## Writing RawHost Application
+
+	HyperFastCgi allows your to write fast web-request processing routines using C#. To do it you should do the following steps
+
+	1. Create new C# library project and add HyperFastCgi as reference to the project.
+	2. Create your own class derived from the class HyperFastCgi.AppHosts.Raw.BaseRawRequest.
+	3. Override method Process and write here your own logic. See the sample
+
+    public class HelloWorldRequest : BaseRawRequest
+	{
+        public override void Process(IWebResponse response)
+        {
+            Status = 200;
+            StatusDescription = "OK";
+            ResponseHeaders.Add("Content-Type","text/html; charset=utf-8");
+            response.Send(Encoding.ASCII.GetBytes("Hello, Wrold!"));
+            response.CompleteResponse ();
+        }
+    }
+
+    4. Get the `samples/hello-world.config` and replace `request-type` element value with the type name of your class. You should get something like this 
+
+    <request-type>YourNameSpace.HelloWorldRequest, YourAssemblyName</request-type> 
+
+    5. You're possible have to place your assembly into the GAC or put it under `bin` folder of your web-application, otherwise web-server won't find it. If your web application is located under `/var/www/yourapp` you should place the assembly to `/var/www/yourapp/bin` 
 
 ## Additional Info
 
