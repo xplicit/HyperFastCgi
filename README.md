@@ -68,7 +68,7 @@ All existing types are described in this manual.
 	* `min-io` minimum number of IO completion threads
 	* `max-io` maximal number of IO completion threads
 
-* `root-dir` element. Sets the root directory for the applications.
+* `<root-dir>` element. Sets the root directory for the applications.
 
         <server type="HyperFastCgi.ApplicationServers.SimpleApplicationServer">
             <!-- Host factory defines how host will be created. SystemWebHostFactory creates host in AppDomain in standard ASP.NET way -->
@@ -87,21 +87,21 @@ All existing types are described in this manual.
 	* NativeListener is a FastCgi libevent-based listener written in unmanaged code. It provides faster request processing time and allows you to use multithreading or single-threading request processing (like Node.Js)
 	* ManagedFastCgiListener is a FastCgi listener written in asynchroneous sockets managed code. It works slower and can't process requests in Node.Js-like single-threading style, but if you don't want to deal with unmanaged code at all it can be a solution.
 
-* `listener-transport` element. Transport which sends requests from listener to app host. See transports section for more details.
+* `<listener-transport>` element. Transport which sends requests from listener to app host. See transports section for more details.
 	* `type` attribute. Fully-quilified CLR type name. There are two predefined listeners transports, which can be used with managed listener (NativeListener has it's own in native code and does not require to define listener transport)     	         	 
 	   * `HyperFastCgi.Transports.ManagedFastCgiListenerTransport` - listener transport was written in managed code. It uses cross-domain calls when working with `SystemWebHostFactory`. Cross-domain calls in mono are very slow, so use this transport only if you don't need good performance or want to deal with managed code only. 
 	   * `HyperFastCgi.Transports.CombinedFastCgiListenerTransport` - this transport uses native calls to pass data fast to another domain. Speed of calls are similar to speed of calls to the methods located in one domain.
 
-* `apphost-transport` element. Transport which recieves requests in the application host and sends response from it to listener. 
+* `<apphost-transport>` element. Transport which recieves requests in the application host and sends response from it to listener. 
 	* `type` attribute. Fully-quilified CLR type name. There are three predefined apphost transport.
 		* `HyperFastCgi.Transports.ManagedAppHostTransport` must be used in pair with `HyperFastCgi.Transports.ManagedFastCgiListenerTransport` for managed listener.
 		* `HyperFastCgi.Transports.CombinedAppHostTransport` must be used in pair with `HyperFastCgi.Transports.CombinedFastCgiListenerTransport` for managed listener.
 		* `HyperFastCgi.Transports.NativeTransport` must be used with NativeListener only.
-	* `multithreading` element. Defines how requests will be processed in multithreading. Can hold one of three values: `ThreadPool`, `Task` and `Single`. `ThreadPool` uses ThreadPool.QueueUserWorkItem method for processing requests, `Task` uses TPL, and `Single` processes requests directly. Default is `ThreadPool`
+	* `<multithreading>` element. Defines how requests will be processed in multithreading. Can hold one of three values: `ThreadPool`, `Task` and `Single`. `ThreadPool` uses ThreadPool.QueueUserWorkItem method for processing requests, `Task` uses TPL, and `Single` processes requests directly. Default is `ThreadPool`
 
-* `protocol` element. Defines which protocol will be used for opening sockets. Allowed values `InterNetwork` for IPv4, `InterNetwork6' for IPv6 and `Unix` for unix file sockets.
-* `address` element. Defines the address on which will listen to. For unix-sockets it's a path to file.
-* `port` element. Defines the port on which will listen to. Is not used for unix sockets.
+* `<protocol>` element. Defines which protocol will be used for opening sockets. Allowed values `InterNetwork` for IPv4, `InterNetwork6' for IPv6 and `Unix` for unix file sockets.
+* `<address>` element. Defines the address on which will listen to. For unix-sockets it's a path to file.
+* `<port>` element. Defines the port on which will listen to. Is not used for unix sockets.
 
         <listener type="HyperFastCgi.Listeners.ManagedFastCgiListener">
             <listener-transport type="HyperFastCgi.Transports.CombinedFastCgiListenerTransport" />
@@ -117,11 +117,11 @@ All existing types are described in this manual.
 * `type` attribute. Fully-qualified CLR type name. There are two types: 
 	* `HyperFastCgi.AppHosts.AspNet.AspNetApplicationHost` hosts standard ASP.NET sites using System.Web. 
 	* `HyperFastCgi.AppHosts.Raw.RawHost` provides methods for working with raw request - headers and data. It much faster than ASP.NET host (~2.5x-3.5x) but requires low-level manipulating request data. How to write web-application which works with RawHost see in the "Writing RawHost Application" chapter
-* `log` element. 
+* `<log>` element. 
 		* `level` attribute. Defines log level in AppHost. There are `Error`, `Debug`, `Standard`, `All` values.
 		* `write-to-console` attribute. Defines when logger must write debug info to console. Allowed values are `true` and `false`
-* `add-trailing-slash` element. Allowed values `true` or `false`. Defines when to add trailing slash to the requests of form 'http://server.com/directory'. If you use nginx `rewrite` rule, you're possible don't have to enable this setting.
-* `request-type` element. Used only by RawHost. User-defined fully-qualified CLR type name which will be used for processing requests. See "Writing RawHost Application" chapter. 
+* `<add-trailing-slash>` element. Allowed values `true` or `false`. Defines when to add trailing slash to the requests of form 'http://server.com/directory'. If you use nginx `rewrite` rule, you're possible don't have to enable this setting.
+* `<request-type>` element. Used only by RawHost. User-defined fully-qualified CLR type name which will be used for processing requests. See "Writing RawHost Application" chapter. 
 
     <apphost type="HyperFastCgi.AppHosts.AspNet.AspNetApplicationHost">
         <log level="Debug" write-to-console="true" />
@@ -133,11 +133,11 @@ All existing types are described in this manual.
 `<web-applications>` represents collection of `<web-application>` elements each of them defines web application will be hosted by the server.
 
 `<web-application>` element.
-    * `name` element. Provides name of the web application. Is not used yet.
-    * `vhost` element. Host name of virtual host. For example: www.myserver.com
-    * `vport` element. Port of virtual host.
-    * `vpath` element. Virtual path to the host. Generally `/`
-    * `path` element. Physical path to the host files location. For example, `/var/www/myserver`
+* `<name>` element. Provides name of the web application. Is not used yet.
+* `<vhost>` element. Host name of virtual host. For example: www.myserver.com
+* `<vport>` element. Port of virtual host.
+* `<vpath>` element. Virtual path to the host. Generally `/`
+* `<path>` element. Physical path to the host files location. For example, `/var/www/myserver`
 	     
 ### Nginx configuration
 
@@ -145,29 +145,29 @@ See the [wiki page for examples of how to configure Nginx](https://github.com/xp
 
 ## Writing RawHost Application
 
-	HyperFastCgi allows your to write fast web-request processing routines using C#. To do it you should do the following steps
+HyperFastCgi allows your to write fast web-request processing routines using C#. To do it you should do the following steps
 
-	1. Create new C# library project and add HyperFastCgi as reference to the project.
-	2. Create your own class derived from the class HyperFastCgi.AppHosts.Raw.BaseRawRequest.
-	3. Override method Process and write here your own logic. See the sample
+1. Create new C# library project and add HyperFastCgi as reference to the project.
+2. Create your own class derived from the class HyperFastCgi.AppHosts.Raw.BaseRawRequest.
+3. Override method Process and write here your own logic. See the sample
 
-    public class HelloWorldRequest : BaseRawRequest
-	{
-        public override void Process(IWebResponse response)
+        public class HelloWorldRequest : BaseRawRequest
         {
-            Status = 200;
-            StatusDescription = "OK";
-            ResponseHeaders.Add("Content-Type","text/html; charset=utf-8");
-            response.Send(Encoding.ASCII.GetBytes("Hello, Wrold!"));
-            response.CompleteResponse ();
+            public override void Process(IWebResponse response)
+            {
+                Status = 200;
+                StatusDescription = "OK";
+                ResponseHeaders.Add("Content-Type","text/html; charset=utf-8");
+                response.Send(Encoding.ASCII.GetBytes("Hello, Wrold!"));
+                response.CompleteResponse ();
+            }
         }
-    }
 
-    4. Get the `samples/hello-world.config` and replace `request-type` element value with the type name of your class. You should get something like this 
+4. Get the `samples/hello-world.config` and replace `<request-type>` element value with the type name of your class. You should get something like this 
 
     <request-type>YourNameSpace.HelloWorldRequest, YourAssemblyName</request-type> 
 
-    5. You're possible have to place your assembly into the GAC or put it under `bin` folder of your web-application, otherwise web-server won't find it. If your web application is located under `/var/www/yourapp` you should place the assembly to `/var/www/yourapp/bin` 
+5. You're possible have to place your assembly into the GAC or put it under `bin` folder of your web-application, otherwise web-server won't find it. If your web application is located under `/var/www/yourapp` you should place the assembly to `/var/www/yourapp/bin` 
 
 ## Additional Info
 
