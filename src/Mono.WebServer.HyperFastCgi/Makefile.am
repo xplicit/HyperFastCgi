@@ -167,7 +167,7 @@ $(ASSEMBLY_MDB): $(ASSEMBLY)
 if NET_2_0
 $(ASSEMBLY2): $(build_sources) $(build_resources) $(build_datafiles) $(DLL_REFERENCES) $(PROJECT_REFERENCES) $(build_xamlg_list) $(build_satellite_assembly_list)
 	mkdir -p $(shell dirname 2.0/$(ASSEMBLY))
-	$(GMCS) $(ASSEMBLY_COMPILER_FLAGS) -out:$(ASSEMBLY2) -target:$(COMPILE_TARGET) $(build_sources) $(build_resources:%=-resource:%) $(build_references_ref4)
+	$(GMCS) -d:NET_2_0 $(ASSEMBLY_COMPILER_FLAGS) -out:$(ASSEMBLY2) -target:$(COMPILE_TARGET) $(build_sources) $(build_resources:%=-resource:%) $(build_references_ref4)
 	$(SN) -q -R $(builddir)/$@ $(srcdir)/../mono.snk
 endif
 
