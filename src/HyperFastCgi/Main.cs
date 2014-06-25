@@ -64,15 +64,11 @@ namespace HyperFastCgi
 			string version = assembly.GetName ().Version.ToString ();
 			object att;
 
-			att = assembly.GetCustomAttributes (
-				typeof(AssemblyCopyrightAttribute), false) [0];
-			string copyright =
-				((AssemblyCopyrightAttribute)att).Copyright;
+			att = assembly.GetCustomAttributes (typeof(AssemblyCopyrightAttribute), false) [0];
+			string copyright = ((AssemblyCopyrightAttribute)att).Copyright;
 
-			att = assembly.GetCustomAttributes (
-				typeof(AssemblyDescriptionAttribute), false) [0];
-			string description =
-				((AssemblyDescriptionAttribute)att).Description;
+			att = assembly.GetCustomAttributes (typeof(AssemblyDescriptionAttribute), false) [0];
+			string description = ((AssemblyDescriptionAttribute)att).Description;
 
 			Console.WriteLine ("{0} {1}\n(c) {2}\n{3}",
 				Path.GetFileName (assembly.Location), version,
@@ -81,8 +77,7 @@ namespace HyperFastCgi
 
 		static void ShowHelp ()
 		{
-			string name = Path.GetFileName (
-				              Assembly.GetExecutingAssembly ().Location);
+			string name = Path.GetFileName (Assembly.GetExecutingAssembly ().Location);
 
 			ShowVersion ();
 			Console.WriteLine ();
@@ -105,8 +100,7 @@ namespace HyperFastCgi
 			configmanager.LoadCommandLineArgs (args);
 
 			// Show the help and exit.
-			if ((bool)configmanager ["help"] ||
-			    (bool)configmanager ["?"]) {
+			if ((bool)configmanager ["help"] || (bool)configmanager ["?"]) {
 				ShowHelp ();
 				return 0;
 			}
@@ -126,50 +120,36 @@ namespace HyperFastCgi
 
 
 			try {
-				string config_file = (string)
-				                     configmanager ["configfile"];
-				if (config_file != null)
-					configmanager.LoadXmlConfig (
-						config_file);
+				string config_file = (string)configmanager ["configfile"];
+				if (config_file != null) configmanager.LoadXmlConfig (config_file);
 			} catch (ApplicationException e) {
 				Console.WriteLine (e.Message);
 				return 1;
 			} catch (System.Xml.XmlException e) {
-				Console.WriteLine (
-					"Error reading XML configuration: {0}",
-					e.Message);
+				Console.WriteLine ("Error reading XML configuration: {0}", e.Message);
 				return 1;
 			}
 
 			try {
-				string log_level = (string)
-				                   configmanager ["loglevels"];
+				string log_level = (string) configmanager ["loglevels"];
 
-				if (log_level != null)
-					Logger.Level = (LogLevel)
-					               Enum.Parse (typeof(LogLevel),
-						log_level);
+				if (log_level != null) 
+					Logger.Level = (LogLevel) Enum.Parse (typeof(LogLevel), log_level);
 			} catch {
 				Console.WriteLine ("Failed to parse log levels.");
-				Console.WriteLine ("Using default levels: {0}",
-					Logger.Level);
+				Console.WriteLine ("Using default levels: {0}", Logger.Level);
 			}
 
 			// Enable console logging during Main ().
 			Logger.WriteToConsole = true;
 
 			try {
-				string log_file = (string)
-				                  configmanager ["logfile"];
+				string log_file = (string) configmanager ["logfile"];
 
-				if (log_file != null)
-					Logger.Open (log_file);
+				if (log_file != null) Logger.Open (log_file);
 			} catch (Exception e) {
-				Logger.Write (LogLevel.Error,
-					"Error opening log file: {0}",
-					e.Message);
-				Logger.Write (LogLevel.Error,
-					"Events will not be logged.");
+				Logger.Write (LogLevel.Error, "Error opening log file: {0}", e.Message);
+				Logger.Write (LogLevel.Error,"Events will not be logged.");
 			}
 
 			Logger.Write (LogLevel.Debug,
@@ -177,17 +157,14 @@ namespace HyperFastCgi
 
 			bool auto_map = false; //(bool) configmanager ["automappaths"];
 
-			string applications = (string)
-			                      configmanager ["applications"];
+			string applications = (string) configmanager ["applications"];
 			string app_config_file;
 			string app_config_dir;
 			List<WebAppConfig> webapps = new List<WebAppConfig> ();
 
 			try {
-				app_config_file = (string)
-				                  configmanager ["appconfigfile"];
-				app_config_dir = (string)
-				                 configmanager ["appconfigdir"];
+				app_config_file = (string) configmanager ["appconfigfile"];
+				app_config_dir = (string) configmanager ["appconfigdir"];
 			} catch (ApplicationException e) {
 				Logger.Write (LogLevel.Error, e.Message);
 				return 1;
@@ -288,8 +265,7 @@ namespace HyperFastCgi
 			configmanager = null;
 
 			if (stopable) {
-				Console.WriteLine (
-					"Hit Return to stop the server.");
+				Console.WriteLine ("Hit Return to stop the server.");
 				Console.ReadLine ();
 			} else {
 				UnixSignal[] signals = new UnixSignal[] { 
