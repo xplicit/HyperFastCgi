@@ -45,66 +45,7 @@
 			options. Examples of configuration you can find in ./samples directory</para>
 		</Description>
 	</Setting>
-	<!-- SOCKET SETTINGS -->
-	
-	<Setting Name="socket" Type="String" AppSetting="MonoSocketType"
-		Environment="MONO_FCGI_SOCKET" ConsoleVisible="True" Value="unix">
-		<Description>
-			<para>Specifies the type of socket to listen on. Valid
-			values are "unix" and "tcp".</para>
 
-			<para>"unix" indicates that a standard unix
-			socket should be opened. The file name can be
-			specified in the "filename" argument or appended
-			to this argument with a colon, eg:</para>
-			
-			<example>
-				<code>
-					unix<br />
-					unix:/tmp/fastcgi-mono-socket
-				</code>
-			</example>
-			
-			<para>"tcp" indicates that a TCP socket should
-			be opened. The address and port can be specified
-			in the "port" and "address" arguments with or
-			appended to this argument with a colon, eg:</para>
-			
-			<example>
-				<code>
-					tcp<br />
-					tcp:8081<br />
-					tcp:127.0.0.1:8081<br />
-					tcp:0.0.0.0:8081
-				</code>
-			</example>
-		</Description>
-	</Setting>
-	
-	<Setting Name="filename" AppSetting="MonoUnixSocket" Type="String"
-		Environment="MONO_FCGI_FILENAME" ConsoleVisible="True" Value="/tmp/fastcgi-mono-server">
-		<Description>
-			<para>Specifies a unix socket filename to listen on.<br />
-			To use this argument, "socket" must be set to "unix".</para>
-		</Description>
-	</Setting>
-	
-	<Setting Name="port" AppSetting="MonoServerPort" Type="UInt16"
-		Environment="MONO_FCGI_PORT" ConsoleVisible="True">
-		<Description>
-			<para>Specifies the TCP port number to listen on.<br />
-			To use this argument, "socket" must be set to "tcp".</para>
-		</Description>
-	</Setting>
-	
-	<Setting Name="address" AppSetting="MonoServerAddress" Type="String"
-		Environment="MONO_FCGI_ADDRESS" ConsoleVisible="True">
-		<Description>
-			<para>Specifies the IP address to listen on.<br />
-			To use this argument, "socket" must be set to "tcp".</para>
-		</Description>
-	</Setting>
-	
 	<!-- APPLICATION SETTINGS -->
 	
 	<Setting Name="root" AppSetting="MonoServerRootDir" Type="Directory"
@@ -186,15 +127,6 @@
 			</example>
 		</Description>
 	</Setting>
-
-	<Setting Name="addtrailingslash" AppSetting="FastCgiTrailingSlash" 
-		Environment="MONO_FCGI_ADDTRAILINGSLASH" Type="Bool" ConsoleVisible="True"  WebVisible="True" Value="False" >
-		<Description>
-			<para>Add trailing slash to requests path. Enable this setting only if you can't use standard
-			url rewrite mechanism of front-end web server.</para>
-		</Description>
-	</Setting>
-
 <!--	
 	<Setting Name="automappaths" AppSetting="MonoAutomapPaths"
 		Environment="MONO_FCGI_AUTOMAPPATHS" Type="Bool" ConsoleVisible="True" Value="False">

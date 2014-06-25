@@ -24,12 +24,24 @@ Download the source and perform commands:
 
 ### Arguments
 
-* `/config=<configfile>` Path to configuration file, which holds general settings like listener configuration (Managed or Native, their protocol, address and port), Application Host configuration (AspNet or Custom). The samples of config files can be found in `./samples` directory. This option is required and was introduced in HyperFastCgi v0.4
+* `/config=<configfile>` Path to configuration XML file, which holds general settings like listener configuration (Managed or Native, their protocol, address and port), Application Host configuration (AspNet or Custom). The samples of config files can be found in `./samples` directory. This option is required and was introduced in HyperFastCgi v0.4
 
-Most of the arguments are the same as in mono-server-fastcgi. Some additional arguments were added
+* `/applications` Adds applications from a comma separated list of virtual and physical directory pairs. The pairs are separated by colons and optionally include the virtual host name and port to use: `[hostname:[port:]]VPath:realpath,...`
 
-* `/addtrailingslash=[true|false]` Adds trailing slash if path to directory does not end with '/'. Default is 'false'. This option were added for compatibility with mono-fastcgi-server. For performance reasons it's recommended to use nginx 'rewrite' command instead, i. e.
-    rewrite ^([^.]*[^/])$ $1/ permanent;
+* `/appconfigfile` Adds application definitions from an XML configuration file, typically with the ".webapp" extension. See sample configuration file that comes with the server.
+
+* `/appconfigdir` Adds application definitions from all XML files found in the specified directory DIR. Files must have the ".webapp" extension.
+
+* `/logfile` Specifies a file to log events to.
+
+* `/loglevels` Specifies what log levels to log. It can be any of the following values, or multiple if comma separated:
+			`Debug`, `Notice`, `Warning`, `Error`, `Standard` (Notice,Warning,Error), `All` (Debug,Standard)
+
+* `/printlog` Prints log messages to the console.
+
+* `/stopable` Allows the user to stop the server by if "Enter" is pressed. This should not be used when the server has no controlling terminal
+
+* `/version` Displays version information and exits.
 
 ### Config file parameters
 
@@ -122,7 +134,7 @@ All existing types are described in this manual.
 * `<log>` element. 
 		* `level` attribute. Defines log level in AppHost. There are `Error`, `Debug`, `Standard`, `All` values.
 		* `write-to-console` attribute. Defines when logger must write debug info to console. Allowed values are `true` and `false`
-* `<add-trailing-slash>` element. Allowed values `true` or `false`. Defines when to add trailing slash to the requests of form 'http://server.com/directory'. If you use nginx `rewrite` rule, you're possible don't have to enable this setting.
+* `<add-trailing-slash>` element. Allowed values `true` or `false`. Adds trailing slash if path to directory does not end with '/'. Default is 'false'. This option were added for compatibility with mono-fastcgi-server. For performance reasons it's recommended to use nginx 'rewrite' command instead, i. e. `rewrite ^([^.]*[^/])$ $1/ permanent;`
 * `<request-type>` element. Used only by RawHost. User-defined fully-qualified CLR type name which will be used for processing requests. See "Writing RawHost Application" chapter. 
 
     <apphost type="HyperFastCgi.AppHosts.AspNet.AspNetApplicationHost">
