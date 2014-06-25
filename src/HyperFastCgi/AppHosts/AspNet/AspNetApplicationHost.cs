@@ -23,7 +23,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 
 		public override void ProcessRequest (IWebRequest request)
 		{
-			throw new NotImplementedException ();
+			request.Process((IWebResponse)request);
 		}
 
 		public override void Configure (object appHostConfig, object webAppConfig, 
