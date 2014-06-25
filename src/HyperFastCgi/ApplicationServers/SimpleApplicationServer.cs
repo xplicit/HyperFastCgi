@@ -7,6 +7,7 @@ using HyperFastCgi.Helpers.Logging;
 using System.Collections.Generic;
 using HyperFastCgi.Transports;
 using HyperFastCgi.Helpers;
+using System.Globalization;
 
 namespace HyperFastCgi.ApplicationServers
 {
@@ -57,12 +58,59 @@ namespace HyperFastCgi.ApplicationServers
 
 		public IApplicationHost GetRoute(string vhost, int vport, string vpath)
 		{
+			//TODO: read-write lock or ToArray() and lock-free.
 			lock (hosts) {
-				if (hosts.Count > 0)
+				if (hosts.Count == 1)
 					return hosts [0].Host;
-				else
-					return null;
+				else {
+					foreach (HostInfo host in hosts) {
+						if (Match (host.Host, vhost, vport, vpath)) {
+							return host.Host;
+						}
+					}
+				}
 			}
+
+			return null;
+		}
+
+		private bool Match (IApplicationHost apphost, string vhost, int vport, string vpath)
+		{
+			if (vport != -1 && apphost.VPort != -1 && vport != apphost.VPort)
+				return false;
+
+//			if (vhost != null && apphost.VHost != null && apphost.VHost != "*") {
+//				int length = apphost.VHost.Length;
+//				string lwrvhost = vhost.ToLower (CultureInfo.InvariantCulture);
+//				if (haveWildcard) {
+//					if (length > vhost.Length)
+//						return false;
+//
+//					if (length == vhost.Length && apphost.VHost != lwrvhost)
+//						return false;
+//
+//					if (vhost [vhost.Length - length - 1] != '.')
+//						return false;
+//
+//					if (!lwrvhost.EndsWith (apphost.VHost))
+//						return false;
+//
+//				} else if (apphost.VHost != lwrvhost) {
+//					return false;
+//				}
+//			}
+
+			int local = vpath.Length;
+			int vlength = apphost.VPath.Length;
+			if (vlength > local) {
+				// Check for /xxx requests to be redirected to /xxx/
+				if (apphost.VPath [vlength - 1] != '/')
+					return false;
+
+				return (vlength - 1 == local && apphost.VPath.Substring (0, vlength - 1) == vpath);
+			}
+
+			return (vpath.StartsWith (apphost.VPath, StringComparison.Ordinal));
 		}
 
 		public IApplicationHost CreateApplicationHost(Type appHostType, object appHostConfig, 

@@ -17,7 +17,7 @@
 * [X] Implement threadpooling/tasks/singlethread support
 
 ### GetRoute
-* [ ] Implement GetRoute() for managed classes
+* [X] Implement GetRoute() for managed classes
 * [X] Implement GetRoute() for native classes
 
 ### Domain Reloading
@@ -35,7 +35,7 @@
 * [ ] Add 'Core' namespace, move all common things here
 
 ### Documentation
-* [ ] Document *.config files
+* [X] Document *.config files
 * [ ] Document rules of creating custom  
 
 ## version 0.5
