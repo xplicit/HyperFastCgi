@@ -39,6 +39,7 @@
 #include <sys/socket.h>
 #include <event.h>
 #include <event2/thread.h>
+#include <glib.h>
 #include "fcgi.h"
 #include "fcgi-transport.h"
 #include "libev.h"
@@ -58,44 +59,48 @@
 static void shutdown_cmdsocket(struct cmdsocket *cmdsocket);
 
 // List of open connections to be cleaned up at server shutdown
-static struct cmdsocket cmd_listhead = { .next = NULL };
-static struct cmdsocket * const socketlist = &cmd_listhead;
-/*
-static void quit_func(struct cmdsocket *cmdsocket, struct command *command, const char *params)
-{
-	INFO_OUT("%s %s\n", command->name, params);
-	shutdown_cmdsocket(cmdsocket);
-}
+static pthread_mutex_t sockets_lock;
+static GHashTable* sockets;
 
-static void kill_func(struct cmdsocket *cmdsocket, struct command *command, const char *params)
-{
-	INFO_OUT("%s %s\n", command->name, params);
-
-	INFO_OUT("Shutting down server.\n");
-	if(event_base_loopexit(cmdsocket->evloop, NULL)) {
-		ERROR_OUT("Error shutting down server\n");
-	}
-
-	shutdown_cmdsocket(cmdsocket);
-}
-*/
 static void add_cmdsocket(struct cmdsocket *cmdsocket)
 {
-	cmdsocket->prev = socketlist;
-	cmdsocket->next = socketlist->next;
-	if(socketlist->next != NULL) {
-		socketlist->next->prev = cmdsocket;
-	}
-	socketlist->next = cmdsocket;
+    struct cmdsocket* prev;
+
+    pthread_mutex_lock(&sockets_lock);
+    prev = g_hash_table_lookup(sockets, GINT_TO_POINTER(cmdsocket->fd));
+    pthread_mutex_unlock(&sockets_lock);
+
+    if (prev) {
+        ERROR_OUT("Trying to add existing socket %i",cmdsocket->fd);
+        //TODO: close the socket (previous or new one) and free resources
+    }
+
+    g_hash_table_insert(sockets, GINT_TO_POINTER(cmdsocket->fd), cmdsocket);
+
 }
 
 cmdsocket* find_cmdsocket(int fd)
 {
-    cmdsocket* cur=socketlist;
+    cmdsocket* ret;
 
-    while (cur != NULL && cur->fd != fd) cur = cur->next;
+    pthread_mutex_lock(&sockets_lock);
+    ret = g_hash_table_lookup(sockets, GINT_TO_POINTER(fd));
+    pthread_mutex_unlock(&sockets_lock);
 
-    return cur;
+    return ret;
+}
+
+static void remove_cmdsocket(struct cmdsocket *cmdsocket)
+{
+    gboolean res;
+
+    pthread_mutex_lock(&sockets_lock);
+    res = g_hash_table_remove(sockets, GINT_TO_POINTER(cmdsocket->fd));
+    pthread_mutex_unlock(&sockets_lock);
+
+	if (!res) {
+        ERROR_OUT("Trying to remove non-existing socket %i",cmdsocket->fd);
+	}
 }
 
 
@@ -128,18 +133,7 @@ static void free_cmdsocket(struct cmdsocket *cmdsocket)
 	}
 
 	// Remove socket info from list of sockets
-	if(cmdsocket->prev->next == cmdsocket) {
-		cmdsocket->prev->next = cmdsocket->next;
-	} else {
-		ERROR_OUT("BUG: Socket list is inconsistent: cmdsocket->prev->next != cmdsocket!\n");
-	}
-	if(cmdsocket->next != NULL) {
-		if(cmdsocket->next->prev == cmdsocket) {
-			cmdsocket->next->prev = cmdsocket->prev;
-		} else {
-			ERROR_OUT("BUG: Socket list is inconsistent: cmdsocket->next->prev != cmdsocket!\n");
-		}
-	}
+	remove_cmdsocket(cmdsocket);
 
 	// Close socket and free resources
 	if (cmdsocket->body != NULL) {
@@ -290,36 +284,6 @@ static void fcgi_read(struct bufferevent *buf_event, void *arg)
     }
 }
 
-static void cmd_read(struct bufferevent *buf_event, void *arg)
-{
-	struct cmdsocket *cmdsocket = (struct cmdsocket *)arg;
-	char *cmdline;
-	size_t len;
-//	int i;
-
-	// Process up to 10 commands at a time
-//	for(i = 0; i < 10 && !cmdsocket->shutdown; i++) {
-//		cmdline = evbuffer_readline(buf_event->input);
-//		if(cmdline == NULL) {
-//			// No data, or data has arrived, but no end-of-line was found
-//			break;
-//		}
-//		len = strlen(cmdline);
-//
-//		INFO_OUT("Read a line of length %zd from client on fd %d: %s\n", len, cmdsocket->fd, cmdline);
-//		process_command(len, cmdline, cmdsocket);
-//		free(cmdline);
-//	}
-    cmdline = evbuffer_readline(buf_event->input);
-    len = strlen(cmdline);
-    process_http(len, cmdline, cmdsocket);
-
-	// Send the results to the client
-	flush_cmdsocket(cmdsocket);
-	//to http
-	//shutdown_cmdsocket(cmdsocket);
-}
-
 static void cmd_error(struct bufferevent *buf_event, short error, void *arg)
 {
 	struct cmdsocket *cmdsocket = (struct cmdsocket *)arg;
@@ -420,9 +384,13 @@ void Shutdown()
 	transport_finalize();
 
 	// Clean up and close open connections
-	while(socketlist->next != NULL) {
-		free_cmdsocket(socketlist->next);
-	}
+	//TODO: foreach socket in g_hash_table, call free_cmdsocket
+	//currently it's impossible, because hashtable cannot be modified during
+	//foreach operation, but free_cmdsocket() uses g_hash_table_remove()
+//	while(socketlist->next != NULL) {
+//		free_cmdsocket(socketlist->next);
+//	}
+    pthread_mutex_destroy(&sockets_lock);
 
 	// Clean up libevent
 	if(event_del(&connect_event)) {
@@ -454,6 +422,10 @@ int Listen(unsigned short int address_family, const char *addr, guint16 listen_p
         ERROR_OUT("Unknown address family: %hu\n", address_family);
         return -1;
     }
+
+    //init socket hashtable. passing NULL to use pointer direct hashfunc and equals
+    pthread_mutex_init(&sockets_lock, NULL);
+    sockets = g_hash_table_new(NULL,NULL);
 
 	transport_init();
 
