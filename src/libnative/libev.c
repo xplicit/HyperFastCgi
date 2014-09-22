@@ -60,7 +60,7 @@ static void shutdown_cmdsocket(struct cmdsocket *cmdsocket);
 
 // List of open connections to be cleaned up at server shutdown
 static pthread_mutex_t sockets_lock;
-static GHashTable* sockets;
+static GHashTable* sockets = NULL;
 
 static void add_cmdsocket(struct cmdsocket *cmdsocket)
 {
@@ -81,11 +81,14 @@ static void add_cmdsocket(struct cmdsocket *cmdsocket)
 
 cmdsocket* find_cmdsocket(int fd)
 {
-    cmdsocket* ret;
+    cmdsocket* ret = NULL;
 
-    pthread_mutex_lock(&sockets_lock);
-    ret = g_hash_table_lookup(sockets, GINT_TO_POINTER(fd));
-    pthread_mutex_unlock(&sockets_lock);
+    if (sockets)
+    {
+        pthread_mutex_lock(&sockets_lock);
+        ret = g_hash_table_lookup(sockets, GINT_TO_POINTER(fd));
+        pthread_mutex_unlock(&sockets_lock);
+    }
 
     return ret;
 }
@@ -126,15 +129,8 @@ static struct cmdsocket *create_cmdsocket(int sockfd, struct sockaddr_storage *r
 	return cmdsocket;
 }
 
-static void free_cmdsocket(struct cmdsocket *cmdsocket)
+static void free_cmdsocket_only(struct cmdsocket *cmdsocket)
 {
-	if(CHECK_NULL(cmdsocket)) {
-		abort();
-	}
-
-	// Remove socket info from list of sockets
-	remove_cmdsocket(cmdsocket);
-
 	// Close socket and free resources
 	if (cmdsocket->body != NULL) {
         g_free(cmdsocket->body);
@@ -152,6 +148,25 @@ static void free_cmdsocket(struct cmdsocket *cmdsocket)
 		}
 	}
 	free(cmdsocket);
+}
+
+static gboolean free_cmdsocket_from_hash_table(gpointer key, gpointer value, gpointer user_data)
+{
+    free_cmdsocket_only((struct cmdsocket *)value);
+
+    return TRUE;
+}
+
+static void free_cmdsocket(struct cmdsocket *cmdsocket)
+{
+	if(CHECK_NULL(cmdsocket)) {
+		abort();
+	}
+
+	// Remove socket info from list of sockets
+	remove_cmdsocket(cmdsocket);
+
+	free_cmdsocket_only(cmdsocket);
 }
 
 static void shutdown_cmdsocket(struct cmdsocket *cmdsocket)
@@ -384,12 +399,12 @@ void Shutdown()
 	transport_finalize();
 
 	// Clean up and close open connections
-	//TODO: foreach socket in g_hash_table, call free_cmdsocket
-	//currently it's impossible, because hashtable cannot be modified during
-	//foreach operation, but free_cmdsocket() uses g_hash_table_remove()
-//	while(socketlist->next != NULL) {
-//		free_cmdsocket(socketlist->next);
-//	}
+	pthread_mutex_lock(&sockets_lock);
+	g_hash_table_foreach_remove(sockets, free_cmdsocket_from_hash_table, NULL);
+	g_hash_table_destroy(sockets);
+	sockets = NULL;
+	pthread_mutex_unlock(&sockets_lock);
+
     pthread_mutex_destroy(&sockets_lock);
 
 	// Clean up libevent

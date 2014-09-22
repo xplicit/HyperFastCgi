@@ -39,6 +39,7 @@ static GHashTable* requests;
 static pthread_mutex_t requests_lock;
 
 static int request_num = 0;
+static int finalized = 0;
 
 static gboolean
 parse_params(Request *req, FCGI_Header* header, guint8* data);
@@ -54,6 +55,7 @@ transport_init()
 void
 transport_finalize()
 {
+    finalized = 1;
     pthread_mutex_destroy (&requests_lock);
     g_hash_table_destroy (requests);
 }
@@ -83,6 +85,8 @@ process_record(int fd, FCGI_Header* header, guint8* body)
 {
     Request *req = NULL;
     guint64 id = GET_HASH(fd,fcgi_get_request_id(header));
+
+    if (finalized) return;
 
     //key not found. if header->type is FCGI_BEGIN_REQUEST
     //than create new request, otherwise skip request due to FastCGI spec
@@ -207,6 +211,8 @@ send_stream_data (cmdsocket* sock, guint8 record_type, guint16 requestId, guint8
 void
 send_output (guint64 requestId, int request_num, guint8* data, int len)
 {
+    if (finalized) return;
+
     pthread_mutex_lock (&requests_lock);
     Request* req=(Request *)g_hash_table_lookup (requests, &requestId);
     pthread_mutex_unlock (&requests_lock);
@@ -227,6 +233,8 @@ end_request (guint64 requestId, int request_num, int app_status, int protocol_st
         .reserved2 = 0,
         .reserved3 = 0
     };
+
+    if (finalized) return;
 
     pthread_mutex_lock (&requests_lock);
     Request *req=(Request *)g_hash_table_lookup (requests, &requestId);
