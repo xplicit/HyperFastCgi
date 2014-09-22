@@ -99,6 +99,7 @@ process_record(int fd, FCGI_Header* header, guint8* body)
 
             req = g_new (Request, 1);
             req->hash = id;
+            req->request_num = ++request_num;
 
             g_hash_table_insert (requests, &req->hash, req);
             pthread_mutex_unlock (&requests_lock);
@@ -107,7 +108,6 @@ process_record(int fd, FCGI_Header* header, guint8* body)
             req->requestId = fcgi_get_request_id(header);
             req->header = header;
             req->body = body;
-            req->request_num = ++request_num;
             req->keep_alive = begin_body->flags & FCGI_KEEP_CONN;
             req->stdout_sent = FALSE;
             req->hostname = NULL;
@@ -222,6 +222,8 @@ send_output (guint64 requestId, int request_num, guint8* data, int len)
         if (sock != NULL) {
             send_stream_data (sock, FCGI_STDOUT, req->requestId, data, len);
         }
+    } else {
+        INFO_OUT ("can't find request n=%i", request_num);
     }
 }
 
@@ -257,6 +259,7 @@ end_request (guint64 requestId, int request_num, int app_status, int protocol_st
     }
     else {
         pthread_mutex_unlock (&requests_lock);
+        INFO_OUT ("can't find request n=%i",request_num);
     }
 }
 

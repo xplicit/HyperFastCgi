@@ -68,14 +68,19 @@ static void add_cmdsocket(struct cmdsocket *cmdsocket)
 
     pthread_mutex_lock(&sockets_lock);
     prev = g_hash_table_lookup(sockets, GINT_TO_POINTER(cmdsocket->fd));
+    if (!prev) {
+        g_hash_table_insert(sockets, GINT_TO_POINTER(cmdsocket->fd), cmdsocket);
+    }
     pthread_mutex_unlock(&sockets_lock);
 
     if (prev) {
         ERROR_OUT("Trying to add existing socket %i",cmdsocket->fd);
         //TODO: close the socket (previous or new one) and free resources
-    }
+        pthread_mutex_lock(&sockets_lock);
+        g_hash_table_insert(sockets, GINT_TO_POINTER(cmdsocket->fd), cmdsocket);
+        pthread_mutex_unlock(&sockets_lock);
 
-    g_hash_table_insert(sockets, GINT_TO_POINTER(cmdsocket->fd), cmdsocket);
+    }
 
 }
 
