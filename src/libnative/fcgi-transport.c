@@ -172,12 +172,7 @@ send_record (cmdsocket* sock, guint8 record_type, guint16 requestId, guint8* dat
     fcgi_set_request_id (&header, requestId);
     fcgi_set_content_len (&header, len);
 
-    //TODO: lock buffer if needed
-//    evbuffer_lock (sock->buffer);
-//    evbuffer_add (sock->buffer, &header, FCGI_HEADER_SIZE);
-//    evbuffer_add (sock->buffer, data + offset, len);
-//    evbuffer_unlock (sock->buffer);
-
+//    INFO_OUT("send_record reqId=%i, fd=%i, offset=%i, len=%i\n\r", requestId, sock->fd, offset, len);
     struct evbuffer *output = bufferevent_get_output(sock->buf_event);
     evbuffer_lock(output);
     evbuffer_add (output, &header, FCGI_HEADER_SIZE);

@@ -216,13 +216,15 @@ flush_cmdsocket(struct cmdsocket *cmdsocket)
 	}
 
 	output=bufferevent_get_output(cmdsocket->buf_event);
-
+	evbuffer_lock(output);
 	if (evbuffer_get_length(output) == 0) {
 	    //shutdown_cmdsocket(cmdsocket);
-	    free_cmdsocket(cmdsocket);
+        evbuffer_unlock(output);
+        free_cmdsocket(cmdsocket);
 	} else {
 	    bufferevent_enable(cmdsocket->buf_event, EV_WRITE);
 	    bufferevent_setcb(cmdsocket->buf_event, NULL, close_connection,NULL,cmdsocket);
+        evbuffer_unlock(output);
 	}
 }
 
