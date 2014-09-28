@@ -21,6 +21,18 @@ size_t get_sock_addr_len(sa_family_t family, struct sockaddr_storage* sock_addr)
  */
 sa_family_t address_family_to_sa_family(unsigned short int address_family);
 
+/*
+ * Closes listening socket
+ *
+ * Calls close() on listenfd and deletes the file for UNIX protocol
+ *
+ * Returns 0 if success, -1 if error. errno is set appropriate
+ *
+ * @listenfd listening socket descriptor
+ * @family Socket family
+ * @sock_addr pointer to listening socket structure was set to by init_socket_addr()
+ */
+int close_listening_socket(int listenfd, sa_family_t family, struct sockaddr_storage* sock_addr);
 
 #endif
 

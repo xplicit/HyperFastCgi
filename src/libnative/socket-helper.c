@@ -1,6 +1,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <arpa/inet.h>
+#include <stdio.h>
+#include <unistd.h>
 #include "socket-helper.h"
 
 
@@ -60,4 +62,17 @@ sa_family_t address_family_to_sa_family(unsigned short int address_family)
     }
 }
 
+int close_listening_socket(int listenfd, sa_family_t family, struct sockaddr_storage* sock_addr)
+{
+    if (close(listenfd))
+        return -1;
+
+    //delete file if protocol is UNIX
+    if (family == AF_UNIX)
+    {
+        return remove(((struct sockaddr_un*)sock_addr)->sun_path);
+    }
+
+    return 0;
+}
 

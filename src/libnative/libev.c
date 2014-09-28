@@ -215,7 +215,10 @@ flush_cmdsocket(struct cmdsocket *cmdsocket)
 		ERROR_OUT("Error sending data to client on fd %d\n", cmdsocket->fd);
 	}
 
-	output=bufferevent_get_output(cmdsocket->buf_event);
+    output=bufferevent_get_output(cmdsocket->buf_event);
+
+    //check that all bytes were sent. If yes, free_cmdsocket closes connection and frees buffers
+    //If not, set the callback on write operation completed to close_connection
 	evbuffer_lock(output);
 	if (evbuffer_get_length(output) == 0) {
 	    //shutdown_cmdsocket(cmdsocket);
@@ -363,7 +366,6 @@ static void setup_connection(int sockfd, struct sockaddr_storage *remote_addr, s
 		return;
 	}
 	evbuffer_enable_locking(cmdsocket->buffer, NULL);
-
 }
 
 static void cmd_connect(int listenfd, short evtype, void *arg)
@@ -394,7 +396,10 @@ static void cmd_connect(int listenfd, short evtype, void *arg)
 
 static struct event_base *server_loop;
 static struct event connect_event;
+//listening socket
 static int listenfd;
+static sa_family_t family;
+static struct sockaddr_storage listen_addr;
 
 void Shutdown()
 {
@@ -419,7 +424,7 @@ void Shutdown()
 		ERROR_OUT("Error removing connection event from the event loop.\n");
 	}
 	event_base_free(server_loop);
-	if(close(listenfd)) {
+	if(close_listening_socket(listenfd, family, &listen_addr)) {
 		ERRNO_OUT("Error closing listening socket");
 	}
 
@@ -436,9 +441,9 @@ void ProcessLoop()
 
 int Listen(unsigned short int address_family, const char *addr, guint16 listen_port)
 {
-	struct sockaddr_storage listen_addr;
 	size_t listen_addr_len;
-    sa_family_t family = address_family_to_sa_family(address_family);
+
+    family = address_family_to_sa_family(address_family);
 
     if (family == AF_UNSPEC) {
         ERROR_OUT("Unknown address family: %hu\n", address_family);
