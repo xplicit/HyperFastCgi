@@ -1,12 +1,12 @@
 language: c
 
 before_install:
-    #add badgerpots ppa key
-    - wget http://badgerports.org/directhex.ppa.asc
-    - sudo apt-key add directhex.ppa.asc
-    #add bagderport repository
-    - sudo apt-get install python-software-properties
-    - sudo add-apt-repository "deb http://badgerports.org $(lsb_release -sc) main"
+    #add xamarin ppa key
+    - wget http://download.mono-project.com/repo/xamarin.gpg
+    - sudo apt-key add xamarin.gpg
+    #add xamarin repository
+    - echo "deb http://download.mono-project.com/repo/debian wheezy main" > /etc/apt/sources.list.d/mono-xamarin.list
+    - echo "deb http://download.mono-project.com/repo/debian wheezy-libtiff-compat main" >> /etc/apt/sources.list.d/mono-xamarin.list
     - sudo apt-get update
     #install mono
     - sudo apt-get install mono-devel
