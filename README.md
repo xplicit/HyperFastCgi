@@ -141,10 +141,10 @@ All existing types are described in this manual.
 * `<add-trailing-slash>` element. Allowed values `true` or `false`. Adds trailing slash if path to directory does not end with '/'. Default is 'false'. This option were added for compatibility with mono-fastcgi-server. For performance reasons it's recommended to use nginx 'rewrite' command instead, i. e. `rewrite ^([^.]*[^/])$ $1/ permanent;`
 * `<request-type>` element. Used only by RawHost. User-defined fully-qualified CLR type name which will be used for processing requests. See "Writing RawHost Application" chapter. 
 
-    <apphost type="HyperFastCgi.AppHosts.AspNet.AspNetApplicationHost">
-        <log level="Debug" write-to-console="true" />
-        <add-trailing-slash>false</add-trailing-slash>
-    </apphost>
+        <apphost type="HyperFastCgi.AppHosts.AspNet.AspNetApplicationHost">
+          <log level="Debug" write-to-console="true" />
+          <add-trailing-slash>false</add-trailing-slash>
+        </apphost>
 
 #### `<web-applications>` element.
 
