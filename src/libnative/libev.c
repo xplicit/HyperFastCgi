@@ -313,10 +313,10 @@ static void cmd_error(struct bufferevent *buf_event, short error, void *arg)
 {
 	struct cmdsocket *cmdsocket = (struct cmdsocket *)arg;
 
-	if(error & EVBUFFER_EOF) {
+	if(error & BEV_EVENT_EOF) {
 		INFO_OUT("Remote host disconnected from fd %d.\n", cmdsocket->fd);
 		cmdsocket->shutdown = 1;
-	} else if(error & EVBUFFER_TIMEOUT) {
+	} else if(error & BEV_EVENT_TIMEOUT) {
 		INFO_OUT("Remote host on fd %d timed out.\n", cmdsocket->fd);
 	} else {
 		ERROR_OUT("A socket error (0x%hx) occurred on fd %d.\n", error, cmdsocket->fd);
@@ -351,7 +351,8 @@ static void setup_connection(int sockfd, struct sockaddr_storage *remote_addr, s
     bufferevent_setcb(cmdsocket->buf_event, fcgi_read, NULL, cmd_error, cmdsocket);
 
 	bufferevent_base_set(evloop, cmdsocket->buf_event);
-	bufferevent_settimeout(cmdsocket->buf_event, 60, 0);
+	//set infinite timeouts for read and write operations
+	bufferevent_set_timeouts(cmdsocket->buf_event, NULL, NULL);
 	if(bufferevent_enable(cmdsocket->buf_event, EV_READ)) {
 		ERROR_OUT("Error enabling buffered I/O event for fd %d.\n", sockfd);
 		free_cmdsocket(cmdsocket);
