@@ -1,4 +1,3 @@
-[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=xplicit-ru&url=https://github.com/xplicit/HyperFastCgi&title=HyperFastCgi&language=&tags=github&category=software)
 # HyperFastCgi
 
 HyperFastCgi hosts mono web applications with nginx. It's a primary replacement of mono-server-fastcgi for linux platform.
@@ -116,7 +115,7 @@ All existing types are described in this manual.
 		* `HyperFastCgi.Transports.NativeTransport` must be used with NativeListener only.
 	* `<multithreading>` element. Defines how requests will be processed in multithreading. Can hold one of three values: `ThreadPool`, `Task` and `Single`. `ThreadPool` uses ThreadPool.QueueUserWorkItem method for processing requests, `Task` uses TPL, and `Single` processes requests directly. Default is `ThreadPool`
 
-* `<protocol>` element. Defines which protocol will be used for opening sockets. Allowed values `InterNetwork` for IPv4, `InterNetwork6' for IPv6 and `Unix` for unix file sockets.
+* `<protocol>` element. Defines which protocol will be used for opening sockets. Allowed values `InterNetwork` for IPv4, `InterNetwork6` for IPv6 and `Unix` for unix file sockets.
 * `<address>` element. Defines the address on which will listen to. For unix-sockets it's a path to file.
 * `<port>` element. Defines the port on which will listen to. Is not used for unix sockets.
 
