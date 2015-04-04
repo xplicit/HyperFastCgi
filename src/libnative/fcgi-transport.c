@@ -196,7 +196,7 @@ send_stream_data (cmdsocket* sock, guint8 record_type, guint16 requestId, guint8
             int chunk_len = (len - index < FCGI_SUGGESTED_BODY_SIZE)
                             ? (len - index)
                             : FCGI_SUGGESTED_BODY_SIZE;
-            send_record (sock, record_type, requestId, data, index, len);
+            send_record (sock, record_type, requestId, data, index, chunk_len);
 
             index += chunk_len;
         }
