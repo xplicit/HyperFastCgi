@@ -2,6 +2,7 @@
 using HyperFastCgi.Interfaces;
 using HyperFastCgi.Interfaces.Events;
 using HyperFastCgi.Configuration;
+using HyperFastCgi.Helpers.Logging;
 
 namespace HyperFastCgi.AppHosts
 {
@@ -83,6 +84,7 @@ namespace HyperFastCgi.AppHosts
 			this.listenerTransport = listenerTransport;
 			appHostTransport = (IApplicationHostTransport) Activator.CreateInstance (appHostTransportType);
 			appHostTransport.Configure (this, transportConfig);
+			Logger.Write (LogLevel.Debug, "Configured host in domain {0}, id={1}", AppDomain.CurrentDomain.FriendlyName, AppDomain.CurrentDomain.Id);
 		}
 
 		public virtual void Shutdown()

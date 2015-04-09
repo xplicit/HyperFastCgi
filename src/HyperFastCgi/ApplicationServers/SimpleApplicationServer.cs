@@ -160,32 +160,36 @@ namespace HyperFastCgi.ApplicationServers
 
 		private void OnHostUnload(object sender, HostUnloadEventArgs e)
 		{
-			HostInfo host = null;
+			try
+			{}
+			finally
+			{
+				HostInfo host = null;
 
-			foreach (HostInfo info in hosts) {
-				if (info.Host == sender) {
-					host = info;
-					break;
+				lock (hosts) {
+					foreach (HostInfo info in hosts) {
+						if (info.Host == sender) {
+							host = info;
+							break;
+						}
+					}
 				}
-			}
 
-			if (host == null) {
-				IApplicationHost appHost = sender as IApplicationHost;
-				Logger.Write (LogLevel.Error, "Can't unload host {0}:{1}:{2}:{3}", appHost.VHost, appHost.VPort, appHost.VPath, appHost.Path);
-				return;
-			}
+				if (host == null) {
+					IApplicationHost appHost = sender as IApplicationHost;
+					Logger.Write (LogLevel.Error, "Can't unload host {0}:{1}:{2}:{3}", appHost.VHost, appHost.VPort, appHost.VPath, appHost.Path);
+				} else {
+					Logger.Write (LogLevel.Debug, "Domain={0} Unload host in domain {1} id={2}", AppDomain.CurrentDomain.FriendlyName, ((IApplicationHost)sender).Domain.FriendlyName, ((IApplicationHost)sender).Domain.Id);
 
-			Logger.Write (LogLevel.Debug, "Domain={0} Unload host in domain {1}", AppDomain.CurrentDomain.FriendlyName, ((IApplicationHost)sender).Domain.FriendlyName);
+					lock (hosts) {
+						hosts.Remove (host);
+					}
 
-			lock (hosts) {
-				hosts.Remove (host);
-			}
-
-			if (!e.IsShutdown) {
-//				CombinedFastCgiListenerTransport.RegisterTransport (host.ListenerTransport, typeof(CombinedAppHostTransport));
-
-				CreateAppHost (host.AppHostType, host.AppHostConfig, host.AppConfig,
-					host.ListenerTransport, host.AppHostTransportType, host.AppHostTransportConfig);
+					if (!e.IsShutdown) {
+						CreateAppHost (host.AppHostType, host.AppHostConfig, host.AppConfig,
+							host.ListenerTransport, host.AppHostTransportType, host.AppHostTransportConfig);
+					}
+				}
 			}
 		}
 	}
