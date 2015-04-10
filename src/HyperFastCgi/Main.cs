@@ -160,41 +160,12 @@ namespace HyperFastCgi
 			string applications = (string) configmanager ["applications"];
 			string app_config_file;
 			string app_config_dir;
-			List<WebAppConfig> webapps = new List<WebAppConfig> ();
 
 			try {
 				app_config_file = (string) configmanager ["appconfigfile"];
 				app_config_dir = (string) configmanager ["appconfigdir"];
 			} catch (ApplicationException e) {
 				Logger.Write (LogLevel.Error, e.Message);
-				return 1;
-			}
-
-			if (config != null) {
-				webapps.AddRange (ConfigUtils.GetApplicationsFromConfigFile (config));
-			}
-
-			if (applications != null) {
-				webapps.AddRange (ConfigUtils.GetApplicationsFromCommandLine (applications));
-			}
-
-			if (app_config_file != null) {
-				webapps.AddRange (ConfigUtils.GetApplicationsFromConfigFile (app_config_file));
-			}
-
-			if (app_config_dir != null) {
-				webapps.AddRange (ConfigUtils.GetApplicationsFromConfigDirectory (app_config_dir));
-			}
-
-			if (webapps.Count==0 && !auto_map) {
-				Logger.Write (LogLevel.Error,
-					"There are no applications defined, and path mapping is disabled.");
-				Logger.Write (LogLevel.Error,
-					"Define an application using /applications, /appconfigfile, /appconfigdir");
-				/*				
-				Logger.Write (LogLevel.Error,
-					"or by enabling application mapping with /automappaths=True.");
-				*/
 				return 1;
 			}
 
@@ -249,6 +220,38 @@ namespace HyperFastCgi
 				listenerConfigs[0].AppHostTransport != null? listenerConfigs[0].AppHostTransport.Type: null,
 				listenerConfigs[0].AppHostTransport != null? listenerConfigs[0].AppHostTransport.Config: null
 			);
+
+			//read web applications. It must be done after server creation
+			//because server can change the root path to web apps
+			List<WebAppConfig> webapps = new List<WebAppConfig> ();
+
+			if (config != null) {
+				webapps.AddRange (ConfigUtils.GetApplicationsFromConfigFile (config));
+			}
+
+			if (applications != null) {
+				webapps.AddRange (ConfigUtils.GetApplicationsFromCommandLine (applications));
+			}
+
+			if (app_config_file != null) {
+				webapps.AddRange (ConfigUtils.GetApplicationsFromConfigFile (app_config_file));
+			}
+
+			if (app_config_dir != null) {
+				webapps.AddRange (ConfigUtils.GetApplicationsFromConfigDirectory (app_config_dir));
+			}
+
+			if (webapps.Count==0 && !auto_map) {
+				Logger.Write (LogLevel.Error,
+					"There are no applications defined, and path mapping is disabled.");
+				Logger.Write (LogLevel.Error,
+					"Define an application using /applications, /appconfigfile, /appconfigdir");
+				/*				
+				Logger.Write (LogLevel.Error,
+					"or by enabling application mapping with /automappaths=True.");
+				*/
+				return 1;
+			}
 
 			foreach (WebAppConfig appConfig in webapps) {
 				srv.CreateApplicationHost (

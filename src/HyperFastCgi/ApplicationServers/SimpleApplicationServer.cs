@@ -29,8 +29,10 @@ namespace HyperFastCgi.ApplicationServers
 			physicalRoot = Environment.CurrentDirectory;
 
 			if (config != null) {
-				if (!String.IsNullOrEmpty (config.PhysycalRoot))
+				if (!String.IsNullOrEmpty (config.PhysycalRoot)) {
+					Environment.CurrentDirectory = config.PhysycalRoot;
 					physicalRoot = config.PhysycalRoot; 
+				}
 
 				if (config.ThreadsConfig != null) {
 					ThreadHelper.SetThreads (

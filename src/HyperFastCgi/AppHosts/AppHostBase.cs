@@ -13,6 +13,7 @@ namespace HyperFastCgi.AppHosts
 		int vport;
 		string vpath;
 		string path;
+		string physicalRoot;
 		IListenerTransport listenerTransport;
 		IApplicationHostTransport appHostTransport;
 		IApplicationServer appServer;
@@ -40,6 +41,17 @@ namespace HyperFastCgi.AppHosts
 					path = AppDomain.CurrentDomain.GetData (".appPath").ToString ();
 
 				return path;
+			}
+		}
+
+		public virtual string PhysicalRoot {
+			get {
+				//This is cross domain call, when called from WorkerRequest
+				//but is should be never called, because we set root in Configure()
+				if (physicalRoot == null)
+					physicalRoot = appServer.PhysicalRoot;
+
+				return physicalRoot;
 			}
 		}
 
@@ -81,6 +93,7 @@ namespace HyperFastCgi.AppHosts
 			}
 
 			appServer = server;
+			physicalRoot = server.PhysicalRoot;
 			this.listenerTransport = listenerTransport;
 			appHostTransport = (IApplicationHostTransport) Activator.CreateInstance (appHostTransportType);
 			appHostTransport.Configure (this, transportConfig);

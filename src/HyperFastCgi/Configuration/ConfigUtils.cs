@@ -88,8 +88,9 @@ namespace HyperFastCgi.Configuration
 				doc.Load (fileName);
 
 				foreach (XmlElement el in doc.SelectNodes ("//web-application")) {
-//					applist.Add(GetApplicationFromElement (el));
-					applist.Add((WebAppConfig)GetConfigFromElement (typeof(WebAppConfig),el));
+					WebAppConfig appConfig = (WebAppConfig)GetConfigFromElement (typeof(WebAppConfig),el);
+					appConfig.RealPath = Path.GetFullPath(appConfig.RealPath);
+					applist.Add(appConfig);
 				}
 			} catch {
 				Console.WriteLine ("Error loading '{0}'", fileName);

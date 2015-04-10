@@ -108,7 +108,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 		string HostPhysicalRoot {
 			get {
 				if (hostPhysicalRoot == null)
-					hostPhysicalRoot = appHostBase.Server.PhysicalRoot;
+					hostPhysicalRoot = appHostBase.PhysicalRoot;
 
 				return hostPhysicalRoot;
 			}

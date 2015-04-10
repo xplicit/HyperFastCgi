@@ -13,6 +13,8 @@ namespace HyperFastCgi.Interfaces
 
 		int VPort { get; }
 
+		string PhysicalRoot { get; }
+
 		AppDomain Domain { get; }
 
 		IApplicationHostTransport AppHostTransport { get; }
