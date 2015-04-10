@@ -13,7 +13,6 @@ namespace HyperFastCgi.Listeners
 	[Config(typeof(ListenerConfig))]
 	public class ManagedFastCgiListener : IWebListener
 	{
-		bool useThreadPool;
 		GeneralSocket listener;
 		AsyncCallback accept;
 
@@ -52,8 +51,6 @@ namespace HyperFastCgi.Listeners
 
 		public int Listen ()
 		{
-			this.useThreadPool = true; //useThreadPool;
-
 			try {
 				Logger.Write (LogLevel.Debug,"Listening on port: {0}", config.Port);
 				Logger.Write (LogLevel.Debug,"Listening on address: {0}", config.Address);
@@ -113,7 +110,6 @@ namespace HyperFastCgi.Listeners
 
 				// Additional code to read data goes here.
 				FastCgiNetworkConnector connector = new FastCgiNetworkConnector (client, this);
-				connector.UseThreadPool = useThreadPool;
 				connector.Disconnected += OnDisconnect;
 
 				connector.Receive ();
