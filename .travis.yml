@@ -1,15 +1,7 @@
-language: c
+language: csharp
 
 before_install:
-    #add xamarin ppa key
-    - wget http://download.mono-project.com/repo/xamarin.gpg
-    - sudo apt-key add xamarin.gpg
-    #add xamarin repository
-    - sudo sh -c 'echo "deb http://download.mono-project.com/repo/debian wheezy main" > /etc/apt/sources.list.d/mono-xamarin.list'
-    - sudo sh -c 'echo "deb http://download.mono-project.com/repo/debian wheezy-libtiff-compat main" >> /etc/apt/sources.list.d/mono-xamarin.list'
-    - sudo apt-get update
-    #install mono
-    - sudo apt-get install mono-devel
+    - export CC=gcc
     - sudo apt-get install libevent-dev
 
 script:
