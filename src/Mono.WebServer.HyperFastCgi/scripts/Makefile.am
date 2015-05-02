@@ -16,12 +16,16 @@ $(eval $(call emit-deploy-wrapper,MONO_WEBSERVER_HYPERFASTCGI2,mono-server-hyper
 
 binaries = 
 
+HFC_NAMES = 
+
 if NET_2_0
 MONO_WEBSERVER_HYPERFASTCGI2 = 
+HFC_NAMES += mono-server-hyperfastcgi2
 endif
 
 if NET_4_0
 MONO_WEBSERVER_HYPERFASTCGI4 = 
+HFC_NAMES += mono-server-hyperfastcgi4
 endif
 
 
@@ -29,7 +33,7 @@ BINARIES = $(MONO_WEBSERVER_HYPERFASTCGI2) $(MONO_WEBSERVER_HYPERFASTCGI4)
 
 CLEANFILES = $(BINARIES) 
 
-bin_SCRIPTS = mono-server-hyperfastcgi2 mono-server-hyperfastcgi4
+bin_SCRIPTS = $(HFC_NAMES)
 
 all: $(BINARIES)
 	echo -e 'bin' $(BINARIES)
