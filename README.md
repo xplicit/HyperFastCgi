@@ -14,7 +14,7 @@ Latest stable version https://github.com/xplicit/HyperFastCgi/tree/v0.3_stable
 
 Prerequisites:
 
-     sudo apt-get install autoconf libtool make libglib2.0-dev libevent-dev
+     sudo apt-get install autoconf automake libtool make libglib2.0-dev libevent-dev
 
 Download the source and perform commands:
 
