@@ -16,6 +16,8 @@ Prerequisites:
 
      sudo apt-get install autoconf automake libtool make libglib2.0-dev libevent-dev
 
+For Debian 8 you additionally need to install `libtool-bin` package
+
 Download the source and perform commands:
 
     ./autogen.sh --prefix=/usr
