@@ -23,6 +23,11 @@ namespace HyperFastCgi.AppHosts.Raw
 		IApplicationHost appHost;
 		IApplicationHostTransport transport;
 
+		public virtual byte[] GetPreloadedEntityBody()
+		{
+			return inputData;
+		}
+
 		public IApplicationHost AppHost {
 			get { return appHost; }
 		}
