@@ -33,7 +33,7 @@ namespace HyperFastCgi.Listeners
 			int retval = NativeListener.Listen ((ushort)config.Family, config.Address, (ushort)config.Port);
 			//retval == 0 when no error occured
 			if (retval == 0) {
-				ThreadPool.QueueUserWorkItem (_ => NativeListener.ProcessLoop ());
+				new Thread (_ => NativeListener.ProcessLoop ()).Start ();
 			}
 
 			return retval;
