@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/xplicit/HyperFastCgi.svg?branch=master)](https://travis-ci.org/xplicit/HyperFastCgi)
 # HyperFastCgi
 
 HyperFastCgi hosts mono web applications with nginx. It's a primary replacement of mono-server-fastcgi for linux platform.
@@ -13,7 +14,9 @@ Latest stable version https://github.com/xplicit/HyperFastCgi/tree/v0.3_stable
 
 Prerequisites:
 
-     sudo apt-get install autoconf libtool make libglib2.0-dev libevent-dev
+     sudo apt-get install autoconf automake libtool make libglib2.0-dev libevent-dev
+
+For Debian 8 you additionally need to install `libtool-bin` package
 
 Download the source and perform commands:
 
@@ -175,7 +178,7 @@ HyperFastCgi allows your to write fast web-request processing routines using C#.
                 Status = 200;
                 StatusDescription = "OK";
                 ResponseHeaders.Add("Content-Type","text/html; charset=utf-8");
-                response.Send(Encoding.ASCII.GetBytes("Hello, Wrold!"));
+                response.Send(Encoding.ASCII.GetBytes("Hello, World!"));
                 response.CompleteResponse ();
             }
         }
