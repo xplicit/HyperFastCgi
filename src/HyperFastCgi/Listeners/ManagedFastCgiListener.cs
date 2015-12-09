@@ -71,7 +71,8 @@ namespace HyperFastCgi.Listeners
 
 		public void Shutdown ()
 		{
-			throw new NotImplementedException ();
+			listener.Close ();
+			FastCgiNetworkConnector.ShutdownAll ();
 		}
 
 		#endregion

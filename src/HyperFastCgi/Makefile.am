@@ -145,6 +145,7 @@ REFERENCES =  \
 	Mono.Posix \
 	System \
 	System.Configuration \
+	System.Core \
 	System.Web \
 	System.Xml
 
