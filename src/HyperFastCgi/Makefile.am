@@ -5,30 +5,25 @@ EXTRA_DIST = $(FILES) $(RESOURCES)
 # Warning: This is an automatically generated file, do not edit!
 
 if ENABLE_DEBUG_X86
+BUILD_DIR = bin/Debug
 ASSEMBLY_COMPILER_COMMAND = dmcs
-ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize- -debug "-define:DEBUG; -keyfile:$(top_srcdir)/src/mono.snk"
-ASSEMBLY = bin/Debug/HyperFastCgi.exe
+ASSEMBLY_COMPILER_FLAGS = -noconfig -codepage:utf8 -warn:4 -optimize- -debug "-define:DEBUG;" -keyfile:$(top_srcdir)/src/mono.snk
+ASSEMBLY = $(BUILD_DIR)/HyperFastCgi.exe
 ASSEMBLY_MDB = $(ASSEMBLY).mdb
 COMPILE_TARGET = exe
 PROJECT_REFERENCES = 
-BUILD_DIR = bin/Debug
-
-MONO_WEBSERVER_HYPERFASTCGI_EXE_MDB_SOURCE=bin/Debug/HyperFastCgi.exe.mdb
 MONO_WEBSERVER_HYPERFASTCGI_EXE_MDB=$(BUILD_DIR)/HyperFastCgi.exe.mdb
-
 endif
 
 if ENABLE_RELEASE_X86
+BUILD_DIR = bin/Release
 ASSEMBLY_COMPILER_COMMAND = dmcs
-ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize+ -keyfile:$(top_srcdir)/src/mono.snk
-ASSEMBLY = bin/Release/HyperFastCgi.exe
-ASSEMBLY_MDB = 
+ASSEMBLY_COMPILER_FLAGS = -noconfig -codepage:utf8 -warn:4 -optimize+ -debug -keyfile:$(top_srcdir)/src/mono.snk
+ASSEMBLY = $(BUILD_DIR)/HyperFastCgi.exe
+ASSEMBLY_MDB = $(ASSEMBLY).mdb
 COMPILE_TARGET = exe
 PROJECT_REFERENCES = 
-BUILD_DIR = bin/Release
-
-MONO_WEBSERVER_HYPERFASTCGI_EXE_MDB=
-
+MONO_WEBSERVER_HYPERFASTCGI_EXE_MDB=$(BUILD_DIR)/HyperFastCgi.exe.mdb
 endif
 
 if NET_2_0
@@ -196,9 +191,9 @@ build_references_ref4 += $(call q2s,$(foreach ref, $(call s2q,$(DLL_REFERENCES))
 build_references_ref4 += $(call q2s,$(foreach ref, $(call s2q,$(PROJECT_REFERENCES)), -r:$(ref)))
 
 
-$(ASSEMBLY_MDB): $(ASSEMBLY)
-
 if NET_2_0
+$(ASSEMBLY_MDB): $(ASSEMBLY2)
+
 $(ASSEMBLY2): $(build_sources) $(build_resources) $(build_datafiles) $(DLL_REFERENCES) $(PROJECT_REFERENCES) $(build_xamlg_list) $(build_satellite_assembly_list)
 	$(MKDIR_P) $(shell dirname 2.0/$(ASSEMBLY))
 	$(GMCS) -d:NET_2_0 $(ASSEMBLY_COMPILER_FLAGS) -out:$(ASSEMBLY2) -target:$(COMPILE_TARGET) $(build_sources) $(build_resources:%=-resource:%) $(build_references_ref4)
@@ -206,6 +201,8 @@ $(ASSEMBLY2): $(build_sources) $(build_resources) $(build_datafiles) $(DLL_REFER
 endif
 
 if NET_4_0
+$(ASSEMBLY_MDB): $(ASSEMBLY4)
+
 $(ASSEMBLY4): $(build_sources) $(build_resources) $(build_datafiles) $(DLL_REFERENCES) $(PROJECT_REFERENCES) $(build_xamlg_list) $(build_satellite_assembly_list)
 	$(MKDIR_P) $(shell dirname 4.0/$(ASSEMBLY))
 	$(DMCS) $(ASSEMBLY_COMPILER_FLAGS) -out:$(ASSEMBLY4) -target:$(COMPILE_TARGET) $(build_sources) $(build_resources:%=-resource:%) $(build_references_ref4)
@@ -216,9 +213,11 @@ endif
 install-data-local:
 if NET_2_0
 	$(GACUTIL2) $(GACUTIL_FLAGS) -i $(ASSEMBLY2)
+	cp -fv 2.0/$(ASSEMBLY_MDB) $(programfiles2dir)
 endif
 if NET_4_0
 	$(GACUTIL4) $(GACUTIL_FLAGS) -i $(ASSEMBLY4)
+	cp -fv 4.0/$(ASSEMBLY_MDB) $(programfiles4dir)
 endif
 
 uninstall-local:
