@@ -20,7 +20,7 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="HyperFastCGI web server"
 NAME=hyperfastcgi4
 DAEMON=/usr/bin/$NAME
-DAEMON_ARGS="/config=/etc/hyperfastcgi/hfc.config /loglevels=Standard /logfile=/var/log/hyperfasctcgi/hfc.log"
+DAEMON_ARGS="/config=/etc/hyperfastcgi/hfc.config /loglevels=Standard /logfile=/var/log/hyperfastcgi/hfc.log"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 

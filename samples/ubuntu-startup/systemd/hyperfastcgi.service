@@ -1,0 +1,13 @@
+[Unit]
+Description=HyperFastCGI service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+ExecStart=/usr/bin/hyperfastcgi4 /config=/etc/hyperfastcgi/hfc.config /loglevels=Standard /logfile=/var/log/hyperfastcgi/hfc.log >> /var/log/hyperfastcgi/native.log
+Restart=on-failure
+TimeoutStopSec=5
+
+[Install]
+WantedBy=multi-user.target
