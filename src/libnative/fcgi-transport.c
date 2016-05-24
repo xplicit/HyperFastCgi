@@ -93,41 +93,44 @@ process_record(int fd, FCGI_Header* header, guint8* body)
     pthread_mutex_lock (&requests_lock);
     req = g_hash_table_lookup (requests, &id);
 
-    if (!req) {
-        if (header->type == FCGI_BEGIN_REQUEST) {
-            FCGI_BeginRequestBody *begin_body = (FCGI_BeginRequestBody *)body;
+    if (header->type == FCGI_BEGIN_REQUEST) {
+        FCGI_BeginRequestBody *begin_body = (FCGI_BeginRequestBody *)body;
+        TRACE_OUT("process_record: FCGI_BEGIN_REQUEST\n");
 
-            req = g_new (Request, 1);
-            req->hash = id;
-            req->request_num = ++request_num;
+        if (req)
+            g_hash_table_remove(requests, &req->hash);
+        //TODO: cancel previous executing request in ASP.NET
 
-            g_hash_table_insert (requests, &req->hash, req);
-            pthread_mutex_unlock (&requests_lock);
+        req = g_new (Request, 1);
+        req->hash = id;
+        req->request_num = ++request_num;
 
-            req->fd = fd;
-            req->requestId = fcgi_get_request_id(header);
-            req->header = header;
-            req->body = body;
-            req->keep_alive = begin_body->flags & FCGI_KEEP_CONN;
-            req->stdout_sent = FALSE;
-            req->hostname = NULL;
-            req->port = -1;
-            req->vpath = NULL;
+        g_hash_table_insert (requests, &req->hash, req);
+        pthread_mutex_unlock (&requests_lock);
 
-            //TODO: host_info must be set in parse_params
-            req->host_info = find_host_by_path(NULL, -1, NULL);
+        req->fd = fd;
+        req->requestId = fcgi_get_request_id(header);
+        req->header = header;
+        req->body = body;
+        req->keep_alive = begin_body->flags & FCGI_KEEP_CONN;
+        req->stdout_sent = FALSE;
+        req->hostname = NULL;
+        req->port = -1;
+        req->vpath = NULL;
 
-            //if host is not single, preallocate space for server variables
-            if (!req->host_info) {
-                req->chunks = g_string_chunk_new(4096);
-                req->key_value_pairs = g_array_sized_new(FALSE, FALSE, sizeof(KeyValuePair), 128);
-            } else {
-                //host is single, so we can create request now
-                create_request (req->host_info, req->hash, req->request_num);
-            }
+        //TODO: host_info must be set in parse_params
+        req->host_info = find_host_by_path(NULL, -1, NULL);
 
-            return;
+        //if host is not single, preallocate space for server variables
+        if (!req->host_info) {
+            req->chunks = g_string_chunk_new(4096);
+            req->key_value_pairs = g_array_sized_new(FALSE, FALSE, sizeof(KeyValuePair), 128);
+        } else {
+            //host is single, so we can create request now
+            create_request (req->host_info, req->hash, req->request_num);
         }
+
+        return;
     }
     pthread_mutex_unlock (&requests_lock);
 
@@ -216,9 +219,11 @@ send_output (guint64 requestId, int request_num, guint8* data, int len)
         cmdsocket* sock = find_cmdsocket (req->fd);
         if (sock != NULL) {
             send_stream_data (sock, FCGI_STDOUT, req->requestId, data, len);
+        } else {
+            TRACE_OUT("send_output: socket is null. reqId=%"G_GUINT64_FORMAT", reqNum=%i\n", requestId, request_num);
         }
     } else {
-        INFO_OUT ("can't find request n=%i", request_num);
+        INFO_OUT ("can't find request n=%i\n", request_num);
     }
 }
 

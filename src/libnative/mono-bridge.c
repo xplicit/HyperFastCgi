@@ -37,11 +37,14 @@ create_request (HostInfo *host, guint64 requestId, int request_num)
     MonoDomain* domain=mono_object_get_domain(host->host);
     MonoDomain* current=mono_domain_get();
     mono_domain_set(domain,FALSE);
+
+    TRACE_OUT("create_request: reqId=%"G_GUINT64_FORMAT", reqNum=%i\n", requestId, request_num);
+
     host_create_request(host->host,requestId, request_num, &ex);
     //TODO: handle exception
     mono_domain_set(current,FALSE);
     if (ex)
-        ERROR_OUT("exception! %s","add_server_variable");
+        ERROR_OUT("exception! %s","create_request");
 }
 
 void
@@ -51,6 +54,8 @@ add_server_variable (HostInfo *host, guint64 requestId, int request_num, gchar *
     MonoDomain* domain=mono_object_get_domain(host->host);
     MonoDomain* current=mono_domain_get();
     mono_domain_set(domain,FALSE);
+
+    TRACE_OUT("add_server_variable: reqId=%"G_GUINT64_FORMAT", reqNum=%i, name=%.*s\n", requestId, request_num, name_len, name);
 
     host_add_server_variable(host->host, requestId, request_num,
                             mono_string_new_len(domain, name, name_len),
@@ -70,10 +75,14 @@ add_header (HostInfo *host, guint64 requestId, int request_num, gchar *name, int
     MonoDomain* current=mono_domain_get();
     mono_domain_set(domain,FALSE);
 
+   TRACE_OUT("add_header: reqId=%"G_GUINT64_FORMAT", reqNum=%i, name=%.*s\n", requestId, request_num, name_len, name);
+
     host_add_header(host->host, requestId, request_num,
                             mono_string_new_len(domain, name, name_len),
                             mono_string_new_len(domain, value, value_len),
                             &ex);
+
+
     //TODO: handle exception
     mono_domain_set(current,FALSE);
 
@@ -82,6 +91,8 @@ add_header (HostInfo *host, guint64 requestId, int request_num, gchar *name, int
 void
 headers_sent (HostInfo *host, guint64 requestId, int request_num)
 {
+    TRACE_OUT("headers_sent: reqId=%"G_GUINT64_FORMAT", reqNum=%i\n", requestId, request_num);
+
     MonoException* ex;
     MonoDomain* domain=mono_object_get_domain(host->host);
     MonoDomain* current=mono_domain_get();
@@ -102,6 +113,8 @@ add_body_part (HostInfo *host, guint64 requestId, int request_num, guint8 *body,
     MonoDomain *domain=mono_object_get_domain(host->host);
     MonoDomain *current=mono_domain_get();
     mono_domain_set(domain,FALSE);
+
+    TRACE_OUT("headers_sent: reqId=%"G_GUINT64_FORMAT", reqNum=%i, len=%i, final=%i\n", requestId, request_num, len, final);
 
     if (len > 0) {
         byte_array = mono_array_new(domain, byte_class, len);
@@ -124,6 +137,8 @@ process (HostInfo *host, guint64 requestId, int request_num)
     MonoDomain* current=mono_domain_get();
     mono_domain_set(domain,FALSE);
 
+    TRACE_OUT("process: reqId=%"G_GUINT64_FORMAT", reqNum=%i\n", requestId, request_num);
+
     host_process(host->host, requestId, request_num,&ex);
     //TODO: handle exception
     mono_domain_set(current,FALSE);
@@ -133,6 +148,8 @@ void
 bridge_send_output(MonoObject *transport, guint64 requestId, int request_num, MonoArray *byte_array, int len)
 {
     MonoClass *byte_class = mono_get_byte_class();
+
+    TRACE_OUT("bridge_send_otput: reqId=%"G_GUINT64_FORMAT", reqNum=%i, len=%i\n", requestId, request_num, len);
 
     if (len > 0) {
         int elem_size = mono_class_data_size(byte_class);
@@ -144,6 +161,8 @@ bridge_send_output(MonoObject *transport, guint64 requestId, int request_num, Mo
 void
 bridge_end_request(MonoObject *transport, guint64 requestId, int request_num, int status)
 {
+    TRACE_OUT("bridge_end_request: reqId=%"G_GUINT64_FORMAT", reqNum=%i, status=%i\n", requestId, request_num, status);
+
     end_request(requestId, request_num, status, FCGI_REQUEST_COMPLETE);
 }
 

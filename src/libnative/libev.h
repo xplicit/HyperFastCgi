@@ -12,6 +12,15 @@
 	printf(__VA_ARGS__);\
 }
 
+#ifdef TRACE
+    #define TRACE_OUT(...) {\
+        /* printf("%s:%d: %s():\t", __FILE__, __LINE__, __FUNCTION__); */\
+        printf(__VA_ARGS__);\
+    }
+#else
+    #define TRACE_OUT(...)
+#endif
+
 // Behaves similarly to fprintf(stderr, ...), but adds file, line, and function
 // information.
 #define ERROR_OUT(...) {\
