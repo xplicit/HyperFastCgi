@@ -53,8 +53,8 @@ namespace Mono.WebServer.HyperFastCgi
 		private int port = -1;
 		private string vhost = null;
 		//headers
-		private string[] knownHeaders;
-		private Dictionary<string,string> unknownHeadersDict = new Dictionary<string, string> ();
+	    private string[] knownHeaders;
+		private Dictionary<string, string> unknownHeadersDict = new Dictionary<string, string> ();
 		private string[][] unknownHeaders;
 
 		public ushort RequestId {
@@ -66,8 +66,8 @@ namespace Mono.WebServer.HyperFastCgi
 
 		public Request (ushort requestId)
 		{
-			this.requestId = requestId;
-			knownHeaders = new string[HttpWorkerRequest.RequestHeaderMaximum];
+			this.requestId = requestId;		 
+            knownHeaders = new string[HttpWorkerRequest.RequestHeaderMaximum];	
 		}
 
 		public byte [] InputData {
@@ -168,27 +168,53 @@ namespace Mono.WebServer.HyperFastCgi
 				value = enc.GetString (data, offset, vlen);
 				offset += vlen;
 
-				parameter_table.Add (name, value);
+			    if (IsServerVariable(name))
+			    {
+			        if (parameter_table.ContainsKey(name))
+			            throw new ArgumentException(string.Format("Duplicate ServerVariable detected: '{0}'", name));
 
-				if (parseHeaders) {
+			        parameter_table.Add(name, value);
+			    }
+			    else
+			    {
+                    AddOrConcatenateValues(parameter_table, name, value);
+                }
+			                       
+                if (parseHeaders) {
 					string header = ReformatHttpHeader (name);
 
 					if (!String.IsNullOrEmpty (header)) {
 						int idx = HttpWorkerRequest.GetKnownRequestHeaderIndex (header);
-
+                        
 						if (idx != -1) {
-							knownHeaders [idx] = value;
-						} else {
-							unknownHeadersDict.Add (header, value);
+                            knownHeaders[idx] = String.IsNullOrEmpty(knownHeaders[idx]) ? value : knownHeaders[idx] + ", " + value;
+                        } else {
+                            AddOrConcatenateValues(unknownHeadersDict, header, value);                           					
 						}
 					}
 				}
 			}
 		}
+ 
+
+        private static void AddOrConcatenateValues<T>(IDictionary<T, string> dict, T key, string value)
+        {
+            //if duplicate values are passed, join them into single csv value
+            if (dict.ContainsKey(key)) {
+                dict[key] = dict[key] + ", " + value;
+            } else {
+                dict.Add(key, value);
+            }
+        }
+
+        private static bool IsServerVariable(string name)
+	    {
+	        return !name.StartsWith("HTTP_", StringComparison.Ordinal);
+	    }        
 
 		private static string ReformatHttpHeader (string name)
 		{
-			if (name.StartsWith ("HTTP_", StringComparison.Ordinal)) {
+			if (!IsServerVariable(name)) {
 				char[] header = new char[name.Length - 5];
 
 				// "HTTP_".Length
