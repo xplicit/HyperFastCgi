@@ -24,6 +24,22 @@ Download the source and perform commands:
      make
      sudo make install
 
+## Installation on FreeBSD
+
+Prerequisites:
+
+     pkg install mono autoconf automake libtool gmake libevent2 pkgconf
+     
+If you want to use the buildin clang instead of gcc you can make a symlink to fool autoconf:
+     
+     ln -s /usr/bin/cc /usr/bin/gcc
+
+Download the source and perform commands:
+
+    ./autogen.sh --prefix=/usr/local
+     gmake
+     gmake install
+
 ## Run
 
     hyperfastcgi4 /config=<configfile> [arguments]

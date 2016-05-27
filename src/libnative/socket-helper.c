@@ -2,6 +2,10 @@
 #include <sys/un.h>
 #include <arpa/inet.h>
 #include <stdio.h>
+#include <string.h>
+#ifdef __FreeBSD__
+#include <netinet/in.h> //Required include for the sock_addr structs in FreeBSD
+#endif
 #include <unistd.h>
 #include "socket-helper.h"
 
