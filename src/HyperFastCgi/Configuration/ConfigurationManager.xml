@@ -17,7 +17,7 @@
 		</Description>
 	</Setting>
 	
-	<Setting Name="stopable" Type="Bool" ConsoleVisible="True">
+	<Setting Name="stoppable" Type="Bool" ConsoleVisible="True">
 		<Description>
 			<para>Allows the user to stop the server by if "Enter"
 			is pressed. This should not be used when the server has

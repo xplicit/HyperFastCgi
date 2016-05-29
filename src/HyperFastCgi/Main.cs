@@ -183,7 +183,7 @@ namespace HyperFastCgi
 //			Logger.Write (LogLevel.Debug, "Multiplex connections: {0}",
 //				server.MultiplexConnections);
 
-			bool stopable = (bool)configmanager ["stopable"];
+			bool stoppable = (bool)configmanager ["stoppable"];
 			Logger.WriteToConsole = (bool)configmanager ["printlog"];
 
 			List<ConfigInfo> serverConfigs = ConfigUtils.GetConfigsFromFile (config, "server", typeof(AppServerConfig));
@@ -267,7 +267,7 @@ namespace HyperFastCgi
 
 			configmanager = null;
 
-			if (stopable) {
+			if (stoppable) {
 				Console.WriteLine ("Hit Return to stop the server.");
 				Console.ReadLine ();
 			} else {
