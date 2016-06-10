@@ -213,10 +213,12 @@ endif
 install-data-local:
 if NET_2_0
 	$(GACUTIL2) $(GACUTIL_FLAGS) -i $(ASSEMBLY2)
+	mkdir -p $(programfiles2dir)
 	cp -fv 2.0/$(ASSEMBLY_MDB) $(programfiles2dir)
 endif
 if NET_4_0
 	$(GACUTIL4) $(GACUTIL_FLAGS) -i $(ASSEMBLY4)
+	mkdir -p $(programfiles4dir)
 	cp -fv 4.0/$(ASSEMBLY_MDB) $(programfiles4dir)
 endif
 
