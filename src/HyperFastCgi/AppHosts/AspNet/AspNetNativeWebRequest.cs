@@ -84,14 +84,21 @@ namespace HyperFastCgi.AppHosts.AspNet
 		private int input_data_offset;
 
 		public int PortNumber {
-			get {
-				if (port < 0)
-					//FIXME: tryparse
-					port = int.Parse (GetParameter (
-						"SERVER_PORT"));
+			get
+			{
+			    if (port < 0)
+			    {
+			        if (!int.TryParse(GetParameter("SERVER_PORT"), out port))
+			        {
+                        Logger.Write(LogLevel.Error, "fastcgi_param 'SERVER_PORT' not set! Setting to default value '80'! "
+                            + "Please add 'fastcgi_param SERVER_PORT $server_port;' to your webserver config!");
+			            port = 80;
+			        }
 
-				return port;
-			}
+			    }
+
+                return port;
+            }
 		}
 
 		public string Path {
