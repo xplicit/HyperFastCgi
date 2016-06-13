@@ -317,7 +317,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 
 			StringBuilder b = new StringBuilder (GetUriPath ());
 			string query = GetQueryString ();
-			if (query != null && query.Length > 0) {
+			if (!string.IsNullOrEmpty(query)) {
 				b.Append ('?');
 				b.Append (query);
 			}
@@ -344,17 +344,17 @@ namespace HyperFastCgi.AppHosts.AspNet
 		public override string GetLocalAddress ()
 		{
 			string address = GetParameter ("SERVER_ADDR");
-			if (address != null && address.Length > 0)
+			if (!string.IsNullOrEmpty(address))
 				return address;
 
 			address = AddressFromHostName (
 				GetParameter ("HTTP_HOST"));
-			if (address != null && address.Length > 0)
+			if (!string.IsNullOrEmpty(address))
 				return address;
 
 			address = AddressFromHostName (
 				GetParameter ("SERVER_NAME"));
-			if (address != null && address.Length > 0)
+			if (!string.IsNullOrEmpty(address))
 				return address;
 
 			return base.GetLocalAddress ();
@@ -385,7 +385,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 		public override string GetRemoteAddress ()
 		{
 			string addr = GetParameter ("REMOTE_ADDR");
-			return addr != null && addr.Length > 0 ?
+			return !string.IsNullOrEmpty(addr) ?
 				addr : base.GetRemoteAddress ();
 		}
 
@@ -406,7 +406,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 		public override int GetRemotePort ()
 		{
 			string port = GetParameter ("REMOTE_PORT");
-			if (port == null || port.Length == 0)
+			if (string.IsNullOrEmpty(port))
 				return base.GetRemotePort ();
 
 			try {
@@ -423,7 +423,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 			if (value == null)
 				value = Environment.GetEnvironmentVariable (name);
 
-			return value != null ? value : base.GetServerVariable (name);
+			return value ?? base.GetServerVariable (name);
 		}
 
 		public override string GetUriPath ()
@@ -577,7 +577,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 
 		private static string HostNameFromString (string host)
 		{
-			if (host == null || host.Length == 0)
+			if (string.IsNullOrEmpty(host))
 				return null;
 
 			int colon_index = host.IndexOf (':');
