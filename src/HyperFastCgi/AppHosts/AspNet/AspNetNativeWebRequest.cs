@@ -149,7 +149,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 
 		public void AddHeader (string header, string value)
 		{
-			if (!String.IsNullOrEmpty (header)) {
+			if (!string.IsNullOrEmpty (header)) {
 				int idx = HttpWorkerRequest.GetKnownRequestHeaderIndex (header);
 
 				if (idx != -1) {
@@ -634,16 +634,16 @@ namespace HyperFastCgi.AppHosts.AspNet
 		#endregion
 
 		#region IWebResponse implementation
-		public void Send (int status, string description, IDictionary<string, string> headers)
+		public void Send (int status, string description, IDictionary<string, string> sendHeaders)
 		{
 			SendStatus (status, description);
-			foreach (KeyValuePair<string, string> pair in headers) {
+			foreach (KeyValuePair<string, string> pair in sendHeaders) {
 				SendUnknownResponseHeader (pair.Key, pair.Value);
 			}
 		}
-		public void Send (int status, string description, IDictionary<string, string> headers, byte[] response)
+		public void Send (int status, string description, IDictionary<string, string> sendHeaders, byte[] response)
 		{
-			Send (status, description, headers);
+			Send (status, description, sendHeaders);
 			SendResponseFromMemory (response, response.Length);
 		}
 		public void Send (byte[] response)

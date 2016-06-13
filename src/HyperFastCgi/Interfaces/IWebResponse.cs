@@ -8,9 +8,9 @@ namespace HyperFastCgi.Interfaces
 	{
 		IWebRequest Request { get; }
 
-		void Send (int status, string description, IDictionary<string,string> headers);
+		void Send (int status, string description, IDictionary<string,string> sendHeaders);
 
-		void Send (int status, string description, IDictionary<string,string> headers, byte[] response);
+		void Send (int status, string description, IDictionary<string,string> sendHeaders, byte[] response);
 
 		void Send (byte[] response);
 

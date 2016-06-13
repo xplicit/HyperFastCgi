@@ -114,16 +114,16 @@ namespace HyperFastCgi.AppHosts.Raw
 
 		#region IWebResponse implementation
 
-		public void Send (int status, string description, IDictionary<string, string> headers)
+		public void Send (int status, string description, IDictionary<string, string> sendHeaders)
 		{
 			Status = status;
 			StatusDescription = description;
-			responseHeaders = (Dictionary<string,string>)headers;
+			responseHeaders = (Dictionary<string,string>)sendHeaders;
 		}
 
-		public void Send (int status, string description, IDictionary<string, string> headers, byte[] response)
+		public void Send (int status, string description, IDictionary<string, string> sendHeaders, byte[] response)
 		{
-			Send (status, description, headers);
+			Send (status, description, sendHeaders);
 			Send (response);
 		}
 

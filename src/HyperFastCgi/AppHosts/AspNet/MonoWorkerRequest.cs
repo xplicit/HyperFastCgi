@@ -150,7 +150,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 		}
 
 		public MonoWorkerRequest (HyperFastCgi.Interfaces.IApplicationHost appHost)
-			: base (String.Empty, String.Empty, null)
+			: base (string.Empty, string.Empty, null)
 		{
 			if (appHost == null)
 				throw new ArgumentNullException ("appHost");
@@ -256,12 +256,11 @@ namespace HyperFastCgi.AppHosts.AspNet
 			if (eventResult != null)
 				return eventResult;
 
-			string hostVPath = HostVPath;
+			string currentHostVPath = HostVPath;
 			int hostVPathLen = HostVPath.Length;
 			int pathLen = path != null ? path.Length : 0;
-			bool inThisApp;
 
-			inThisApp = path.StartsWith (hostVPath, StringComparison.Ordinal);
+		    bool inThisApp = path.StartsWith (currentHostVPath, StringComparison.Ordinal);
 
 			if (pathLen == 0 || (inThisApp && (pathLen == hostVPathLen || (pathLen == hostVPathLen + 1 && path [pathLen - 1] == '/')))) {
 				if (needToReplacePathSeparator)
@@ -314,18 +313,14 @@ namespace HyperFastCgi.AppHosts.AspNet
 				error = ex.GetHtmlErrorMessage ();
 			} catch (Exception ex) {
 				inUnhandledException = true;
-				HttpException hex = new HttpException (400, "Bad request", ex);
-				if (hex != null) // just a precaution
-					error = hex.GetHtmlErrorMessage ();
-				else
-					error = String.Format (defaultExceptionHtml, ex.Message);
+                error = new HttpException(400, "Bad request", ex).GetHtmlErrorMessage();
 			}
 
 			if (!inUnhandledException)
 				return;
 
-			if (error.Length == 0)
-				error = String.Format (defaultExceptionHtml, "Unknown error");
+			if (error != null && error.Length == 0)
+				error = string.Format (defaultExceptionHtml, "Unknown error");
 
 			try {
 				SendStatus (400, "Bad request");
@@ -333,17 +328,20 @@ namespace HyperFastCgi.AppHosts.AspNet
 				SendUnknownResponseHeader ("Date", DateTime.Now.ToUniversalTime ().ToString ("r"));
 
 				Encoding enc = Encoding.UTF8;
-				if (enc == null)
-					enc = Encoding.ASCII;
 
-				byte[] bytes = enc.GetBytes (error);
+                SendUnknownResponseHeader("Content-Type", "text/html; charset=" + enc.WebName);
 
-				SendUnknownResponseHeader ("Content-Type", "text/html; charset=" + enc.WebName);
-				SendUnknownResponseHeader ("Content-Length", bytes.Length.ToString ());
-				SendResponseFromMemory (bytes, bytes.Length);
-				FlushResponse (true);
+			    if (error != null)
+			    {
+			        byte[] bytes = enc.GetBytes(error);
+			        SendUnknownResponseHeader("Content-Length", bytes.Length.ToString());
+			        SendResponseFromMemory(bytes, bytes.Length);
+			    }
+
+			    FlushResponse (true);
+
 			} catch (Exception ex) { // should "never" happen
-				throw ex;
+				throw; // rethrow
 			}
 		}
 
@@ -380,7 +378,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 		public override string GetServerVariable (string name)
 		{
 			if (server_variables == null)
-				return String.Empty;
+				return string.Empty;
 
 			if (IsSecure ()) {
 				X509Certificate client = ClientCertificate;
@@ -388,7 +386,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 				case "CERT_COOKIE":
 					if (cert_cookie == null) {
 						if (client == null)
-							cert_cookie = String.Empty;
+							cert_cookie = string.Empty;
 						else
 							cert_cookie = client.GetCertHashString ();
 					}
@@ -396,7 +394,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 				case "CERT_ISSUER":
 					if (cert_issuer == null) {
 						if (client == null)
-							cert_issuer = String.Empty;
+							cert_issuer = string.Empty;
 						else
 							cert_issuer = client.Issuer;
 					}
@@ -404,7 +402,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 				case "CERT_SERIALNUMBER":
 					if (cert_serial == null) {
 						if (client == null)
-							cert_serial = String.Empty;
+							cert_serial = string.Empty;
 						else
 							cert_serial = client.GetSerialNumberString ();
 					}
@@ -412,7 +410,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 				case "CERT_SUBJECT":
 					if (cert_subject == null) {
 						if (client == null)
-							cert_subject = String.Empty;
+							cert_subject = string.Empty;
 						else
 							cert_subject = client.Subject;
 					}
@@ -421,7 +419,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 			}
 
 			string s = server_variables [name];
-			return (s == null) ? String.Empty : s;
+			return s ?? string.Empty;
 		}
 
 		public void AddServerVariable (string name, string value)
