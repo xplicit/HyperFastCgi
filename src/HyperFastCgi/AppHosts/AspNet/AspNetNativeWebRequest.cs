@@ -88,8 +88,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 			{
 			    if (port < 0)
 			    {
-			        if (!int.TryParse(GetParameter("SERVER_PORT"), out port))
-			        {
+			        if (!int.TryParse(GetParameter("SERVER_PORT"), out port)) {
                         Logger.Write(LogLevel.Error, "fastcgi_param 'SERVER_PORT' not set! Setting to default value '80'! "
                             + "Please add 'fastcgi_param SERVER_PORT $server_port;' to your webserver config!");
 			            port = 80;
@@ -161,34 +160,48 @@ namespace HyperFastCgi.AppHosts.AspNet
 			}
 		}
 
+        /// <summary>
+        /// TODO errors can happen here, changing return value to bool and then evaluating the return value outside could help
+        /// </summary>
+        /// <param name="data"></param>
 		public void AddBodyPart (byte[] data)
 		{
 			if (input_data == null) {
-				int len = 0;
+				int len;
 				string slen = GetParameter ("CONTENT_LENGTH");
 
 				if (slen == null) {
-					//TODO: error, throw an exception
+                    //Instead of throwing an Exception, write to error log and return
+                    Logger.Write(LogLevel.Error, "fastcgi_param 'CONTENT_LENGTH' not set! "
+                        + "Please add 'fastcgi_param SERVER_PORT $server_port;' to your webserver config!");
+
+                    return;
 				}
+
 				if (!int.TryParse (slen, NumberStyles.None, CultureInfo.InvariantCulture, out len)) {
-					//TODO: error, throw an exception
+                    Logger.Write(LogLevel.Error, "Invalid CONTENT_LENGTH: {0}", slen);
+
+                    return;
 				}
 
 				input_data = new byte[len];
 			}
 
 			if (input_data_offset + data.Length > input_data.Length) {
-				//TODO: throw an exception
+                //Instead of throwing an Exception, write to error log and return
+                Logger.Write(LogLevel.Error, "Buffer too small: input_data (size {0}) but should be at least {1}", input_data.Length, (input_data_offset + data.Length));
+
+                return;
 			}
 
-			Buffer.BlockCopy (data, 0, input_data, input_data_offset, data.Length);
+            Buffer.BlockCopy (data, 0, input_data, input_data_offset, data.Length);
 			input_data_offset += data.Length;
 		}
 
 		public string GetParameter (string parameter)
 		{
 			if (parameter_table != null && parameter_table.ContainsKey (parameter))
-				return (string)parameter_table [parameter];
+				return parameter_table [parameter];
 
 			return null;
 		}
@@ -275,8 +288,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 
 		public override void SendStatus (int statusCode, string statusDescription)
 		{
-			AppendHeaderLine ("Status: {0} {1}",
-				statusCode, statusDescription);
+			AppendHeaderLine ("Status: {0} {1}", statusCode, statusDescription);
 		}
 
 		public override void SendUnknownResponseHeader (string name, string value)
@@ -301,7 +313,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 
 		public override string GetPathInfo ()
 		{
-			return GetParameter ("PATH_INFO") ?? String.Empty;
+			return GetParameter ("PATH_INFO") ?? string.Empty;
 		}
 
 		public override string GetRawUrl ()
@@ -420,7 +432,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 		{
 			string value = GetParameter (name);
 
-			if (value == null)
+			if (value == null && name != null)
 				value = Environment.GetEnvironmentVariable (name);
 
 			return value ?? base.GetServerVariable (name);
@@ -560,7 +572,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 			if (host == null || host.Length > 126)
 				return null;
 
-			System.Net.IPAddress[] addresses = null;
+			IPAddress[] addresses = null;
 			try {
 				addresses = Dns.GetHostAddresses (host);
 			} catch (System.Net.Sockets.SocketException) {
@@ -599,15 +611,17 @@ namespace HyperFastCgi.AppHosts.AspNet
 			List<string> files = new List<string> ();
 
 			string [] fs = list.Split (',');
-			foreach (string f in fs) {
-				string trimmed = f.Trim ();
-				if (trimmed == "")
-					continue;
+		    for (int index = 0; index < fs.Length; index++)
+		    {
+		        string f = fs[index];
+		        string trimmed = f.Trim();
+		        if (trimmed == "")
+		            continue;
 
-				files.Add (trimmed);
-			}
+		        files.Add(trimmed);
+		    }
 
-			indexFiles = files.ToArray ();
+		    indexFiles = files.ToArray ();
 		}
 
 		#endregion
