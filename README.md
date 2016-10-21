@@ -205,6 +205,12 @@ HyperFastCgi allows your to write fast web-request processing routines using C#.
 
 5. You're possible have to place your assembly into the GAC or put it under `bin` folder of your web-application, otherwise web-server won't find it. If your web application is located under `/var/www/yourapp` you should place the assembly to `/var/www/yourapp/bin` 
 
+## Package Build Recipe Using [FPM-Cookery](https://github.com/bernd/fpm-cookery)
+
+Here is a fpm build recipe for HyperFastCgi
+
+https://github.com/sepulworld/fpm-hyperfastcgi
+
 ## Additional Info
 
 For more information read the blog
