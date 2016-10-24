@@ -102,11 +102,13 @@ namespace HyperFastCgi.AppHosts
 
 		public virtual void Shutdown()
 		{
+			Logger.Write (LogLevel.Debug, "AppHostBase.Shutdown()");
 			AppDomain.CurrentDomain.DomainUnload -= OnDomainUnload;
 
 			EventHandler<HostUnloadEventArgs> handler = HostUnload;
 
 			if (handler != null) {
+				Logger.Write (LogLevel.Debug, "Calling HostUnload event handler");
 				handler (this, new HostUnloadEventArgs (){ IsShutdown = true });
 			}
 		}
@@ -119,14 +121,20 @@ namespace HyperFastCgi.AppHosts
 
 		public virtual void OnDomainUnload (object sender, EventArgs e)
 		{
+			Logger.Write (LogLevel.Debug, "AppHostBase.OnDomainUnload");
 			EventHandler<HostUnloadEventArgs> handler = HostUnload;
 
 			if (handler != null) {
+				Logger.Write (LogLevel.Debug, "Calling HostUnload event handler, num events={0}", handler.GetInvocationList ().Length);
 				handler (this, new HostUnloadEventArgs (){ IsShutdown = false });
 			}
 		}
 		#endregion
 
+		public override object InitializeLifetimeService ()
+		{
+			return null;
+		}
 	}
 
 }

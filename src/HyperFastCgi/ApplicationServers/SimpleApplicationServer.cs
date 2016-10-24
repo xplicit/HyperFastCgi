@@ -133,6 +133,7 @@ namespace HyperFastCgi.ApplicationServers
 			WebAppConfig appConfig, 
 			IListenerTransport listenerTransport, Type appHostTransportType, object appHostTransportConfig)
 		{
+			Logger.Write (LogLevel.Debug, "SimpleApplicationServer.CreateAppHost vhost={0}, vport={1}", appConfig.VHost, appConfig.VPort);
 			try
 			{
 				IApplicationHost host = hostFactory.CreateApplicationHost (appHostType, appConfig.VHost, appConfig.VPort, appConfig.VPath, appConfig.RealPath);
@@ -190,9 +191,16 @@ namespace HyperFastCgi.ApplicationServers
 					if (!e.IsShutdown) {
 						CreateAppHost (host.AppHostType, host.AppHostConfig, host.AppConfig,
 							host.ListenerTransport, host.AppHostTransportType, host.AppHostTransportConfig);
+					} else {
+						Logger.Write (LogLevel.Debug, "Domain is shutdown. Host is not recreated");
 					}
 				}
 			}
+		}
+
+		public override object InitializeLifetimeService ()
+		{
+			return null;
 		}
 	}
 }

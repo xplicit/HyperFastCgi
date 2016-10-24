@@ -18,6 +18,8 @@ namespace HyperFastCgi.Transports
 
 		protected override void OnHostUnload (IApplicationHost host, bool isShutdown)
 		{
+			Logger.Write (LogLevel.Debug, "Unloading ApplicationHost domain, isShutdown={0}", isShutdown);
+
 			UnregisterHost (
 				host.VHost,
 				host.VPort,
@@ -26,6 +28,8 @@ namespace HyperFastCgi.Transports
 		}
 		public override void Configure (IApplicationHost host, object config)
 		{
+			Logger.Write (LogLevel.Debug, "Configuring ApplicationHost");
+
 			base.Configure (host, config);
 
 			RegisterHost (host.VHost, host.VPort, host.VPath, host.Path);

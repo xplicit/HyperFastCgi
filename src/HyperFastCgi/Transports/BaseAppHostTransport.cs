@@ -47,7 +47,7 @@ namespace HyperFastCgi.Transports
 
 		public virtual void CreateRequest (ulong requestId, int requestNumber)
 		{
-//			Console.WriteLine ("reqN={0}", requestNumber);
+//			Console.WriteLine ("Create Request: reqN={0}", requestNumber);
 			IWebRequest req=AppHost.CreateRequest (requestId, requestNumber, null);
 
 			lock (requestsLock) {
@@ -145,6 +145,11 @@ namespace HyperFastCgi.Transports
 		public abstract void EndRequest (ulong requestId, int requestNumber, int appStatus);
 
 		#endregion
+
+		public override object InitializeLifetimeService ()
+		{
+			return null;
+		}
 	}
 }
 

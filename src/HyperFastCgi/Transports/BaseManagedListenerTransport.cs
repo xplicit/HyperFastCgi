@@ -347,6 +347,10 @@ namespace HyperFastCgi.Transports
 		}
 		#endregion
 
+		public override object InitializeLifetimeService ()
+		{
+			return null;
+		}
 	}
 }
 
