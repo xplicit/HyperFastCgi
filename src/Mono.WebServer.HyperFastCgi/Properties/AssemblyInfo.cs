@@ -17,7 +17,7 @@ using System.Runtime.CompilerServices;
 #if NET_2_0
 [assembly: AssemblyVersion ("0.3.2.0")]
 #else
-[assembly: AssemblyVersion ("0.3.4.0")]
+[assembly: AssemblyVersion ("0.3.5.0")]
 #endif
 
 // The following attributes are used to specify the signing key for the assembly,
