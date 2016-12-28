@@ -39,9 +39,18 @@
 
 typedef enum {HEADER, BODY, PADDING} FCGI_State;
 
+typedef enum {
+    NONE = 0,
+    SHUTDOWN = 1,
+    SENDING = 2
+} CmdSocket_State;
+
 typedef struct cmdsocket {
 	// The file descriptor for this client's socket
 	int fd;
+
+	//state of socket (sending or releasing when shutdown)
+	volatile guint cmdsocket_state;
 
 	// Whether this socket has been shut down
 	int shutdown;
@@ -82,5 +91,7 @@ find_cmdsocket(int fd);
 void
 flush_cmdsocket(cmdsocket *cmdsocket);
 
+void
+free_cmdsocket_only(cmdsocket *cmdsocket);
 
 #endif

@@ -95,7 +95,7 @@ process_record(int fd, FCGI_Header* header, guint8* body)
 
     if (header->type == FCGI_BEGIN_REQUEST) {
         FCGI_BeginRequestBody *begin_body = (FCGI_BeginRequestBody *)body;
-        TRACE_OUT("process_record: FCGI_BEGIN_REQUEST\n");
+        TRACE_OUT("process_record: FCGI_BEGIN_REQUEST. fd=%i\n", fd);
 
         if (req)
             g_hash_table_remove(requests, &req->hash);
@@ -165,6 +165,7 @@ process_record(int fd, FCGI_Header* header, guint8* body)
 static void
 send_record (cmdsocket* sock, guint8 record_type, guint16 requestId, guint8* data, int offset, int len)
 {
+    guint cmdsocket_state;
     FCGI_Header header = {
         .version = FCGI_VERSION_1,
         .type = record_type,
@@ -175,12 +176,17 @@ send_record (cmdsocket* sock, guint8 record_type, guint16 requestId, guint8* dat
     fcgi_set_request_id (&header, requestId);
     fcgi_set_content_len (&header, len);
 
-//    INFO_OUT("send_record reqId=%i, fd=%i, offset=%i, len=%i\n\r", requestId, sock->fd, offset, len);
-    struct evbuffer *output = bufferevent_get_output(sock->buf_event);
-    evbuffer_lock(output);
-    evbuffer_add (output, &header, FCGI_HEADER_SIZE);
-    evbuffer_add (output, data + offset, len);
-    evbuffer_unlock(output);
+    cmdsocket_state = g_atomic_int_get(&sock->cmdsocket_state);
+
+    if ((cmdsocket_state & SHUTDOWN) == NONE) {
+        TRACE_OUT("send_record reqId=%i, fd=%i, offset=%i, len=%i\n\r", requestId, sock->fd, offset, len);
+
+        struct evbuffer *output = bufferevent_get_output(sock->buf_event);
+        evbuffer_lock(output);
+        evbuffer_add (output, &header, FCGI_HEADER_SIZE);
+        evbuffer_add (output, data + offset, len);
+        evbuffer_unlock(output);
+    }
 
 
 //    bufferevent_lock (sock->buf_event);
@@ -209,6 +215,7 @@ send_stream_data (cmdsocket* sock, guint8 record_type, guint16 requestId, guint8
 void
 send_output (guint64 requestId, int request_num, guint8* data, int len)
 {
+    guint prev_state;
     if (finalized) return;
 
     pthread_mutex_lock (&requests_lock);
@@ -218,7 +225,29 @@ send_output (guint64 requestId, int request_num, guint8* data, int len)
     if (req && req->request_num == request_num) {
         cmdsocket* sock = find_cmdsocket (req->fd);
         if (sock != NULL) {
-            send_stream_data (sock, FCGI_STDOUT, req->requestId, data, len);
+            //change state to SENDING
+            prev_state = g_atomic_int_or(&sock->cmdsocket_state, SENDING);
+
+            TRACE_OUT("Before send. prev state %i, req_num %i\n", prev_state, request_num);
+
+            if ((prev_state & SHUTDOWN) == NONE) {
+                send_stream_data (sock, FCGI_STDOUT, req->requestId, data, len);
+            }
+
+            //clear SENDING state and check if we are in shutdown state
+            //if we are in SHUTDOWN then we need to release cmdsocket
+            prev_state = g_atomic_int_and(&sock->cmdsocket_state, ~SENDING);
+
+            TRACE_OUT("After send. prev state %i, req_num %i\n", prev_state, request_num);
+
+            if ((prev_state & SHUTDOWN) != NONE) {
+                //remove request
+                pthread_mutex_lock (&requests_lock);
+                g_hash_table_remove(requests, &requestId);
+                pthread_mutex_unlock (&requests_lock);
+
+                free_cmdsocket_only(sock);
+            }
         } else {
             TRACE_OUT("send_output: socket is null. reqId=%"G_GUINT64_FORMAT", reqNum=%i\n", requestId, request_num);
         }
@@ -230,6 +259,7 @@ send_output (guint64 requestId, int request_num, guint8* data, int len)
 void
 end_request (guint64 requestId, int request_num, int app_status, int protocol_status)
 {
+    guint prev_state;
     FCGI_EndRequestBody body = {
         .reserved1 = 0,
         .reserved2 = 0,
@@ -246,20 +276,35 @@ end_request (guint64 requestId, int request_num, int app_status, int protocol_st
         pthread_mutex_unlock (&requests_lock);
         cmdsocket* sock = find_cmdsocket (req->fd);
         if (sock != NULL) {
-            fcgi_set_app_status (&body, app_status);
-            body.protocolStatus=protocol_status;
-            send_record (sock, FCGI_END_REQUEST, req->requestId, (guint8 *)&body, 0, sizeof (body));
+            //change state to SENDING
+            prev_state = g_atomic_int_or(&sock->cmdsocket_state, SENDING);
 
-            //flush and disconnect cmdsocket if KEEP_ALIVE is false
-            if (!req->keep_alive) {
-                flush_cmdsocket(sock);
+            //if state was SHUTDOWN before sending that means cmdsocket will be released
+            //in cmd_error function. Otherwise if we go into sending state and after this we
+            //receive shutdown and get SHUTDOWN state also then we need to release cmdsocket resources
+            if ((prev_state & SHUTDOWN) == NONE) {
+                fcgi_set_app_status (&body, app_status);
+                body.protocolStatus=protocol_status;
+                send_record (sock, FCGI_END_REQUEST, req->requestId, (guint8 *)&body, 0, sizeof (body));
+
+                //flush and disconnect cmdsocket if KEEP_ALIVE is false
+                if (!req->keep_alive) {
+                    flush_cmdsocket(sock);
+                }
+            }
+
+            //clear SENDING state and check if we are in shutdown state
+            //if we are in SHUTDOWN then we need to release cmdsocket
+            prev_state = g_atomic_int_and(&sock->cmdsocket_state, ~SENDING);
+            if ((prev_state & SHUTDOWN) != NONE) {
+                free_cmdsocket_only(sock);
             }
         }
         g_free (req);
     }
     else {
         pthread_mutex_unlock (&requests_lock);
-        INFO_OUT ("can't find request n=%i",request_num);
+        INFO_OUT ("can't find request n=%i\n",request_num);
     }
 }
 

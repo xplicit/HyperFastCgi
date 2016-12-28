@@ -134,7 +134,7 @@ static struct cmdsocket *create_cmdsocket(int sockfd, struct sockaddr_storage *r
 	return cmdsocket;
 }
 
-static void free_cmdsocket_only(struct cmdsocket *cmdsocket)
+void free_cmdsocket_only(struct cmdsocket *cmdsocket)
 {
 	// Close socket and free resources
 	if (cmdsocket->body != NULL) {
@@ -311,6 +311,7 @@ static void fcgi_read(struct bufferevent *buf_event, void *arg)
 
 static void cmd_error(struct bufferevent *buf_event, short error, void *arg)
 {
+    guint prev_state;
 	struct cmdsocket *cmdsocket = (struct cmdsocket *)arg;
 
 	if(error & BEV_EVENT_EOF) {
@@ -322,7 +323,20 @@ static void cmd_error(struct bufferevent *buf_event, short error, void *arg)
 		ERROR_OUT("A socket error (0x%hx) occurred on fd %d.\n", error, cmdsocket->fd);
 	}
 
-	free_cmdsocket(cmdsocket);
+    //removing socket from the list
+	remove_cmdsocket(cmdsocket);
+
+	prev_state = g_atomic_int_or(&cmdsocket->cmdsocket_state, SHUTDOWN);
+
+	//release socket if it not in sending state
+	//if socket in sending state then it will be released after
+	//send in send_output/end_request function
+	if ((prev_state & SENDING) == NONE) {
+        TRACE_OUT("cmdsocket is not in sending state. Release it\n");
+        free_cmdsocket_only(cmdsocket);
+    } else {
+        TRACE_OUT("cmdsocket is in sending state. Leave it unreleased\n");
+    }
 }
 
 static void setup_connection(int sockfd, struct sockaddr_storage *remote_addr, struct event_base *evloop)
