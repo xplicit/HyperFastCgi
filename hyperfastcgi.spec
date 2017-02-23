@@ -1,51 +1,61 @@
-Name:           mono-webserver-hyperfastcgi
+Name:           hyperfastcgi
 Url:            https://github.com/xplicit/HyperFastCgi
 License:        X11/MIT
 Group:          Productivity/Networking/Web/Servers
-Version:        0.3
+Version:        0.4
 Release:        1
 Summary:        Mono WebServer HyperFastCgi
-Source:         %{name}-%{version}-%{release}.tar
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-BuildArch:      noarch
-BuildRequires:  mono-devel
+Source:         https://github.com/xplicit/HyperFastCgi/archive/master.zip
+Requires:       mono, glib2, libevent, libmonosgen-2_0-1, systemd
+BuildRequires:  mono-devel, glib2-devel, libevent-devel, libmonosgen-2_0-devel, autoconf, automake, libtool
 
-# To build the tar, you can use : 
-# git archive --format=tar --prefix=mono-webserver-hyperfastcgi-0.3-1/ master > ~/rpmbuild/SOURCES/mono-webserver-hyperfastcgi-0.3-1.tar
+# Build from spec file as root user
+# yum install rpm-build redhat-rpm-config rpmdevtools yum-utils
+# mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+# curl -o ~/rpmbuild/SPECS/hyperfastcgi.spec https://raw.githubusercontent.com/xplicit/HyperFastCgi/master/hyperfastcgi.spec
+#
+# spectool -g -R  ~/rpmbuild/SPECS/hyperfastcgi.spec
+# yum-builddep ~/rpmbuild/SPECS/hyperfastcgi.spec
+# rpmbuild -ba  ~/rpmbuild/SPECS/hyperfastcgi.spec
 
 %description
 Performant nginx to mono fastcgi server
 
+%define debug_package %{nil}
+
 %prep
-%setup -q -n %{name}-%{version}-%{release}
+%setup -q -n HyperFastCgi-master
 
 %build
-sed -i 's#"1.0.*"#"2.0.*"#' src/Mono.WebServer.HyperFastCgi/Properties/AssemblyInfo.cs
-xbuild /tv:2.0 /p:Configuration=Release /target:rebuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile="../mono.snk"
-gacutil -i src/Mono.WebServer.HyperFastCgi/bin/Release/Mono.WebServer.HyperFastCgi.exe -package 2.0 -gacdir .%{_prefix}
-sed -i 's#"2.0.*"#"4.0.*"#' src/Mono.WebServer.HyperFastCgi/Properties/AssemblyInfo.cs
-xbuild /tv:4.0 /p:Configuration=Release /target:rebuild /p:SignAssembly=true /p:AssemblyOriginatorKeyFile="../mono.snk"
-gacutil -i src/Mono.WebServer.HyperFastCgi/bin/Release/Mono.WebServer.HyperFastCgi.exe -package 4.0 -gacdir .%{_prefix}
+
+./autogen.sh --prefix=%{_prefix}
+make
 
 %install
-mv .%{_prefix} %{buildroot}%{_prefix}
-mkdir -p %{buildroot}%{_bindir}
-echo "#!/bin/sh" > %{buildroot}%{_bindir}/mono-server-hyperfastcgi2
-echo 'exec %{_bindir}/mono $MONO_OPTIONS "%{_prefix}/lib/mono/2.0/Mono.WebServer.HyperFastCgi.exe" "$@"' >> %{buildroot}%{_bindir}/mono-server-hyperfastcgi2
-chmod +x %{buildroot}%{_bindir}/mono-server-hyperfastcgi2
-echo "#!/bin/sh" > %{buildroot}%{_bindir}/mono-server-hyperfastcgi4
-echo 'exec %{_bindir}/mono $MONO_OPTIONS "%{_prefix}/lib/mono/4.0/Mono.WebServer.HyperFastCgi.exe" "$@"' >> %{buildroot}%{_bindir}/mono-server-hyperfastcgi4
-chmod +x %{buildroot}%{_bindir}/mono-server-hyperfastcgi4
+make DESTDIR=%{buildroot} install
+mkdir -p %{buildroot}%{_datadir}/%{name}/samples
+cp samples/*.config %{buildroot}%{_datadir}/%{name}/samples
+mkdir -p %{buildroot}%{_sysconfdir}/hyperfastcgi
+cp samples/server.config %{buildroot}%{_sysconfdir}/%{name}/hfc.config
+mkdir -p %{buildroot}%{_unitdir}
+cp samples/ubuntu-startup/systemd/hyperfastcgi.service %{buildroot}%{_unitdir}
+
+%post
+/sbin/ldconfig
+/usr/bin/gacutil -package 4.5  -i %{_prefix}/lib/%{name}/4.0/HyperFastCgi.exe
+install -m 777 -d /var/log/%{name}
+
+%postun
+/usr/bin/gacutil -package 4.5  -u %{_prefix}/lib/%{name}/4.0/HyperFastCgi.exe
+/sbin/ldconfig
 
 %clean
 rm -rf %{buildroot}
 
 %files
-%defattr(-,root,root)
-%{_bindir}/mono-server-hyperfastcgi2
-%{_bindir}/mono-server-hyperfastcgi4
-%{_prefix}/lib/mono/2.0/Mono.WebServer.HyperFastCgi.exe
-%{_prefix}/lib/mono/4.0/Mono.WebServer.HyperFastCgi.exe
-%{_prefix}/lib/mono/gac/Mono.WebServer.HyperFastCgi/*
+%{_bindir}/*
+%{_prefix}/lib/*
+%config(noreplace) %{_sysconfdir}/*
+%{_datadir}/*
 
 %changelog
