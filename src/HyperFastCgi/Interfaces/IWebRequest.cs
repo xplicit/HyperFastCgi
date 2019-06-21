@@ -41,11 +41,12 @@ namespace HyperFastCgi.Interfaces
 		/// </summary>
 		/// <param name="name">Header name.</param>
 		/// <param name="value">Header value.</param>
-		/// <remarks>This method is called by transport when new header has come<remarks> 
+		/// <remarks>This method is called by transport when new header has come</remarks> 
 		void AddHeader(string name, string value);
 
 		/// <summary>
 		/// Adds the content data
+		/// TODO: Change return value to "bool" to be able to report (buffer) errors?
 		/// </summary>
 		/// <param name="data">content data</param>
 		/// <remarks>The method is called by transport to add the part of content (post) data. 
@@ -62,7 +63,7 @@ namespace HyperFastCgi.Interfaces
 		/// Processes the request.
 		/// </summary>
 		/// <param name="response">Response</param>
-		/// <remarks>The method is called by transport to process Web Request<remarks>
+		/// <remarks>The method is called by transport to process Web Request</remarks>
 		void Process (IWebResponse response);
 	}
 }

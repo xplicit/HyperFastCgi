@@ -84,14 +84,20 @@ namespace HyperFastCgi.AppHosts.AspNet
 		private int input_data_offset;
 
 		public int PortNumber {
-			get {
-				if (port < 0)
-					//FIXME: tryparse
-					port = int.Parse (GetParameter (
-						"SERVER_PORT"));
+			get
+			{
+			    if (port < 0)
+			    {
+			        if (!int.TryParse(GetParameter("SERVER_PORT"), out port)) {
+                        Logger.Write(LogLevel.Error, "fastcgi_param 'SERVER_PORT' not set! Setting to default value '80'! "
+                            + "Please add 'fastcgi_param SERVER_PORT $server_port;' to your webserver config!");
+			            port = 80;
+			        }
 
-				return port;
-			}
+			    }
+
+                return port;
+            }
 		}
 
 		public string Path {
@@ -143,7 +149,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 
 		public void AddHeader (string header, string value)
 		{
-			if (!String.IsNullOrEmpty (header)) {
+			if (!string.IsNullOrEmpty (header)) {
 				int idx = HttpWorkerRequest.GetKnownRequestHeaderIndex (header);
 
 				if (idx != -1) {
@@ -154,34 +160,48 @@ namespace HyperFastCgi.AppHosts.AspNet
 			}
 		}
 
+        /// <summary>
+        /// TODO errors can happen here, changing return value to bool and then evaluating the return value outside could help
+        /// </summary>
+        /// <param name="data"></param>
 		public void AddBodyPart (byte[] data)
 		{
 			if (input_data == null) {
-				int len = 0;
+				int len;
 				string slen = GetParameter ("CONTENT_LENGTH");
 
 				if (slen == null) {
-					//TODO: error, throw an exception
+                    //Instead of throwing an Exception, write to error log and return
+                    Logger.Write(LogLevel.Error, "fastcgi_param 'CONTENT_LENGTH' not set! "
+                        + "Please add 'fastcgi_param SERVER_PORT $server_port;' to your webserver config!");
+
+                    return;
 				}
+
 				if (!int.TryParse (slen, NumberStyles.None, CultureInfo.InvariantCulture, out len)) {
-					//TODO: error, throw an exception
+                    Logger.Write(LogLevel.Error, "Invalid CONTENT_LENGTH: {0}", slen);
+
+                    return;
 				}
 
 				input_data = new byte[len];
 			}
 
 			if (input_data_offset + data.Length > input_data.Length) {
-				//TODO: throw an exception
+                //Instead of throwing an Exception, write to error log and return
+                Logger.Write(LogLevel.Error, "Buffer too small: input_data (size {0}) but should be at least {1}", input_data.Length, (input_data_offset + data.Length));
+
+                return;
 			}
 
-			Buffer.BlockCopy (data, 0, input_data, input_data_offset, data.Length);
+            Buffer.BlockCopy (data, 0, input_data, input_data_offset, data.Length);
 			input_data_offset += data.Length;
 		}
 
 		public string GetParameter (string parameter)
 		{
 			if (parameter_table != null && parameter_table.ContainsKey (parameter))
-				return (string)parameter_table [parameter];
+				return parameter_table [parameter];
 
 			return null;
 		}
@@ -268,8 +288,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 
 		public override void SendStatus (int statusCode, string statusDescription)
 		{
-			AppendHeaderLine ("Status: {0} {1}",
-				statusCode, statusDescription);
+			AppendHeaderLine ("Status: {0} {1}", statusCode, statusDescription);
 		}
 
 		public override void SendUnknownResponseHeader (string name, string value)
@@ -294,7 +313,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 
 		public override string GetPathInfo ()
 		{
-			return GetParameter ("PATH_INFO") ?? String.Empty;
+			return GetParameter ("PATH_INFO") ?? string.Empty;
 		}
 
 		public override string GetRawUrl ()
@@ -310,7 +329,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 
 			StringBuilder b = new StringBuilder (GetUriPath ());
 			string query = GetQueryString ();
-			if (query != null && query.Length > 0) {
+			if (!string.IsNullOrEmpty(query)) {
 				b.Append ('?');
 				b.Append (query);
 			}
@@ -337,17 +356,17 @@ namespace HyperFastCgi.AppHosts.AspNet
 		public override string GetLocalAddress ()
 		{
 			string address = GetParameter ("SERVER_ADDR");
-			if (address != null && address.Length > 0)
+			if (!string.IsNullOrEmpty(address))
 				return address;
 
 			address = AddressFromHostName (
 				GetParameter ("HTTP_HOST"));
-			if (address != null && address.Length > 0)
+			if (!string.IsNullOrEmpty(address))
 				return address;
 
 			address = AddressFromHostName (
 				GetParameter ("SERVER_NAME"));
-			if (address != null && address.Length > 0)
+			if (!string.IsNullOrEmpty(address))
 				return address;
 
 			return base.GetLocalAddress ();
@@ -378,7 +397,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 		public override string GetRemoteAddress ()
 		{
 			string addr = GetParameter ("REMOTE_ADDR");
-			return addr != null && addr.Length > 0 ?
+			return !string.IsNullOrEmpty(addr) ?
 				addr : base.GetRemoteAddress ();
 		}
 
@@ -399,7 +418,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 		public override int GetRemotePort ()
 		{
 			string port = GetParameter ("REMOTE_PORT");
-			if (port == null || port.Length == 0)
+			if (string.IsNullOrEmpty(port))
 				return base.GetRemotePort ();
 
 			try {
@@ -413,10 +432,10 @@ namespace HyperFastCgi.AppHosts.AspNet
 		{
 			string value = GetParameter (name);
 
-			if (value == null)
+			if (value == null && name != null)
 				value = Environment.GetEnvironmentVariable (name);
 
-			return value != null ? value : base.GetServerVariable (name);
+			return value ?? base.GetServerVariable (name);
 		}
 
 		public override string GetUriPath ()
@@ -553,7 +572,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 			if (host == null || host.Length > 126)
 				return null;
 
-			System.Net.IPAddress[] addresses = null;
+			IPAddress[] addresses = null;
 			try {
 				addresses = Dns.GetHostAddresses (host);
 			} catch (System.Net.Sockets.SocketException) {
@@ -570,7 +589,7 @@ namespace HyperFastCgi.AppHosts.AspNet
 
 		private static string HostNameFromString (string host)
 		{
-			if (host == null || host.Length == 0)
+			if (string.IsNullOrEmpty(host))
 				return null;
 
 			int colon_index = host.IndexOf (':');
@@ -592,15 +611,17 @@ namespace HyperFastCgi.AppHosts.AspNet
 			List<string> files = new List<string> ();
 
 			string [] fs = list.Split (',');
-			foreach (string f in fs) {
-				string trimmed = f.Trim ();
-				if (trimmed == "")
-					continue;
+		    for (int index = 0; index < fs.Length; index++)
+		    {
+		        string f = fs[index];
+		        string trimmed = f.Trim();
+		        if (trimmed == "")
+		            continue;
 
-				files.Add (trimmed);
-			}
+		        files.Add(trimmed);
+		    }
 
-			indexFiles = files.ToArray ();
+		    indexFiles = files.ToArray ();
 		}
 
 		#endregion
@@ -613,16 +634,16 @@ namespace HyperFastCgi.AppHosts.AspNet
 		#endregion
 
 		#region IWebResponse implementation
-		public void Send (int status, string description, IDictionary<string, string> headers)
+		public void Send (int status, string description, IDictionary<string, string> sendHeaders)
 		{
 			SendStatus (status, description);
-			foreach (KeyValuePair<string, string> pair in headers) {
+			foreach (KeyValuePair<string, string> pair in sendHeaders) {
 				SendUnknownResponseHeader (pair.Key, pair.Value);
 			}
 		}
-		public void Send (int status, string description, IDictionary<string, string> headers, byte[] response)
+		public void Send (int status, string description, IDictionary<string, string> sendHeaders, byte[] response)
 		{
-			Send (status, description, headers);
+			Send (status, description, sendHeaders);
 			SendResponseFromMemory (response, response.Length);
 		}
 		public void Send (byte[] response)
